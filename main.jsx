@@ -8,7 +8,7 @@ import ShopContextProvider from './src/assets/pages/Context/ShopContext.jsx';
 // import './assets/all.scss';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <BrowserRouter basename='/MERN-PetsLove'>
+  <BrowserRouter basename='/PetsLove'>
     <App />
   </BrowserRouter>
 );

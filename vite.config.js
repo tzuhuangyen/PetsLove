@@ -9,7 +9,7 @@ dotenv.config();
 
 export default defineConfig(({ mode }) => {
   return {
-    base: '/MERN-PetsLove/',
+    base: '/PetsLove/',
     // base: 'https://tzuhuangyen.github.io/MERN-petslove/',
     plugins: [react(), nodePolyfills()],
     build: {

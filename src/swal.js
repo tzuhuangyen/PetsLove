@@ -52,12 +52,12 @@ export const showSignUpErrorAlert = (username) => {
     text: "Let's go to Login",
     icon: 'info',
     html: `
-    <a href="MERN-petslove/users/login" style="color:white; text-decoration:none; display:inline-block; padding:10px 20px; background-color:#3085d6; border-radius:5px;">Login</a>
+    <a href=PetsLove/users/login" style="color:white; text-decoration:none; display:inline-block; padding:10px 20px; background-color:#3085d6; border-radius:5px;">Login</a>
   `,
 
     footer: `
     
-    <a href="MERN-petslove/users/users/forgotPsw">click here if you forgot password</a>
+    <a href=PetsLove/users/users/forgotPsw">click here if you forgot password</a>
   `,
     showConfirmButton: false, // Hide the default confirm button
   });
@@ -82,12 +82,12 @@ export const showLoginErrorAlert = (username) => {
     text: `try again?`,
     icon: 'error',
     html: `
-    <a href="MERN-petslove/users/login" style="color:white; text-decoration:none; display:inline-block; padding:10px 20px; background-color:#3085d6; border-radius:5px;">Login again</a>
+    <a href=PetsLove/users/login" style="color:white; text-decoration:none; display:inline-block; padding:10px 20px; background-color:#3085d6; border-radius:5px;">Login again</a>
   `,
 
     footer: `
     
-    <a href="MERN-petslove/users/users/forgotPsw">click here if you forgot password</a>
+    <a href=PetsLove/users/users/forgotPsw">click here if you forgot password</a>
   `,
     showConfirmButton: false, // Hide the default confirm button
   });
@@ -100,12 +100,12 @@ export const showLoginUsernameErrorAlert = (username) => {
 
     icon: 'error',
     html: `
-    <a href="MERN-petslove/users/signup" style="color:white; text-decoration:none; display:inline-block; padding:10px 20px; background-color:#3085d6; border-radius:5px;">Login again</a>
+    <a href=PetsLove/users/signup" style="color:white; text-decoration:none; display:inline-block; padding:10px 20px; background-color:#3085d6; border-radius:5px;">Login again</a>
   `,
 
     footer: `
     
-    <a href="MERN-petslove/users/signup">click here to sign up</a>
+    <a href=PetsLove/users/signup">click here to sign up</a>
   `,
     showConfirmButton: false, // Hide the default confirm button
   });
