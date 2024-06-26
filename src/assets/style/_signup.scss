@@ -1,0 +1,32 @@
+.signup-form,
+.login-form {
+  background: #ffffff;
+  border-radius: 7px;
+  /* box-shadow: 0 2px 5px #ccc; */
+  padding: 20px;
+  width: 450px;
+
+  margin-top: 40px;
+  // margin-left: 400px;
+  float: left;
+}
+.label {
+  font-size: 15px;
+  font-weight: bold;
+}
+.input {
+  width: 90%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+.form--submit {
+  width: 30%;
+  margin-top: 15px;
+  //   margin-left: 20px;
+  background-color: $secondary;
+}
+.para {
+  text-align: right;
+}

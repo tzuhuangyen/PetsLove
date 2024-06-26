@@ -1,0 +1,168 @@
+.loading {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+
+  background-color: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(5px);
+  z-index: 99999;
+  // display: flex;
+  justify-content: center;
+  align-items: center;
+}
+// 手機版
+.products {
+  margin-bottom: 40px;
+  h2 {
+    font-size: 1.75rem;
+    margin-top: 40px;
+    margin-bottom: 32px;
+    img {
+      width: 28px;
+    }
+    @include media-breakpoint-up(lg) {
+      font-size: 56px;
+      margin-top: 80px;
+      margin-bottom: 40px;
+      img {
+        width: 56px;
+      }
+    }
+  }
+  .card {
+    border-radius: 16px;
+    border: 1px solid transparent;
+    &:hover {
+      border: 1px solid $primary;
+    }
+    .card-img-top {
+      border-radius: 16px;
+      width: 320px;
+      height: 200px;
+    }
+  }
+  .viewBtn {
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+}
+
+// 桌機 筆電版
+
+// .navbar {
+//   .cartBtn {
+//     display: flex;
+//     align-items: center;
+//     color: $secondary;
+//     background-color: transparent;
+//     .badge {
+//       border-radius: 50%;
+//     }
+//   }
+// }
+//shop search btn
+.searchForm button .searchBtn {
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.25rem;
+  border: 1px solid #ced4da;
+}
+//shop filter category
+.categoryGroup {
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+.categoryGroup-item {
+  padding: 0.75rem 1.25rem;
+  border: 1px solid rgba(0, 0, 0, 0.125);
+
+  :first-child {
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+  }
+  :active {
+    color: #fff;
+    background-color: $primary;
+  }
+}
+/* Media query for screens that are 765px wide or less */
+@media (max-width: 768px) {
+  .categoryGroup {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: start;
+  }
+  .categoryGroup-item {
+    flex: 1 1 auto; /* Adjust flex item sizing as needed */
+    margin-right: 10px; /* Add some spacing between items */
+    margin-top: 10px;
+  }
+}
+//shop filter btns
+.filterbtns {
+  margin-top: 8px;
+  .typeBtns,
+  .filterFavoBtn {
+    button {
+      padding: 8px;
+      margin-right: 4px;
+      background-color: $secondary;
+      color: #fff;
+      &:hover {
+        background-color: $primary;
+        color: #fff;
+      }
+    }
+  }
+}
+.product-card {
+  position: relative;
+  padding: 0;
+  margin: 8px 4px;
+  width: 250px;
+  transition: all 0.3s ease;
+  &:hover {
+    cursor: pointer;
+  }
+  .product-img {
+    position: relative;
+    width: 100%;
+    height: 250px;
+  }
+  .favorited {
+    position: absolute;
+    top: 8px;
+    right: 30px;
+    font-size: 1.5rem;
+    z-index: 2;
+    &:active {
+      color: purple;
+    }
+  }
+}
+.cardBtns {
+  display: flex;
+  justify-content: space-between;
+}
+//product card btn
+.btnHeart.btn-purple-outline {
+  color: $secondary;
+  background-color: transparent;
+}
+.btnHeart.btn-purple-outline.favorited {
+  color: #fff;
+  background-color: $secondary; /* 實心紫色背景 */
+}
+.btnHeart.btn-purple-outline:hover {
+  background-color: $secondary;
+  color: #fff;
+}
+.btnCart {
+  &:hover {
+    background-color: $primary;
+    color: #fff;
+  }
+}

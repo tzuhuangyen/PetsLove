@@ -1,0 +1,674 @@
+//--------start of banner -------
+//container
+.banner {
+  top: 80px;
+  background-color: #f7f3ec;
+  .container {
+    height: 375px;
+    @include media-breakpoint-up(md) {
+      max-width: 720px;
+    }
+    @include media-breakpoint-up(lg) {
+      max-width: 960px;
+      height: 715px;
+    }
+  }
+}
+.slogan {
+  @include media-breakpoint-up(md) {
+    padding-left: 320px;
+    padding-top: 70px;
+  }
+  @include media-breakpoint-up(lg) {
+    padding-left: 550px;
+    padding-top: 110px;
+  }
+  img {
+    @include media-breakpoint-up(md) {
+      width: 20px;
+    }
+  }
+  span {
+    color: $secondary;
+    @include media-breakpoint-up(md) {
+      font-size: 14px;
+    }
+  }
+  .footprintBig1 {
+    top: 500px;
+    left: 10px;
+
+    img {
+      width: 50px;
+      transform: rotate(320deg);
+    }
+  }
+  .footprintBig2 {
+    top: 420px;
+    left: -50px;
+
+    img {
+      width: 50px;
+      transform: rotate(320deg);
+    }
+  }
+}
+// dog&cat
+.bannerDog {
+  width: 300px;
+  top: 65px;
+  @include media-breakpoint-up(lg) {
+    width: 520px;
+    left: 0;
+    top: 70px;
+  }
+}
+.bannerDogWhiteFrame {
+  width: 327px;
+  top: 58px;
+  left: -5px;
+
+  @include media-breakpoint-up(lg) {
+    width: 520px;
+    top: 60px;
+    left: -6px;
+  }
+}
+
+.bannerDogFrameOrange {
+  width: 310px;
+  top: 75px;
+  left: 5px;
+  @include media-breakpoint-up(lg) {
+    width: 530px;
+    top: 83px;
+    left: -5px;
+  }
+}
+.bannerCatFrame {
+  top: 200px;
+  right: 20px;
+  width: 140px;
+  @include media-breakpoint-up(md) {
+    top: 230px;
+    right: 30px;
+    width: 150px;
+  }
+  @include media-breakpoint-up(lg) {
+    width: 320px;
+    top: 285px;
+    right: -5px;
+  }
+}
+.bannerCat {
+  top: 200px;
+  right: 20px;
+  width: 120px;
+  @include media-breakpoint-up(md) {
+    top: 240px;
+    right: 30px;
+    width: 140px;
+  }
+  @include media-breakpoint-up(lg) {
+    width: 310px;
+    top: 290px;
+    right: 0;
+  }
+}
+
+//footprint
+.banner {
+  .footprint1 {
+    top: 10px;
+    left: 40px;
+    transform: rotate(45deg);
+    @include media-breakpoint-up(lg) {
+      top: 500px;
+      left: -40px;
+      transform: rotate(330deg);
+    }
+  }
+  .footprint2 {
+    top: 50px;
+    left: 18px;
+    transform: rotate(330deg);
+    @include media-breakpoint-up(lg) {
+      top: 630px;
+      left: 20px;
+    }
+  }
+  .footprint3 {
+    @include media-breakpoint-up(md) {
+      top: 400px;
+      left: 545px;
+    }
+  }
+  .footprint4 {
+    @include media-breakpoint-up(lg) {
+      top: 380px;
+      left: 600px;
+    }
+  }
+  .footprint5 {
+    @include media-breakpoint-up(lg) {
+      top: 460px;
+      left: 550px;
+    }
+  }
+  .footprint6 {
+    @include media-breakpoint-up(lg) {
+      top: 490px;
+      left: 480px;
+    }
+  }
+}
+
+//slogan-sm
+.slogan-sm {
+  text-align: center;
+  margin-top: 40px;
+  margin-bottom: 80px;
+  p {
+    margin-bottom: 0;
+  }
+  span {
+    font-size: 21px;
+  }
+  img {
+    width: 20px;
+  }
+}
+// -------end of banner--------
+//start index- about
+//about jc of mobile
+.about {
+  margin-bottom: 40px;
+  h2 {
+    margin: 0 8px 32px;
+    text-align: center;
+  }
+  img {
+    width: 28px;
+  }
+}
+.about {
+  .card {
+    width: 100%;
+    border: none;
+    margin-bottom: 24px;
+    img {
+      width: 160px;
+    }
+  }
+}
+
+// about-md & lg
+
+.about-lg {
+  margin-bottom: 130px;
+  h2 {
+    margin-top: 80px;
+    margin-bottom: 50px;
+
+    img {
+      margin-right: 16px;
+      margin-left: 16px;
+      width: 56px;
+    }
+  }
+  .card-body {
+    border-radius: 16px;
+    position: relative;
+    max-width: 960px;
+    background-color: #faf8f8;
+    .card-title {
+      font-size: 36px;
+      margin-bottom: 4px;
+    }
+    .card-text {
+      font-size: 20px;
+    }
+  }
+}
+.card-bodys {
+  .card-body {
+    margin-top: 130px;
+    margin-bottom: 140px;
+  }
+}
+// about1
+.about1 {
+  margin-top: 150px;
+  margin-right: 50px;
+  padding: 16px;
+  .aboutImg1 {
+    position: absolute;
+    top: -85px;
+    left: -75px;
+    width: 300px;
+  }
+  .card-title {
+    margin-left: 220px;
+    font-size: 36px;
+    margin-bottom: 4px;
+  }
+  .card-text {
+    margin-left: 220px;
+    padding-bottom: 16px;
+  }
+}
+
+// about2
+
+.about2 {
+  position: relative;
+  margin-top: 180px;
+  margin-left: -10px;
+
+  padding: 32px 8px 32px 32px;
+  .aboutImg2 {
+    position: absolute;
+    width: 330px;
+    height: 330px;
+    top: -115px;
+    right: -50px;
+    border-radius: 50%;
+  }
+}
+
+// about3
+.about3 {
+  position: relative;
+  margin-top: 150px;
+  padding-left: 290px;
+  padding-top: 32px;
+  padding-bottom: 32px;
+  .aboutImg3 {
+    position: absolute;
+    width: 300px;
+
+    top: -70px;
+    left: -50px;
+    border-radius: 50%;
+  }
+}
+
+//end of about
+// -------start of types-------
+.types {
+  padding-bottom: 24px;
+  background-color: #f7f3ec;
+  .container {
+    max-width: 1140px;
+  }
+  h2 {
+    padding-top: 40px;
+    margin-bottom: 32px;
+
+    @include media-breakpoint-up(lg) {
+      font-size: 56px;
+      padding-top: 80px;
+      margin-bottom: 40px;
+    }
+    img {
+      width: 28px;
+      @include media-breakpoint-up(lg) {
+        width: 56px;
+      }
+    }
+  }
+  .card {
+    width: 100%;
+    background-color: #f7f3ec;
+
+    @include media-breakpoint-up(md) {
+      max-width: 50%;
+    }
+    @include media-breakpoint-up(lg) {
+      max-width: 32%;
+    }
+
+    .card-img,
+    .card-img-top {
+      height: 235px;
+    }
+  }
+}
+
+.types {
+  .card-img-overlay {
+    height: 270px;
+    top: 15%;
+    transition: transform 0.5s ease;
+    .card-title {
+      text-align: center;
+      position: relative; /* 使下划线相对于这个div进行定位 */
+      // opacity: 0.7;
+      font-size: 32px;
+      padding: 16px;
+      color: purple;
+      transition: transform 0.3s ease;
+
+      @include media-breakpoint-up(md) {
+        font-size: 34px;
+      }
+    }
+  }
+  .card-body {
+    text-align: center;
+
+    @include media-breakpoint-up(lg) {
+      margin-top: 16px;
+      margin-bottom: 16px;
+    }
+    .btn {
+      background-color: $primary;
+      color: white;
+      border-radius: 70px;
+      padding: 10px 24px;
+      margin: 16px;
+      transition: transform 0.3s ease;
+      &:hover {
+        transform: scale(1.2);
+      }
+    }
+    img {
+      width: 18px;
+      margin-right: 4px;
+    }
+  }
+}
+.card-img-overlay::after {
+  content: '';
+  position: absolute;
+  left: 90px;
+  top: 70px;
+  display: block;
+  width: 0; /* 调整下划线宽度 */
+  border-bottom: 2px solid #fff; /* 下划线样式 */
+  transition: width 0.3s ease;
+}
+.card-img-overlay:hover::after {
+  width: 50%; /* 当hover时，调整下划线的宽度 */
+}
+.card-img-overlay .card-title:hover {
+  color: #c8a3c2;
+  &:hover {
+    transform: scale(1.2);
+  }
+}
+// -------end of types-------
+
+// -------start of review-------
+//review h2
+.review {
+  h2 {
+    margin-top: 40px;
+    margin-bottom: 32px;
+
+    @include media-breakpoint-up(md) {
+      font-size: 3rem;
+    }
+    img {
+      width: 28px;
+      @include media-breakpoint-up(md) {
+        width: 56px;
+      }
+    }
+  }
+}
+//review card/ cardBody 箭頭
+.reviewSwiper {
+  .card {
+    align-items: center;
+    border: none;
+    height: auto;
+  }
+  .review-cardBody {
+    position: relative;
+    right: 0;
+    background-color: $primary;
+    border-radius: 24px 24px 24px 24px;
+    @include media-breakpoint-up(md) {
+      border-radius: 24px;
+    }
+    &:after {
+      // 箭頭
+      content: '';
+      position: absolute;
+      right: calc(50% - 12px);
+      bottom: -17px;
+      transform: rotate(90deg);
+      width: 0;
+      height: 0;
+      border-width: 12px 0 12px 12px;
+      border-style: solid;
+      border-color: transparent transparent transparent $primary;
+      @include media-breakpoint-up(md) {
+        left: 459px;
+        top: 160px;
+        transform: rotate(1deg);
+      }
+    }
+  }
+}
+//review cardBody
+.review-cardBody {
+  padding: 32px;
+  .reviewPetPic {
+    margin: 18px 18px 18px 36px;
+    position: absolute;
+    top: 10px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+
+    // @include media-breakpoint-up(md) {
+    //   top: 95%;
+    //   left: 30%;
+    //   width: 90px;
+    //   height: 110px;
+    // }
+  }
+  .card-title {
+    margin-left: 140px;
+    margin-top: 40px;
+  }
+  .ratings {
+    margin-left: 140px;
+    margin-top: 5px;
+  }
+  .card-text {
+    margin-top: 20px;
+    margin-left: 25px;
+    padding: 16px;
+    color: white;
+  }
+}
+
+.reviewFoodPic {
+  width: 320px;
+  height: auto;
+  @include media-breakpoint-up(md) {
+    height: 270px;
+    width: 100%;
+  }
+}
+
+//1.先把預設的左右箭頭設為空值
+// .swiper-control {
+//   .swiper-button-next:after,
+//   .swiper-button-prev:after {
+//     content: '';
+//   }
+// }
+
+//2.再重新設定左右箭頭大小顏色
+// .review {
+//   //左右圓型样式
+//   .swiper-control {
+//     .swiper-button-prev,
+//     .swiper-button-next {
+//       width: 50px; /* 定义的左右圓型宽度 */
+//       height: 50px; /* 定义左右圓型的高度 */
+//       background-color: rgba(240, 240, 240, 0.4); /* 设置箭头的背景颜色 */
+//       border-radius: 50%; /* 设置箭头为圆形 */
+//       display: flex; /* 设置箭头为弹性盒子以便居中内容 */
+//       justify-content: center; /* 水平居中内容 */
+//       align-items: center; /* 垂直居中内容 */
+//       cursor: pointer; /* 鼠标悬停时显示指针 */
+//     }
+//   }
+// }
+//使用伪元素添加箭头图标
+// .review {
+//   .swiper-control {
+//     .swiper-button-prev::after,
+//     .swiper-button-next::before {
+//       content: ''; /* 使用伪元素添加箭头图标 */
+//       border-style: solid; /* 设置为实线 */
+//       display: inline-block; /* 设置为内联块级元素 */
+//       border-width: 2px 2px 0 0; /* 定义箭头的大小和方向 */
+//       width: 30px; /* 定义箭头的宽度 */
+//       height: 30px; /* 定义箭头的高度 */
+//       border-color: rgba(188, 188, 188, 0.4); /* 设置箭头的颜色 */
+//       position: relative; /* 相对定位，用于后面的旋转 */
+//     }
+//     .swiper-button-prev::after {
+//       transform: rotate(230deg); /* 设置为左箭头 */
+//     }
+//     .swiper-button-next::before {
+//       transform: rotate(45deg); /* 设置为右箭头 */
+//       // 调整箭头位置
+//       .swiper-button-prev,
+//       .swiper-button-next {
+//         top: 50%; /* 使箭头垂直居中 */
+//         transform: translateY(-50%); /* 平移箭头使其垂直居中 */
+//         width: 30px; /* 設定箭頭的寬度 */
+//         height: 30px; /* 設定箭頭的高度 */
+//         background-color: transparent; /* 箭頭背景色透明 */
+//         border: none; /* 移除箭頭的邊框 */
+//         cursor: pointer; /* 改變滑鼠游標為指示箭頭的樣式 */
+//         position: absolute; /* 絕對定位，以便位置調整 */
+//         transform: rotate(-135deg); /* 旋转箭头，使其成为左箭头 */
+//       }
+//     }
+//   }
+// }
+
+// .swiper-control {
+//   position: relative;
+//   transform: none;
+//   bottom: 0px;
+//   left: 150px;
+//   transform: translateX(-50%); /* 將左上角定位點設置在元素中心 */
+// }
+// .swiper-pagination-bullet {
+//   position: absolute;
+//   bottom: 0;
+//   left: 50px;
+//   background-color: $primary; /* 將背景顏色設置為您的主色 */
+// }
+// .swiper-pagination-bullet-active {
+//   width: 16px; /* 調整活動點點的大小 */
+//   border-radius: 100px; /* 圓角 */
+// }
+// .swiper-pagination {
+//   position: absolute; /* 調整分頁點點的位置 */
+//   bottom: 10px; /* 距離底部的距離 */
+//   left: 50%; /* 將分頁點點置中 */
+//   transform: translateX(-50%); /* 水平居中 */
+//   width: auto !important; /* 讓分頁點點寬度自適應內容 */
+// }
+
+// -------end of review-------
+
+// ------start of knowPet
+.indexBlog {
+  background-color: #f7f3ec;
+  h2 {
+    @include media-breakpoint-up(md) {
+      margin-top: 40px;
+    }
+
+    margin-bottom: 32px;
+
+    img {
+      width: 28px;
+    }
+  }
+  .card {
+    min-width: 100%;
+    box-shadow: 0px 4px 24px 0px #0000001a;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    border: 1px solid transparent;
+    &:hover {
+      border: 1px solid $primary;
+      box-shadow: #c8a3c2;
+      transition: border 0.3s ease, transform 0.3s ease; /* 添加 transition 属性 */
+    }
+
+    img {
+      height: 200px;
+      border-radius: 16px;
+    }
+    .card-body {
+      .card-title {
+        font-size: 24px;
+        color: $primary;
+      }
+    }
+  }
+  ul {
+    margin-bottom: 40px;
+    padding-left: 0;
+  }
+}
+// ------end of knowPet
+
+// ------start lg of knowPet
+.indexBlog {
+  background-color: #f7f3ec;
+
+  h2 {
+    padding-top: 56px;
+    margin-bottom: 40px;
+    img {
+      width: 28px;
+      @include media-breakpoint-up(md) {
+        width: 56px;
+      }
+    }
+  }
+  .card {
+    border: none;
+    margin-bottom: 40px;
+    border: 1px solid transparent;
+    &:hover {
+      border: 1px solid $primary;
+    }
+    img {
+      width: 370px;
+      height: 230px;
+      border-radius: 16px;
+      @include media-breakpoint-up(md) {
+        padding-top: 18px;
+      }
+    }
+  }
+  .card-body {
+    .card-title {
+      color: $secondary;
+      font-size: 32px;
+      margin-top: 8px;
+    }
+  }
+  .readMoreBtn {
+    color: #faf8f8;
+
+    &:hover {
+      color: black;
+    }
+  }
+}

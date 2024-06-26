@@ -1,0 +1,107 @@
+.header {
+  background-color: $primary;
+  position: sticky;
+  top: 0;
+  z-index: 99;
+
+  /* navbar */
+  .logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    h1 {
+      font-size: 28px;
+    }
+    img {
+      max-height: 50px;
+    }
+  }
+  @media (max-width: 576px) {
+    .logo h1 {
+      display: none;
+    }
+  }
+  .navbar-icons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .nav-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      span {
+        font-size: 24px;
+        margin-left: -1px;
+      }
+      .icon {
+        width: 28px;
+        height: 28px;
+      }
+    }
+  }
+  .nav-cart-count {
+    width: 20px;
+    height: 20px;
+    border-radius: 11px;
+    font-size: 11px;
+    background-color: red;
+    color: aliceblue;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    margin-top: -35px;
+    right: -5px;
+  }
+}
+
+.nav-login-btn {
+  border-radius: 75px;
+  cursor: pointer;
+  background-color: $primary;
+  padding: 0;
+}
+.nav-login-btn:active {
+  background-color: $secondary;
+  padding: 12px;
+}
+.nav-login-btn:hover {
+  color: black;
+}
+
+.cart-dropdown {
+  display: none; /* 默认隐藏 */
+  position: absolute;
+  top: calc(100% - 7px); // Overlap by 5px to prevent a gap
+  right: 0;
+  z-index: 1000;
+  width: 300px;
+  background-color: white;
+  border: 1px solid #ddd;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* 使用兄弟选择器来控制下拉菜单的显示 */
+.cart-toggle:hover .cart-dropdown {
+  display: block; /* 确保规则生效 */
+}
+.cart-dropdown.show {
+  display: block !important; /* Ensure this rule takes priority when class "show" is added */
+}
+.countInput {
+  width: 70px;
+}
+@media (max-width: 768px) {
+  // Styles specific to screens smaller than 768px
+  .navbar-icons {
+    .nav-link span {
+      // Hide the text labels for small screens
+
+      display: none;
+    }
+    // Make sure the icons are properly sized and spaced
+    .icon {
+      font-size: 24px; // Adjust as needed
+    }
+  }
+}

@@ -1,0 +1,66 @@
+.product-detail {
+  margin-top: 40px;
+  .product-detail-img {
+    width: 500px;
+    height: 350px;
+    border-radius: 16px;
+  }
+  .card {
+    border: none;
+    max-width: 500px;
+
+    .btn {
+      width: 100%;
+    }
+  }
+  .row {
+    @include media-breakpoint-up(lg) {
+      margin-bottom: 32px;
+    }
+  }
+}
+.product-detail {
+  .card-body {
+    display: grid;
+    grid-template-columns: 1fr; /* 单列布局 */
+    grid-gap: 1rem; /* 定义子元素之间的间隔 */
+
+    padding: 16px;
+    &:last-child {
+      margin-bottom: 0; /* 最后一个项不留底部间距 */
+    }
+  }
+}
+.nutrition {
+  background-color: #f7f3ec;
+  border-radius: 3rem;
+
+  box-shadow: 3px 3px 3px 3px #0000001a;
+}
+
+.customers-also-viewed {
+  img {
+    width: 100%;
+  }
+  .card {
+    border: none;
+
+    padding-bottom: 8px;
+    &:hover {
+      cursor: pointer;
+    }
+  }
+}
+.ProductDetailAdd-btn {
+  width: 500px;
+}
+.ProductDetailAdd-like-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid grey;
+}
+
+.Accordion {
+  font-size: 16px;
+}

@@ -1,0 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Noto+Sans+TC:wght@400;500;700;900&family=Roboto+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0');
+@import url('https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css');
+@import url('https://unpkg.com/aos@next/dist/aos.css');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
+
+@import 'bootstrap/scss/functions';
+//自己的＿variables.scss要先放在bs的前面 因為都是default這樣就可以蓋掉後面的bs default
+@import './style/variables';
+// bs ＿variables.scss default要放在自己的＿variables.scss後面
+@import 'bootstrap/scss/bootstrap';
+
+@import './style/reset';
+@import './style/base';
+@import './style/util';
+@import './style/header';
+@import './style/indexBanner';
+// @import "./style/about";
+// @import '/src//assets/style/type';
+@import './style/shop';
+@import './style/productDetail';
+@import './style/blogDetail';
+@import './style/signup';
+@import './style/login';
+@import './style/paymentProgressBar';
+@import './style/orderSummary';
+@import './style/footer';
+.testBtn {
+  background-color: brown;
+}
