@@ -1,0 +1,42 @@
+[
+  {
+    "id": "1",
+    "name": " Beer ",
+    "img_url": "/MERN-petslove/images/review-dog.png",
+    "age": 2,
+    "review": "One of the standout features of Pets Fish Snack is the quality of ingredients. It's evident that the snack is made from real fish, which is a great source of protein for pets. Knowing that it contains wholesome ingredients gives me peace of mind that I'm providing my pet with a nutritious treat.",
+    "productName": "fish",
+
+    "productImg": "/MERN-petslove/images/review.png"
+  },
+  {
+    "id": "2",
+    "name": "NiNi",
+    "img_url": "/MERN-petslove/images/review-cat.png",
+    "age": 2,
+    "review": "The aroma of fish is quite strong, which immediately captures my pet's attention. The snack is crunchy and satisfying to chew on, making it an enjoyable treat for my furry friend.",
+    "productName": "pork",
+
+    "productImg": "/MERN-petslove/images/review.png"
+  },
+  {
+    "id": "3",
+    "name": "Pinki",
+    "img_url": "/MERN-petslove/images/review-dog.png",
+    "age": 5,
+    "review": "Besides being delicious, Pets Fish Snack also offers nutritional benefits. It's low in fat and contains essential nutrients that contribute to my pet's overall health and well-being. ",
+    "productName": "beef",
+
+    "productImg": "/MERN-petslove/images/review.png"
+  },
+  {
+    "id": "4",
+    "name": "Chubi",
+    "img_url": "/MERN-petslove/images/review-cat.png",
+
+    "age": 5,
+    "review": "The snack comes in a convenient resealable bag, which helps maintain its freshness and prevents it from going stale. The packaging is durable and easy to store, making it ideal for on-the-go pet owners like myself",
+    "productName": "chicken",
+    "productImg": "/MERN-petslove/images/review.png"
+  }
+]
