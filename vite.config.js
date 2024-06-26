@@ -19,7 +19,7 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         input: {
           // 相对于项目根目录的路径
-          main: path.resolve(__dirname, 'main.jsx'),
+          main: path.resolve(__dirname, 'index.html'),
         },
         output: {
           entryFileNames: ({ name }) => `assets/${name}.js`,
