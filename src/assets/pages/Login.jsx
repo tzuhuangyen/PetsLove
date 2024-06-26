@@ -106,14 +106,14 @@ function Login() {
       );
       console.log('Login successful:', response);
       // The server should send back a response containing the token
-      const { token } = response.data;
+      const { token, userId } = response.data;
       if (token) {
         localStorage.setItem('token', token);
         console.log('User logged in & token:', token);
         login({ token }); // 登入成功，將令牌儲存至 localStorage，並更新 AuthContext
 
         // After login, fetch the user's cart items from the server
-        const userCartFromServer = await fetchUserCartFromServer(userData);
+        const userCartFromServer = await fetchUserCartFromServer(userId);
 
         // Fetch cart from localStorage
         const localCart = JSON.parse(localStorage.getItem('cart')) || [];

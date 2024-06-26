@@ -6,22 +6,21 @@ import React from 'react';
 import { useAuth } from '../Context/AuthContext';
 
 const Logout = () => {
-  const navigate = useNavigate();
-  const { authState, setAuthState } = useAuth();
+  const { authState, logout } = useAuth();
   console.log('anyone log in:', authState.isAuthenticated);
   //logout from db base
   const handleLogoutAccount = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
       console.error('No token found, redirecting to login');
-      logoutUser();
+      logout();
       return;
     }
     try {
       await axios.post(`${backendUrl}/api/users/member/myProfile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      logoutUser();
+      logout();
       console.log('Logged out successfully');
     } catch (error) {
       console.error('Error logging out', error);
@@ -29,12 +28,7 @@ const Logout = () => {
   };
 
   //logout from local
-  function logoutUser() {
-    setAuthState({ ...authState, isAuthenticated: false });
-    console.log('user log out:', authState.isAuthenticated);
-    localStorage.removeItem('token'); // Remove the token from local storage
-    navigate('/users/login');
-  }
+
   return (
     <Link to='#'>
       <ListGroup.Item action onClick={handleLogoutAccount}>
