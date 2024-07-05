@@ -1,7 +1,5 @@
 (PetsLove website)[<https://tzuhuangyen.github.io/PetsLove/>]
 
-### the project name is PetLoveClient in Yen's file
-
 PetsLove is a web application built with React, Node.js, and Express that allows users to browse and purchase pet products online. It features user authentication, a shopping cart, and various alert notifications using the SweetAlert2 library.
 
 ## Features
