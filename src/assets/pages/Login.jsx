@@ -112,11 +112,12 @@ function Login() {
         console.log('User logged in & token:', token);
         login({ token }); // 登入成功，將令牌儲存至 localStorage，並更新 AuthContext
 
+        // Fetch cart from localStorage
+        const localCart = JSON.parse(localStorage.getItem('cart')) || [];
+
         // After login, fetch the user's cart items from the server
         const userCartFromServer = await fetchUserCartFromServer(userId);
 
-        // Fetch cart from localStorage
-        const localCart = JSON.parse(localStorage.getItem('cart')) || [];
         // Merge the carts
         const mergedCart = mergeCarts(localCart, userCartFromServer);
 
@@ -128,10 +129,6 @@ function Login() {
         localStorage.setItem('cart', JSON.stringify([]));
 
         showLoginAlert(formData.username);
-        setTimeout(() => {
-          console.log('Redirecting to user profile page...');
-          navigate('/users/member/myProfile');
-        }, 3000);
       }
     } catch (error) {
       console.error('Error Error up:', error);

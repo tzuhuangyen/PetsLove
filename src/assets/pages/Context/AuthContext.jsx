@@ -25,12 +25,13 @@ export const AuthProvider = ({ children }) => {
   const login = (user) => {
     localStorage.setItem('token', user.token);
     setAuthState({ isAuthenticated: true, user });
+    window.location.href = '/users/member/myProfile';
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     setAuthState({ isAuthenticated: false, user: null });
-    window.location.href = 'PetsLove/user/login';
+    window.location.href = '/users/login';
   };
   return (
     <AuthContext.Provider value={{ authState, setAuthState, login, logout }}>

@@ -33,34 +33,6 @@ function Header() {
   console.log('get localCart:', localCart);
   const { authState } = useContext(AuthContext);
   console.log('anyone log in:', authState.isAuthenticated);
-  //get Login User CartItems
-  // const getLoginUserCartItems = async () => {
-  //   try {
-  //     if (token) {
-  //       const response = await axios.get(
-  //         `${backendUrl}/api/users/member/cart`,
-  //         {
-  //           headers: { Authorization: `Bearer ${token}` },
-  //         }
-  //       );
-  //       console.log('UserCart', response.data.cart);
-  //       console.log('fetch All CartItems:', response.data.cart);
-  //       setCartItems(response.data.cart);
-  //     } else {
-  //       console.log('no token,no user login yet');
-  //     }
-  //   } catch (error) {
-  //     console.error('fetching no cartItems:', error);
-  //     console.dir('Error fetching cartItems or no user login:', error);
-  //     console.error(
-  //       'Error details:',
-  //       error.response ? error.response.data : error.message
-  //     );
-  //   }
-  // };
-  // useEffect(() => {
-  //   getLoginUserCartItems();
-  // }, [token]);
 
   const showDropdown = () => {
     clearTimeout(hideDropdownTimeout);
