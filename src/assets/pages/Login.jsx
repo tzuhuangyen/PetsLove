@@ -1,6 +1,7 @@
 import { backendUrl } from '../../../config.js';
 import { AuthContext } from '../pages/Context/AuthContext';
 import { CartContext } from '../pages/Context/CartContext';
+
 import axios from 'axios';
 // import { jwtDecode } from 'jwt-decode';
 import React, {
@@ -49,7 +50,7 @@ function Login() {
   // const navigate = useNavigate();
   const [passwordVisible, setPasswordVisible] = useState(false); // State for password visibility
   const passwordInputRef = useRef(null);
-  // const [userId, setUserId] = useState(null);
+  const { authState } = useContext(AuthContext);
   const [error, setError] = useState('');
   const {
     register,
@@ -60,7 +61,7 @@ function Login() {
   } = useForm({ mode: 'onTouched' });
 
   const { login } = useContext(AuthContext);
-  const { setCart } = useContext(CartContext);
+  const { cartItems, setCartItems } = useContext(CartContext);
 
   useEffect(() => {
     // 確認用戶是否已經登入

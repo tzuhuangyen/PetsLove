@@ -1,5 +1,7 @@
-import React, { useState, useContext } from 'react';
+import React, { useReducer } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
+import { AuthProvider } from './assets/pages/Context/AuthContext';
+import { CartProvider } from './assets/pages/Context/CartContext';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
@@ -26,8 +28,7 @@ import ProductDetail from './assets/pages/ProductDetail';
 import IndexBlog from './assets/pages/component/IndexBlog';
 import ForgotPsw from './assets/pages/component/ForgotPsw';
 import ResetPsw from './assets/pages/component/ResetPsw';
-import { AuthProvider } from './assets/pages/Context/AuthContext';
-import { CartProvider } from './assets/pages/Context/CartContext';
+
 import PaymentRoutes from './PaymentRoutes';
 import { MemberOrders } from './assets/pages/MemberOrders';
 

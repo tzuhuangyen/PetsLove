@@ -183,8 +183,7 @@ const Shop = () => {
               headers: { Authorization: `Bearer ${token}` },
             }
           );
-          console.log('All CartItems:', response.data);
-          setCartItems(response.data.cart);
+          console.log('getLoginUserCartItems:', response.data);
         }
       } catch (error) {
         console.error('Error fetching cartItems:', error);

@@ -24,8 +24,6 @@ import { AuthContext } from '../Context/AuthContext.jsx';
 function Header() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   let hideDropdownTimeout;
-  const [token, setToken] = useState(localStorage.getItem('token'));
-
   const contextValue = useContext(AuthContext);
   console.log(contextValue); // Check what you're getting here
   //localstorage cart
@@ -54,32 +52,6 @@ function Header() {
       item._id === id ? { ...item, quantity: quantity } : item
     );
     setCartItems(updateQtyCart);
-    console.log(`Price: ${updateQtyCart.price}, Quantity:
-      ${updateQtyCart.quantity}`);
-
-    console.log('updateQty cartItems:', updateQtyCart);
-
-    //updateCartItemInDatabase
-    // try {
-    //   const response = await axios.patch(
-    //     `${backendUrl}/api/users/member/cart/${id}`,
-    //     { quantity },
-    //     {
-    //       headers: {
-    //         Authorization: `Bearer ${token}`,
-    //         'Content-Type': 'application/json',
-    //       },
-    //     }
-    //   );
-    //   if (!response.ok) {
-    //     throw new Error('Failed to update cart item');
-    //   }
-
-    //   const updatedCart = await response.json();
-    //   console.log('Successfully updated item quantity:', response.data);
-    // } catch (error) {
-    //   console.error('Failed to update item quantity:', error);
-    // }
   };
 
   const handleDelete = (id) => {
@@ -122,7 +94,6 @@ function Header() {
                 >
                   <CiShoppingCart size={32} className=' icon' />
                   <div className='nav-cart-count'>
-                    {/* <div className='nav-cart-count'>10</div> */}
                     {Array.isArray(cartItems)
                       ? cartItems.reduce(
                           (total, item) => total + (item.quantity || 0),
