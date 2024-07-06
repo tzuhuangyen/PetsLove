@@ -39,7 +39,7 @@ import { backendUrl } from '../../../config.js';
 import { useProgress } from './Context/ProgressContext';
 import Confetti from 'react-confetti';
 import { useCart } from './Context/CartContext.jsx';
-import { useAuth } from './Context/AuthContext.jsx';
+import { userAuth } from './Context/AuthContext.jsx';
 //訂單付款進度條
 export const ProgressBar = ({ steps, currentStep }) => {
   return (
@@ -77,13 +77,13 @@ export const ProgressBar = ({ steps, currentStep }) => {
 export const MemberCart = () => {
   const [token, setToken] = useState(localStorage.getItem('token'));
   //get Login User CartItems from db
-  const [cartItems, setCartItems] = useState([]);
+  // const [cartItems, setCartItems] = useState([]);
   const location = useLocation();
   const { handleNextStep } = useProgress();
   const navigate = useNavigate();
   //display localstorage cart items
-  const { localCart, setLocalCart } = useCart(); // Use cart context
-  const { authState } = useAuth();
+  const { cartItems, setCartItems } = useCart(); // Use cart context
+  const { authState } = userAuth();
   const steps = ['Cart', 'Order Summary', 'Payment', 'Finalization'];
   const currentStep = 0;
 
@@ -101,10 +101,10 @@ export const MemberCart = () => {
       quantity = 1; // 確保數量至少為1
     }
     // Update quantity in the local state
-    const updatedCartItems = localCart.map((item) =>
+    const updatedCartItems = setCartItems.map((item) =>
       item._id === id ? { ...item, quantity: quantity } : item
     );
-    setLocalCart(updatedCartItems);
+    setCartItems(updatedCartItems);
     // try {
     //   await axios.patch(
     //     `${backendUrl}/api/users/member/cart/${id}`,
@@ -121,12 +121,12 @@ export const MemberCart = () => {
 
   const handleDelete = (_id) => {
     console.log('Deleting item with id:', _id);
-    const updateDeleteItem = localCart.filter((item) => item._id !== _id);
-    setLocalCart(updateDeleteItem);
+    const updateDeleteItem = cartItems.filter((item) => item._id !== _id);
+    setCartItems(updateDeleteItem);
     console.log('Cart after deletion:', updateDeleteItem);
   };
 
-  const totalAmount = localCart?.reduce(
+  const totalAmount = cartItems?.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0
   );
@@ -153,9 +153,10 @@ export const MemberCart = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        // console.log('User Id:', response.data.cart.userId.username);
-        console.log('get user All db CartItems:', response.data.cart?.items);
-        setCartItems(response.data.cart?.items);
+        // Check if cart items exist in the response data
+        const cartItems = response.data.cart?.items || [];
+        console.log('get user All db CartItems:', cartItems);
+        setCartItems(cartItems);
       }
     } catch (error) {
       console.error('Error fetching db cartItems:', error);
@@ -169,7 +170,7 @@ export const MemberCart = () => {
   return (
     <div>
       <h2 className='mb-4'>Shopping Cart</h2>
-      {localCart?.map((item) => (
+      {cartItems?.map((item) => (
         <Card className='mb-3' key={item._id}>
           <Card.Body>
             <Row className='d-flex align-items-center'>

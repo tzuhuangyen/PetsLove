@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
 export const AuthContext = createContext();
-export const useAuth = () => useContext(AuthContext);
+export const userAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [authState, setAuthState] = useState({
@@ -12,26 +12,23 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      // Implement a way to validate the token and fetch user info
-      // For now, just setting isAuthenticated to true
       setAuthState((prevState) => ({
         ...prevState,
         isAuthenticated: true,
       }));
     }
-    console.log('Authentication state changed: ', authState.isAuthenticated);
-  }, [authState.isAuthenticated]);
+  }, []);
 
   const login = (user) => {
     localStorage.setItem('token', user.token);
     setAuthState({ isAuthenticated: true, user });
-    window.location.href = '/users/member/myProfile';
+    window.location.href = '/PetsLove/users/member/myProfile';
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     setAuthState({ isAuthenticated: false, user: null });
-    window.location.href = '/users/login';
+    window.location.href = '/PetsLove/users/login';
   };
   return (
     <AuthContext.Provider value={{ authState, setAuthState, login, logout }}>

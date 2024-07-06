@@ -29,8 +29,8 @@ function Header() {
   const contextValue = useContext(AuthContext);
   console.log(contextValue); // Check what you're getting here
   //localstorage cart
-  const { localCart, setLocalCart } = useCart();
-  console.log('get localCart:', localCart);
+  const { cartItems, setCartItems } = useCart();
+  console.log('get cartItems:', cartItems);
   const { authState } = useContext(AuthContext);
   console.log('anyone log in:', authState.isAuthenticated);
 
@@ -50,13 +50,14 @@ function Header() {
     if (quantity < 1) {
       quantity = 1; // Ensure quantity is at least 1
     }
-    const updateQtyCart = localCart.map((item) =>
+    const updateQtyCart = cartItems.map((item) =>
       item._id === id ? { ...item, quantity: quantity } : item
     );
-    setLocalCart(updateQtyCart);
-    console.log(`Price: ${item.price}, Quantity:
-      ${item.quantity}`);
-    console.log('updateQty localCart:', updateQtyCart);
+    setCartItems(updateQtyCart);
+    console.log(`Price: ${updateQtyCart.price}, Quantity:
+      ${updateQtyCart.quantity}`);
+
+    console.log('updateQty cartItems:', updateQtyCart);
 
     //updateCartItemInDatabase
     // try {
@@ -84,8 +85,8 @@ function Header() {
   const handleDelete = (id) => {
     console.log('Deleting item with id:', id);
 
-    const updateDeleteItem = localCart.filter((item) => item._id !== id);
-    setLocalCart(updateDeleteItem);
+    const updateDeleteItem = cartItems.filter((item) => item._id !== id);
+    setCartItems(updateDeleteItem);
 
     console.log('Cart after deletion:', updateDeleteItem);
   };
@@ -122,8 +123,8 @@ function Header() {
                   <CiShoppingCart size={32} className=' icon' />
                   <div className='nav-cart-count'>
                     {/* <div className='nav-cart-count'>10</div> */}
-                    {Array.isArray(localCart)
-                      ? localCart.reduce(
+                    {Array.isArray(cartItems)
+                      ? cartItems.reduce(
                           (total, item) => total + (item.quantity || 0),
                           0
                         )
@@ -135,8 +136,8 @@ function Header() {
                   onMouseLeave={hideDropdown}
                 >
                   <div className='cart-dropdown '>
-                    {localCart && localCart.length > 0 ? (
-                      localCart.map((item, index) => (
+                    {cartItems && cartItems.length > 0 ? (
+                      cartItems.map((item, index) => (
                         <Dropdown.Item key={index} className='p-0 '>
                           <Card className='mb-3 border-0' key={item._id}>
                             <Card.Body className='d-flex p-3'>

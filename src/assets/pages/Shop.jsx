@@ -56,7 +56,7 @@ const Shop = () => {
   //共用購物車狀態
   const [addItemToCart, setAddItemToCart] = useState([]);
   const token = localStorage.getItem('token');
-  const { localCart, setLocalCart } = useCart();
+  const { cartItems, setCartItems } = useCart();
 
   //get all products data
   const getAllData = async () => {
@@ -145,7 +145,7 @@ const Shop = () => {
   };
   //add item to localstorage
   const addItemToLocalstorage = (product) => {
-    let localstorageCart = Array.isArray(localCart) ? [...localCart] : [];
+    let localstorageCart = Array.isArray(cartItems) ? [...cartItems] : [];
 
     // 检查购物车中是否已存在该商品
     const existingItemIndex = localstorageCart.findIndex(
@@ -163,7 +163,7 @@ const Shop = () => {
     }
     // 将更新后的购物车数组存回本地存储
     localStorage.setItem('cart', JSON.stringify(localstorageCart));
-    setLocalCart(localstorageCart);
+    setCartItems(localstorageCart);
     showAddToCartAlert(product.productName);
     console.log('add item to Localstorage:', localstorageCart);
   };
@@ -184,7 +184,7 @@ const Shop = () => {
             }
           );
           console.log('All CartItems:', response.data);
-          setLocalCart(response.data.cart);
+          setCartItems(response.data.cart);
         }
       } catch (error) {
         console.error('Error fetching cartItems:', error);

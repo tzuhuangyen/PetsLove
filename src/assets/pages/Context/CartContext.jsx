@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext } from 'react';
 import { useLocalStorage } from '../useLocalStorage';
 //建立購物車共用的環境
 //product page's cart component
@@ -6,23 +6,10 @@ import { useLocalStorage } from '../useLocalStorage';
 export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  const [localCart, setLocalCart] = useLocalStorage('LocalstorageCart', []);
-
-  // const getLocalCart = localStorage.setItem(
-  //   'updatedLocalstorageCart',
-  //   JSON.stringify(cart)
-  // );
-
-  // useEffect(() => {
-  //   setCart(getLocalCart);
-  // }, []); // 仅在 setCart 函数发生变化时执行 useEffect
-
-  // useEffect(() => {
-  //   localStorage.setItem('updatedLocalstorageCart', JSON.stringify(cart));
-  // }, [cart]);
+  const [cartItems, setCartItems] = useLocalStorage('cartItems', []);
 
   return (
-    <CartContext.Provider value={{ localCart, setLocalCart }}>
+    <CartContext.Provider value={{ cartItems, setCartItems }}>
       {children}
     </CartContext.Provider>
   );
