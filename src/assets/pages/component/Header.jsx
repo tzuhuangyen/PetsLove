@@ -28,7 +28,6 @@ function Header() {
   console.log(contextValue); // Check what you're getting here
   //localstorage cart
   const { cartItems, setCartItems } = useCart();
-  console.log('get cartItems:', cartItems);
   const { authState } = useContext(AuthContext);
   console.log('anyone log in:', authState.isAuthenticated);
 
@@ -52,6 +51,7 @@ function Header() {
       item._id === id ? { ...item, quantity: quantity } : item
     );
     setCartItems(updateQtyCart);
+    localStorage.setItem('cartItems', JSON.stringify(updateQtyCart));
   };
 
   const handleDelete = (id) => {
@@ -59,8 +59,8 @@ function Header() {
 
     const updateDeleteItem = cartItems.filter((item) => item._id !== id);
     setCartItems(updateDeleteItem);
-
     console.log('Cart after deletion:', updateDeleteItem);
+    localStorage.setItem('cartItems', JSON.stringify(updateDeleteItem));
   };
 
   return (

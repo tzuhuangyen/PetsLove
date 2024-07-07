@@ -24,6 +24,7 @@ import Container from 'react-bootstrap/Container';
 import Loading from './component/Loading';
 // import { CartContext } from './Context/CartContext.jsx';
 import { useCart } from './Context/CartContext.jsx';
+import { userAuth } from './Context/AuthContext.jsx';
 
 //Debounce function
 function debounce(func, wait) {
@@ -57,6 +58,71 @@ const Shop = () => {
   const [addItemToCart, setAddItemToCart] = useState([]);
   const token = localStorage.getItem('token');
   const { cartItems, setCartItems } = useCart();
+  const { authState } = userAuth();
+
+  // 同步購物車函數 get user All db CartItems
+  const fetchUserCartFromServer = async (token) => {
+    try {
+      const response = await axios.get(`${backendUrl}/api/users/member/cart`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const dataCartItems = response.data.cart?.items || [];
+      // console.log('get user All db CartItems:', dataCartItems);
+      return dataCartItems;
+    } catch (error) {
+      console.error('Error fetching user cart from server:', error);
+      return [];
+    }
+  };
+
+  const updateServerCart = async (token, mergedCart) => {
+    try {
+      const response = await axios.post(
+        `${backendUrl}/api/users/member/cart`,
+        { items: mergedCart },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      console.log('Server cart updated:', response.data);
+    } catch (error) {
+      console.error('Error updating server cart:', error);
+    }
+  };
+  const mergeCarts = (cartItems, serverCart) => {
+    const mergedCart = [...cartItems];
+    serverCart.forEach((serverItem) => {
+      const localItemIndex = mergedCart.findIndex(
+        (localItem) => localItem._id === serverItem._id
+      );
+      if (localItemIndex !== -1) {
+        mergedCart[localItemIndex].quantity += serverItem.quantity;
+      } else {
+        mergedCart.push(serverItem);
+      }
+    });
+    return mergedCart;
+  };
+  useEffect(() => {
+    const syncUserCartWithServer = async () => {
+      if (authState.isAuthenticated && token) {
+        try {
+          const userCartFromServer = await fetchUserCartFromServer(token);
+          console.log('User cart from server:', userCartFromServer);
+          const mergedCart = mergeCarts(cartItems, userCartFromServer);
+          console.log('Merged cart:', mergedCart);
+          await updateServerCart(token, mergedCart);
+          console.log('Server cart updated successfully.');
+          setCartItems(mergedCart);
+          localStorage.setItem('cart', JSON.stringify([]));
+        } catch (error) {
+          console.error('Error syncing user cart with server:', error);
+        }
+      }
+    };
+
+    syncUserCartWithServer();
+  }, [authState.isAuthenticated, cartItems, token]);
 
   //get all products data
   const getAllData = async () => {
@@ -85,6 +151,7 @@ const Shop = () => {
   useEffect(() => {
     getAllData();
   }, []);
+
   //component create products card
   const ProductCard = ({ productTypes }) => {
     if (!Array.isArray(productTypes)) {
@@ -173,29 +240,28 @@ const Shop = () => {
   };
 
   //get login user cartItem from db
-  useEffect(() => {
-    const getLoginUserCartItems = async () => {
-      try {
-        if (token) {
-          const response = await axios.get(
-            `${backendUrl}/api/users/member/cart`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
-          console.log('getLoginUserCartItems:', response.data);
-        }
-      } catch (error) {
-        console.error('Error fetching cartItems:', error);
-        console.error(
-          'Error details:',
-          error.response ? error.response.data : error.message
-        );
-      }
-    };
-    getLoginUserCartItems();
-  }, [token]);
-
+  // const getLoginUserCartItems = async () => {
+  //   try {
+  //     if (token) {
+  //       const response = await axios.get(
+  //         `${backendUrl}/api/users/member/cart`,
+  //         {
+  //           headers: { Authorization: `Bearer ${token}` },
+  //         }
+  //       );
+  //       console.log('getLoginUserCartItems:', response.data);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error fetching cartItems:', error);
+  //     console.error(
+  //       'Error details:',
+  //       error.response ? error.response.data : error.message
+  //     );
+  //   }
+  // };
+  // useEffect(() => {
+  //   getLoginUserCartItems();
+  // }, [token]);
   //登入用戶加入購物車到server數據庫
   //当用户决定要结账或者在进行特定操作时，系统会提示用户登录或注册。
   //如果用户选择登录或注册，系统会验证用户的身份并将用户导向登录页面。
@@ -210,8 +276,9 @@ const Shop = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log('Item added to cart:', response.data);
-      setAddItemToCart(response.data.cart);
+      const addItemToServerCart = response.data.cart;
+      return addItemToServerCart;
+      console.log('Item added to serverCart:', addItemToServerCart);
     } catch (error) {
       console.error('Error adding item to cart:', error);
       console.error(

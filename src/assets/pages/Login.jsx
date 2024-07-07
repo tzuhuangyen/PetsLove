@@ -62,33 +62,51 @@ function Login() {
 
   const { login } = useContext(AuthContext);
   const { cartItems, setCartItems } = useContext(CartContext);
+  const [token, setToken] = useState(null);
 
   useEffect(() => {
-    // 確認用戶是否已經登入
-    if (authState.isAuthenticated) {
-      if (cartItems && cartItems.length > 0) {
-        cartItems.forEach(async (item) => {
-          try {
-            const response = await axios.post(
-              `${backendUrl}/api/users/member/cart/${item.id}`,
-              {
-                quantity: item.quantity,
-              },
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  'Content-Type': 'application/json',
-                },
-              }
-            );
-            console.log('Item added to database:', response.data);
-          } catch (error) {
-            console.error('Error adding item to database:', error);
-          }
-        });
+    console.log('authState.isAuthenticated:', authState.isAuthenticated);
+    console.log('cartItems:', cartItems);
+    console.log('token:', token);
+
+    const syncUserCartWithServer = async () => {
+      console.log('Starting syncUserCartWithServer...');
+
+      // 確認用戶是否已經登入
+      if (authState.isAuthenticated && token) {
+        try {
+          // Fetch the user's cart items from the server
+          console.log('Fetching user cart from server...');
+          const userCartFromServer = await fetchUserCartFromServer(token);
+          console.log('User cart from server:', userCartFromServer);
+
+          // Merge local cart with user's cart from server
+          console.log('Merging carts...');
+          const mergedCart = mergeCarts(cartItems, userCartFromServer);
+          console.log('Merged cart:', mergedCart);
+
+          // Update server with the merged cart
+          console.log('Updating server cart...');
+          await updateServerCart(token, mergedCart);
+          console.log('Server cart updated successfully.');
+
+          // Set the merged cart to the state (if needed)
+          console.log('Setting merged cart to state...');
+          setCartItems(mergedCart);
+
+          // Clear local storage cart as it's now merged
+          console.log('Clearing local storage cart...');
+          localStorage.setItem('cart', JSON.stringify([]));
+        } catch (error) {
+          console.error('Error syncing user cart with server:', error);
+        }
+      } else {
+        console.log('User not authenticated or token not available.');
       }
-    }
-  }, [authState.isAuthenticated, cartItems]);
+    };
+
+    syncUserCartWithServer();
+  }, [authState.isAuthenticated, cartItems, token]);
   // This function fetches the user's cart from the server using the token
   const fetchUserCartFromServer = async (token) => {
     try {
@@ -117,6 +135,7 @@ function Login() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+      console.log('Server cart updated successfully.');
     } catch (error) {
       console.error('Error updating cart on server:', error);
     }
@@ -137,6 +156,8 @@ function Login() {
       // The server should send back a response containing the token
       const { token, userId } = response.data;
       if (token) {
+        setToken(token); // 将 token 设置到状态中
+
         localStorage.setItem('token', token);
         console.log('User logged in & token:', token);
         login({ token }); // 登入成功，將令牌儲存至 localStorage，並更新 AuthContext
@@ -152,15 +173,14 @@ function Login() {
 
         // Update the server with the merged cart (if necessary)
         await updateServerCart(token, mergedCart);
-
-        setCart(mergedCart);
+        setCartItems(mergedCart);
         // Clear localStorage cart as it's now merged
         localStorage.setItem('cart', JSON.stringify([]));
 
         showLoginAlert(formData.username);
       }
     } catch (error) {
-      console.error('Error Error up:', error);
+      console.error('Error during login:', error);
       if (error.response) {
         if (error.response.status === 401) {
           setError('Invalid credentials');

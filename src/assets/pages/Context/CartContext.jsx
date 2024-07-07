@@ -4,14 +4,20 @@ import { useLocalStorage } from '../useLocalStorage';
 //product page's cart component
 //cart navbar component
 export const CartContext = createContext();
+// Custom hook to use the cart context
+export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useLocalStorage('cartItems', []);
+  const [cartItems, setCartItems] = useLocalStorage(() => {
+    // 初始化時從 LocalStorage 獲取數據
+    const savedCartItems = localStorage.getItem('cartItems');
+    return savedCartItems ? JSON.parse(savedCartItems) : [];
+  });
   // Effect to sync local storage cart with context after login
+  // 每次 cartItems 改變時同步更新 LocalStorage
   useEffect(() => {
-    const storedCart = JSON.parse(localStorage.getItem('cartItems') || '[]');
-    setCartItems(storedCart);
-  }, [setCartItems]);
+    localStorage.setItem('cartItems', JSON.stringify(cartItems));
+  }, [cartItems]);
 
   return (
     <CartContext.Provider value={{ cartItems, setCartItems }}>
@@ -19,5 +25,3 @@ export const CartProvider = ({ children }) => {
     </CartContext.Provider>
   );
 };
-// Custom hook to use the cart context
-export const useCart = () => useContext(CartContext);

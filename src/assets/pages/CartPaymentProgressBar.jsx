@@ -76,8 +76,6 @@ export const ProgressBar = ({ steps, currentStep }) => {
  */
 export const MemberCart = () => {
   const [token, setToken] = useState(localStorage.getItem('token'));
-  //get Login User CartItems from db
-  // const [cartItems, setCartItems] = useState([]);
   const location = useLocation();
   const { handleNextStep } = useProgress();
   const navigate = useNavigate();
@@ -93,7 +91,7 @@ export const MemberCart = () => {
     navigate('/users/member/order-summary');
   };
   useEffect(() => {
-    getAllCartItems();
+    getUsersAllCartItems();
   }, [token]);
 
   const handleQtyChange = async (id, quantity) => {
@@ -101,7 +99,7 @@ export const MemberCart = () => {
       quantity = 1; // 確保數量至少為1
     }
     // Update quantity in the local state
-    const updatedCartItems = setCartItems.map((item) =>
+    const updatedCartItems = cartItems.map((item) =>
       item._id === id ? { ...item, quantity: quantity } : item
     );
     setCartItems(updatedCartItems);
@@ -144,7 +142,7 @@ export const MemberCart = () => {
   };
 
   //get login user's cart from db
-  const getAllCartItems = async () => {
+  const getUsersAllCartItems = async () => {
     try {
       if (token) {
         const response = await axios.get(
@@ -154,9 +152,10 @@ export const MemberCart = () => {
           }
         );
         // Check if cart items exist in the response data
-        const cartItems = response.data.cart?.items || [];
-        console.log('get user All db CartItems:', cartItems);
-        setCartItems(cartItems);
+        const userCartItems = response.data.cart?.items || [];
+        console.log('get user All db userCartItems:', userCartItems);
+        setCartItems(userCartItems);
+        return userCartItems;
       }
     } catch (error) {
       console.error('Error fetching db cartItems:', error);
@@ -165,6 +164,7 @@ export const MemberCart = () => {
         'Error details:',
         error.response ? error.response.data : error.message
       );
+      return [];
     }
   };
   return (
