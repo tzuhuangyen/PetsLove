@@ -61,68 +61,68 @@ const Shop = () => {
   const { authState } = userAuth();
 
   // 同步購物車函數 get user All db CartItems
-  const fetchUserCartFromServer = async (token) => {
-    try {
-      const response = await axios.get(`${backendUrl}/api/users/member/cart`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const dataCartItems = response.data.cart?.items || [];
-      // console.log('get user All db CartItems:', dataCartItems);
-      return dataCartItems;
-    } catch (error) {
-      console.error('Error fetching user cart from server:', error);
-      return [];
-    }
-  };
+  // const fetchUserCartFromServer = async (token) => {
+  //   try {
+  //     const response = await axios.get(`${backendUrl}/api/users/member/cart`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
+  //     const dataCartItems = response.data.cart?.items || [];
+  //     // console.log('get user All db CartItems:', dataCartItems);
+  //     return dataCartItems;
+  //   } catch (error) {
+  //     console.error('Error fetching user cart from server:', error);
+  //     return [];
+  //   }
+  // };
 
-  const updateServerCart = async (token, mergedCart) => {
-    try {
-      const response = await axios.post(
-        `${backendUrl}/api/users/member/cart`,
-        { items: mergedCart },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      console.log('Server cart updated:', response.data);
-    } catch (error) {
-      console.error('Error updating server cart:', error);
-    }
-  };
-  const mergeCarts = (cartItems, serverCart) => {
-    const mergedCart = [...cartItems];
-    serverCart.forEach((serverItem) => {
-      const localItemIndex = mergedCart.findIndex(
-        (localItem) => localItem._id === serverItem._id
-      );
-      if (localItemIndex !== -1) {
-        mergedCart[localItemIndex].quantity += serverItem.quantity;
-      } else {
-        mergedCart.push(serverItem);
-      }
-    });
-    return mergedCart;
-  };
-  useEffect(() => {
-    const syncUserCartWithServer = async () => {
-      if (authState.isAuthenticated && token) {
-        try {
-          const userCartFromServer = await fetchUserCartFromServer(token);
-          console.log('User cart from server:', userCartFromServer);
-          const mergedCart = mergeCarts(cartItems, userCartFromServer);
-          console.log('Merged cart:', mergedCart);
-          await updateServerCart(token, mergedCart);
-          console.log('Server cart updated successfully.');
-          setCartItems(mergedCart);
-          localStorage.setItem('cart', JSON.stringify([]));
-        } catch (error) {
-          console.error('Error syncing user cart with server:', error);
-        }
-      }
-    };
+  // const updateServerCart = async (token, mergedCart) => {
+  //   try {
+  //     const response = await axios.post(
+  //       `${backendUrl}/api/users/member/cart`,
+  //       { items: mergedCart },
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       }
+  //     );
+  //     console.log('Server cart updated:', response.data);
+  //   } catch (error) {
+  //     console.error('Error updating server cart:', error);
+  //   }
+  // };
+  // const mergeCarts = (cartItems, serverCart) => {
+  //   const mergedCart = [...cartItems];
+  //   serverCart.forEach((serverItem) => {
+  //     const localItemIndex = mergedCart.findIndex(
+  //       (localItem) => localItem._id === serverItem._id
+  //     );
+  //     if (localItemIndex !== -1) {
+  //       mergedCart[localItemIndex].quantity += serverItem.quantity;
+  //     } else {
+  //       mergedCart.push(serverItem);
+  //     }
+  //   });
+  //   return mergedCart;
+  // };
+  // useEffect(() => {
+  //   const syncUserCartWithServer = async () => {
+  //     if (authState.isAuthenticated && token) {
+  //       try {
+  //         const userCartFromServer = await fetchUserCartFromServer(token);
+  //         console.log('User cart from server:', userCartFromServer);
+  //         const mergedCart = mergeCarts(cartItems, userCartFromServer);
+  //         console.log('Merged cart:', mergedCart);
+  //         await updateServerCart(token, mergedCart);
+  //         console.log('Server cart updated successfully.');
+  //         setCartItems(mergedCart);
+  //         localStorage.setItem('cart', JSON.stringify([]));
+  //       } catch (error) {
+  //         console.error('Error syncing user cart with server:', error);
+  //       }
+  //     }
+  //   };
 
-    syncUserCartWithServer();
-  }, [authState.isAuthenticated, cartItems, token]);
+  //   syncUserCartWithServer();
+  // }, [authState.isAuthenticated, cartItems, token]);
 
   //get all products data
   const getAllData = async () => {
@@ -236,7 +236,7 @@ const Shop = () => {
   };
   const handleAddToCart = (product) => {
     addItemToLocalstorage(product);
-    // addItemToServerCart(product._id, 1);
+    addItemToServerCart(product._id, 1);
   };
 
   //get login user cartItem from db
@@ -276,9 +276,8 @@ const Shop = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      const addItemToServerCart = response.data.cart;
-      return addItemToServerCart;
-      console.log('Item added to serverCart:', addItemToServerCart);
+      setCartItems(response.data.cart.items);
+      console.log('add item to server cart:', response.data);
     } catch (error) {
       console.error('Error adding item to cart:', error);
       console.error(
