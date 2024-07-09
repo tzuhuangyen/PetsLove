@@ -119,23 +119,23 @@ function Banner() {
         <div className='slogan container'>
           <div>
             <p>100% Natural・No preservatives</p>
-            <h2>pets snack</h2>
+            <h2>HomeMade</h2>
             <span>
               <img src={footprintImg} alt='' />
-              Handcrafted in limited quantities.
+              Limited quantities
             </span>
             <span>
-              <img src={footprintImg} alt='' />
-              Specially formulated for picky pets
-            </span>
+              <img src={footprintImg} alt='' /> <br />
+              For picky pets
+            </span>{' '}
+            <br />
             <span>
-              <img src={footprintImg} alt='' />
               <img src={footprintImg} alt='' />
               only the best for pets
               <img src={footprintImg} alt='' />
             </span>
           </div>
-          {/* <!-- big foot print --> */}
+          {/* <!-- foot print --> */}
           <div className='d-none d-lg-block'>
             <span className='footprintBig footprintBig1 position-absolute'>
               <img src={footprintImg} alt='' />

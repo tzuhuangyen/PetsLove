@@ -410,7 +410,7 @@ export const OrderSummary = () => {
               Personal collection at collection points
             </p>
             <p>easybox Bp. II district Budagyongye</p>
-            <p>Budagyongye Szilágyi Erzsébet fasor 121 Bp, 1026</p>
+            <p>Budagyongye Szilágyi Erzsébet 121 Bp, 1026</p>
           </div>
         </Col>
         <Col md={4}>

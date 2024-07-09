@@ -6,7 +6,7 @@ import aboutJC3 from '/images/aboutJC3.png';
 
 function About() {
   return (
-    <div>
+    <>
       {/*<!-- about jc of mobile-->*/}
       <section className='about d-md-none'>
         <div className='container'>
@@ -54,7 +54,7 @@ function About() {
       </section>
 
       {/*<!--about jc of md&lg -->*/}
-      <div className='about-lg container d-none d-md-block'>
+      <section className='about-lg container  d-none d-md-block'>
         <h2 className='text-center'>
           <span>
             <img src={footprintImg} alt='before' />
@@ -92,8 +92,8 @@ function About() {
             </p>
           </li>
         </ul>
-      </div>
-    </div>
+      </section>
+    </>
   );
 }
 

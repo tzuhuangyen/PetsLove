@@ -3,10 +3,12 @@ import Swal from 'sweetalert2';
 //Shop.jsx
 export const showAddToCartAlert = (productName) => {
   Swal.fire({
+    position: 'top-end',
     title: 'Success!',
     text: `${productName} has been added to your cart.`,
     icon: 'success',
-    confirmButtonText: 'OK',
+    showConfirmButton: false,
+    timer: 1000,
   });
 };
 // Alert for removing a product from the cart
@@ -82,7 +84,7 @@ export const showLoginErrorAlert = (username) => {
     text: `try again?`,
     icon: 'error',
     html: `
-    <a href=PetsLove/users/login" style="color:white; text-decoration:none; display:inline-block; padding:10px 20px; background-color:#3085d6; border-radius:5px;">Login again</a>
+    <a href=/users/login" style="color:white; text-decoration:none; display:inline-block; padding:10px 20px; background-color:#3085d6; border-radius:5px;">Login again</a>
   `,
 
     footer: `

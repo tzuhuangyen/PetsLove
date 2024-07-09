@@ -19,7 +19,7 @@ const Footer = () => {
               className='d-flex align-items-center '
             >
               <img src={Logo} alt='logo' className='logo' />
-              <h1 className='logoH1 animate__animated animate__backInLeft animate__slow d-sm-none d-md-block'>
+              <h1 className=' animate__animated animate__backInLeft animate__slow d-s-none'>
                 Pet's Love
               </h1>
             </Navbar.Brand>

@@ -4,6 +4,7 @@ import { Navigation, Pagination, Scrollbar, A11y } from 'swiper/modules';
 // import '../../../node_modules/swiper/swiper-bundle.min.css';
 import footprint from '/images/footprint.png';
 import reviewers from '../../../../public/db.json';
+
 function IndexReview({ reviewer }) {
   return (
     <>
@@ -43,17 +44,21 @@ function IndexReview({ reviewer }) {
                     <div className='card mt-7 mb-1 mx-3 mx-md-0 my-md-0 py-md-4 ps-md-8'>
                       <div className='card-body review-cardBody'>
                         {/* <!-- 頭像 --> */}
-                        <img
-                          src={reviewer.img_url}
-                          className='text-center reviewPetPic'
-                          alt={reviewer.name}
-                        />
-                        <h5 className='card-title fs-5 mb-0'>
-                          {reviewer.name} {reviewer.age} yo
-                        </h5>
-                        <div className='ratings mb-md-3'>
-                          <div className='empty_star'>★★★★★</div>
-                          <div className='full_star'>★★★★★</div>
+                        <div className='d-flex align-items-center p-3'>
+                          <img
+                            src={reviewer.img_url}
+                            className='text-center reviewPetPic me-3'
+                            alt={reviewer.name}
+                          />
+                          <div>
+                            <h5 className='card-title fs-5 mb-0'>
+                              {reviewer.name} {reviewer.age} yo
+                            </h5>
+                            <div className='ratings'>
+                              <div className='empty_star'>★★★★★</div>
+                              <div className='full_star'>★★★★★</div>
+                            </div>
+                          </div>
                         </div>
 
                         <p className='card-text'>{reviewer.review}</p>
@@ -91,8 +96,6 @@ function IndexReview({ reviewer }) {
           </div>
         </div>
       </section>
-
-      {/* <!-- -------end phone of review------- --> */}
     </>
   );
 }

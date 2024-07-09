@@ -82,15 +82,13 @@ function IndexBlog() {
           <div className='card type-card-hover'>
             <img src={article1} className='card-img-top' alt='article1' />
             <div className='card-body'>
-              <span className='card-text text-muted'> 2022-08-21 </span>
+              <span className='card-text text-muted'> Feb 05, 2024</span>
               <h5 className='card-title'>
-                謠言破解！
-                <br />
-                毛孩其實可以吃豬肉！
+                Top 5 benefits of indestructible dog toys
               </h5>
-
+              <span> Darren Brownbill</span>
               <p className='card-text'>
-                <small className='text-muted'>#健康 #謠言破解</small>
+                <small className='text-muted'>#Food #toys</small>
               </p>
             </div>
           </div>
@@ -99,13 +97,11 @@ function IndexBlog() {
             <div className='card-body'>
               <span className='card-text text-muted'> 2023-09-12 </span>
               <h5 className='card-title'>
-                謠言破解！
-                <br />
-                毛孩其實可以吃豬肉！
+                4 things to look out for when shopping for dog treats
               </h5>
 
               <p className='card-text'>
-                <small className='text-muted'>#健康 #謠言破解</small>
+                <small className='text-muted'>#treats</small>
               </p>
             </div>
           </div>
@@ -114,13 +110,11 @@ function IndexBlog() {
             <div className='card-body'>
               <span className='card-text text-muted'> 2023-09-21 </span>
               <h5 className='card-title'>
-                謠言破解！
-                <br />
-                毛孩其實可以吃豬肉！
+                3 easy ways to have a pet-friendly Christmas
               </h5>
 
               <p className='card-text'>
-                <small className='text-muted'>#健康 #謠言破解</small>
+                <small className='text-muted'>#Halloween</small>
               </p>
             </div>
           </div>
