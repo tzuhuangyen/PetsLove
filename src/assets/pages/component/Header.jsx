@@ -18,8 +18,10 @@ import { CiShoppingCart, CiShop, CiUser } from 'react-icons/ci';
 import { RiAdminLine } from 'react-icons/ri';
 import { LiaBookSolid } from 'react-icons/lia';
 import { BsTrash, BsHeart } from 'react-icons/bs';
-import { CartContext, useCart } from '../Context/CartContext.jsx';
+
+import { useCart } from '../Context/CartContext.jsx';
 import { AuthContext } from '../Context/AuthContext.jsx';
+import { userAuth } from '../Context/AuthContext.jsx';
 
 function Header() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -28,6 +30,8 @@ function Header() {
   console.log(contextValue); // Check what you're getting here
   //localstorage cart
   const { cartItems, setCartItems } = useCart();
+  console.log('Cart Items:', cartItems);
+
   const { authState } = useContext(AuthContext);
   console.log('anyone log in:', authState.isAuthenticated);
 
@@ -108,8 +112,8 @@ function Header() {
                 >
                   <div className='cart-dropdown '>
                     {cartItems && cartItems.length > 0 ? (
-                      cartItems.map((item, index) => (
-                        <Dropdown.Item key={index} className='p-0 '>
+                      cartItems.map((item) => (
+                        <Dropdown.Item key={item._id} className='p-0 '>
                           <Card className='mb-3 border-0' key={item._id}>
                             <Card.Body className='d-flex p-3'>
                               <Image

@@ -74,14 +74,14 @@ export const ProgressBar = ({ steps, currentStep }) => {
  * It allows the user to enter their credit card information, which is then processed for the payment.
  * The component uses the `useProgress` hook to handle the progress of the checkout process, and navigates the user to the next step (order finalization) when the payment details are submitted.
  */
+//會員購物車頁面
 export const MemberCart = () => {
-  const [token, setToken] = useState(localStorage.getItem('token'));
   const location = useLocation();
   const { handleNextStep } = useProgress();
   const navigate = useNavigate();
   //display localstorage cart items
   const { cartItems, setCartItems } = useCart(); // Use cart context
-  const { authState } = userAuth();
+  const { authState, token } = userAuth();
   const steps = ['Cart', 'Order Summary', 'Payment', 'Finalization'];
   const currentStep = 0;
 
@@ -124,10 +124,6 @@ export const MemberCart = () => {
     console.log('Cart after deletion:', updateDeleteItem);
   };
 
-  const totalAmount = cartItems?.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  );
   //check user is login or not
   const handleCheckout = () => {
     console.log('Is Authenticated:', authState.isAuthenticated);
@@ -167,52 +163,60 @@ export const MemberCart = () => {
       return [];
     }
   };
+  const totalAmount = cartItems?.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0
+  );
   return (
     <div>
       <h2 className='mb-4'>Shopping Cart</h2>
-      {cartItems?.map((item) => (
-        <Card className='mb-3' key={item._id}>
-          <Card.Body>
-            <Row className='d-flex align-items-center'>
-              <Col md={2}>
-                <Image
-                  src={`${backendUrl}/adminProducts/${item.image}`}
-                  fluid
-                  style={{ maxHeight: '100px' }}
-                  alt={item.productName}
-                />
-              </Col>
-              <Col md={3}>
-                <Card.Title>{item.productName}</Card.Title>
-                <Card.Text>${item.price}</Card.Text>
-              </Col>
-              <Col md={2}>
-                <Form.Control
-                  type='number'
-                  value={item.quantity}
-                  onChange={(e) =>
-                    handleQtyChange(item._id, parseInt(e.target.value))
-                  }
-                  min='1'
-                />
-              </Col>
-              <Col md={2}>
-                <Card.Text>${item.price * item.quantity}</Card.Text>
-              </Col>
-              <Col md={1}>
-                <Button variant='link' onClick={() => handleDelete(item._id)}>
-                  <BsTrash />
-                </Button>
-              </Col>
-              <Col md={1}>
-                <Button variant='link'>
-                  <BsHeart />
-                </Button>
-              </Col>
-            </Row>
-          </Card.Body>
-        </Card>
-      ))}
+      {cartItems.length === 0 ? (
+        <p>your cart is empty</p>
+      ) : (
+        cartItems.map((item) => (
+          <Card className='mb-3' key={item._id}>
+            <Card.Body>
+              <Row className='d-flex align-items-center'>
+                <Col md={2}>
+                  <Image
+                    src={`${backendUrl}/adminProducts/${item.image}`}
+                    fluid
+                    style={{ maxHeight: '100px' }}
+                    alt={item.productName}
+                  />
+                </Col>
+                <Col md={3}>
+                  <Card.Title>{item.productName}</Card.Title>
+                  <Card.Text>${item.price}</Card.Text>
+                </Col>
+                <Col md={2}>
+                  <Form.Control
+                    type='number'
+                    value={item.quantity}
+                    onChange={(e) =>
+                      handleQtyChange(item._id, parseInt(e.target.value))
+                    }
+                    min='1'
+                  />
+                </Col>
+                <Col md={2}>
+                  <Card.Text>${item.price * item.quantity}</Card.Text>
+                </Col>
+                <Col md={1}>
+                  <Button variant='link' onClick={() => handleDelete(item._id)}>
+                    <BsTrash />
+                  </Button>
+                </Col>
+                <Col md={1}>
+                  <Button variant='link'>
+                    <BsHeart />
+                  </Button>
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
+        ))
+      )}
       <Card className='p-3'>
         <Row
           className='d-flex

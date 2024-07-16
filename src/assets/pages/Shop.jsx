@@ -1,5 +1,5 @@
 import { backendUrl } from '../../../config.js';
-console.log('Backend URL:', backendUrl); // 確認 backendUrl 正確
+// console.log('Backend URL:', backendUrl); // 確認 backendUrl 正確
 import axios from 'axios';
 import React from 'react';
 
@@ -14,11 +14,9 @@ import {
 import { CiShoppingCart } from 'react-icons/ci';
 import { MdFavoriteBorder } from 'react-icons/md';
 import { FaSearch } from 'react-icons/fa';
-import { GiChickenOven } from 'react-icons/gi';
 import { LuBeef } from 'react-icons/lu';
-import { GiDuck } from 'react-icons/gi';
-import { IoMdHeart } from 'react-icons/io';
-import { IoMdHeartEmpty } from 'react-icons/io';
+import { GiDuck, GiChickenOven } from 'react-icons/gi';
+import { IoMdHeart, IoMdHeartEmpty } from 'react-icons/io';
 
 import Container from 'react-bootstrap/Container';
 import Loading from './component/Loading';
@@ -46,7 +44,6 @@ const Shop = () => {
   const [productTypes, setProductTypes] = useState([]);
   //search
   const [text, setText] = useState('');
-
   //toggleFavorite function
   const [favorites, setFavorites] = useState([]);
   const [isFilteringFavorites, setIsFilteringFavorites] = useState(false);
@@ -210,83 +207,71 @@ const Shop = () => {
       </>
     );
   };
-  //add item to localstorage
-  const addItemToLocalstorage = (product) => {
-    let localstorageCart = Array.isArray(cartItems) ? [...cartItems] : [];
 
-    // 检查购物车中是否已存在该商品
-    const existingItemIndex = localstorageCart.findIndex(
-      (item) => item._id === product._id
-    );
-    if (existingItemIndex !== -1) {
-      // 如果商品已存在，则将其数量属性加一
-      localstorageCart[existingItemIndex] = {
-        ...localstorageCart[existingItemIndex],
-        quantity: localstorageCart[existingItemIndex].quantity + 1,
-      };
-    } else {
-      // or Add to favorites
-      localstorageCart.push({ ...product, quantity: 1 });
+  const handleAddToCart = (product) => {
+    const newItem = {
+      _id: product._id,
+      productName: product.productName,
+      price: product.price,
+      image: product.image,
+      quantity: 1,
+    };
+    // Add item to local storage
+    addItemToLocalstorage(newItem);
+    // Add item to server cart
+    if (authState.isAuthenticated) {
+      addItemToServerCart(newItem);
+      showAddToCartAlert();
     }
+  };
+
+  //add item to localstorage
+  const addItemToLocalstorage = (item) => {
+    const localstorageCart = JSON.parse(localStorage.getItem('cart')) || [];
+    const existingItem = localstorageCart.find(
+      (cartItem) => cartItem._id === item._id
+    );
+
+    if (existingItem) {
+      existingItem.quantity += 1;
+    } else {
+      localstorageCart.push(item);
+    }
+
     // 将更新后的购物车数组存回本地存储
+    // Update local storage and state
     localStorage.setItem('cart', JSON.stringify(localstorageCart));
     setCartItems(localstorageCart);
     showAddToCartAlert(product.productName);
     console.log('add item to Localstorage:', localstorageCart);
   };
-  const handleAddToCart = (product) => {
-    addItemToLocalstorage(product);
-    addItemToServerCart(product._id, 1);
-  };
 
-  //get login user cartItem from db
-  // const getLoginUserCartItems = async () => {
-  //   try {
-  //     if (token) {
-  //       const response = await axios.get(
-  //         `${backendUrl}/api/users/member/cart`,
-  //         {
-  //           headers: { Authorization: `Bearer ${token}` },
-  //         }
-  //       );
-  //       console.log('getLoginUserCartItems:', response.data);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching cartItems:', error);
-  //     console.error(
-  //       'Error details:',
-  //       error.response ? error.response.data : error.message
-  //     );
-  //   }
-  // };
-  // useEffect(() => {
-  //   getLoginUserCartItems();
-  // }, [token]);
-  //登入用戶加入購物車到server數據庫
-  //当用户决定要结账或者在进行特定操作时，系统会提示用户登录或注册。
-  //如果用户选择登录或注册，系统会验证用户的身份并将用户导向登录页面。
-  //在用户成功登录后，前端应用会检查本地存储中是否有购物车数据。
-  //如果有，前端会将本地存储中的购物车数据发送到后端，后端会根据用户的身份信息（如用户 ID）来获取数据库中该用户的购物车数据。
-  const addItemToServerCart = async (productId, quantity) => {
+  const addItemToServerCart = async (item) => {
+    if (!token) {
+      console.warn(
+        'User not authenticated. Unable to add item to server cart.'
+      );
+      return;
+    }
+
     try {
       const response = await axios.post(
         `${backendUrl}/api/users/member/cart`,
-        { productId, quantity },
+        { item },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setCartItems(response.data.cart.items);
-      console.log('add item to server cart:', response.data);
+
+      console.log('Added item to server cart:', response.data);
     } catch (error) {
-      console.error('Error adding item to cart:', error);
+      console.error('Error adding item to server cart:', error);
       console.error(
         'Error details:',
         error.response ? error.response.data : error.message
       );
     }
   };
-  // Combined function to handle adding item to both local storage and server cart
 
   // add item to favorite function
   const toggleFavorite = (productId) => {
