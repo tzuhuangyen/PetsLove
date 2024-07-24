@@ -242,7 +242,7 @@ const Shop = () => {
     // Update local storage and state
     localStorage.setItem('cart', JSON.stringify(localstorageCart));
     setCartItems(localstorageCart);
-    showAddToCartAlert(product.productName);
+    showAddToCartAlert(item.productName);
     console.log('add item to Localstorage:', localstorageCart);
   };
 

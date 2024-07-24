@@ -1,6 +1,6 @@
 import { backendUrl } from '../../../../config.js';
 import React, { useEffect, useState, useContext } from 'react';
-import Logo from '../../../../public/images/Logo.png';
+import Logo from '/images/Logo.png';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import {

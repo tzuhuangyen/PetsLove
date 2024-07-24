@@ -5,10 +5,10 @@ import axios from 'axios';
 import { backendUrl } from '../../../../config';
 import { CiShoppingCart } from 'react-icons/ci';
 
-import otherProduct1 from '../../../../public/images/otherProduct1.jpeg';
-import otherProduct2 from '../../../../public/images/otherProduct2.jpeg';
-import otherProduct3 from '../../../../public/images/otherProduct3.jpeg';
-import otherProduct4 from '../../../../public/images/otherProduct4.jpeg';
+import otherProduct1 from '/images/otherProduct1.jpeg';
+import otherProduct2 from '/images/otherProduct2.jpeg';
+import otherProduct3 from '/images/otherProduct3.jpeg';
+import otherProduct4 from '/images/otherProduct4.jpeg';
 import Accordion from 'react-bootstrap/Accordion';
 
 const CustomersAlsoViewedProducts = [

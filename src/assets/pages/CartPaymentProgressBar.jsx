@@ -150,8 +150,13 @@ export const MemberCart = () => {
         // Check if cart items exist in the response data
         const userCartItems = response.data.cart?.items || [];
         console.log('get user All db userCartItems:', userCartItems);
-        setCartItems(userCartItems);
-        return userCartItems;
+        const serveUserCartItems = userCartItems.map((item) => ({
+          ...item,
+          image: item.image || 'default.png', // 确保每个 item 都有一个有效的 image
+        }));
+        console.log('Validated cart items:', serveUserCartItems);
+        setCartItems(serveUserCartItems);
+        return serveUserCartItems;
       }
     } catch (error) {
       console.error('Error fetching db cartItems:', error);
@@ -178,12 +183,21 @@ export const MemberCart = () => {
             <Card.Body>
               <Row className='d-flex align-items-center'>
                 <Col md={2}>
-                  <Image
-                    src={`${backendUrl}/adminProducts/${item.image}`}
-                    fluid
-                    style={{ maxHeight: '100px' }}
-                    alt={item.productName}
-                  />
+                  {item.image ? (
+                    <Image
+                      src={`${backendUrl}/adminProducts/${item.image}`}
+                      fluid
+                      style={{ maxHeight: '100px' }}
+                      alt={item.productName}
+                    />
+                  ) : (
+                    <Image
+                      src={`${backendUrl}/adminProducts/default.png`} // 提供一个默认图片路径
+                      fluid
+                      style={{ maxHeight: '100px' }}
+                      alt='Default Image'
+                    />
+                  )}
                 </Col>
                 <Col md={3}>
                   <Card.Title>{item.productName}</Card.Title>
