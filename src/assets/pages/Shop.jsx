@@ -262,8 +262,9 @@ const Shop = () => {
           item: {
             productId: item._id,
             productName: item.productName,
-            quantity: item.quantity || 1,
-            total: item.price,
+            price: item.price,
+            image: item.image,
+            quantity: item.quantity,
           },
         },
         {
@@ -271,7 +272,13 @@ const Shop = () => {
         }
       );
 
-      console.log('Added item to server cart:', response.data);
+      console.log('Added item to server cart:', {
+        productId,
+        productName,
+        quantity,
+        price,
+        image,
+      });
     } catch (error) {
       console.error('Error adding item to server cart:', error);
       console.error(

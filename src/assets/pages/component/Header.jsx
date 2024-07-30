@@ -75,15 +75,25 @@ function Header() {
     console.log('Deleting item with id:', itemId);
     if (authState.isAuthenticated) {
       try {
+        const token = localStorage.getItem('token'); // Retrieve the token
+        console.log('token:', token);
+        if (!token) {
+          console.warn('Access token');
+          return;
+        }
         await axios.delete(`${backendUrl}/api/member/cart/${itemId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
             data: { itemId },
           },
         });
-        console.log('Server cart updated successfully.');
+        console.log('item in Server cart deleted successfully.');
       } catch (error) {
-        console.error('Error updating server cart:', error);
+        console.error('Error deleting server cart:', error);
+        console.error(
+          'Error details:',
+          error.response ? error.response.data : error.message
+        );
       }
     }
   };
