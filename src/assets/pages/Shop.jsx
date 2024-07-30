@@ -263,7 +263,6 @@ const Shop = () => {
             productId: item._id,
             productName: item.productName,
             price: item.price,
-            image: item.image,
             quantity: item.quantity,
           },
         },
@@ -277,7 +276,6 @@ const Shop = () => {
         productName,
         quantity,
         price,
-        image,
       });
     } catch (error) {
       console.error('Error adding item to server cart:', error);
