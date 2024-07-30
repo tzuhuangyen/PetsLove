@@ -72,7 +72,7 @@ function Header() {
   };
   const handleDelete = async (itemId) => {
     removeItemFromLocalStorage(itemId);
-    console.log('Deleting item with id:', id);
+    console.log('Deleting item with id:', itemId);
     if (authState.isAuthenticated) {
       try {
         await axios.delete(`${backendUrl}/api/member/cart/${itemId}`, {

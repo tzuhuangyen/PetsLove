@@ -258,7 +258,14 @@ const Shop = () => {
     try {
       const response = await axios.post(
         `${backendUrl}/api/users/member/cart`,
-        { item },
+        {
+          item: {
+            productId: item._id,
+            productName: item.productName,
+            quantity: item.quantity || 1,
+            total: item.price,
+          },
+        },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
