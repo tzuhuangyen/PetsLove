@@ -213,7 +213,6 @@ const Shop = () => {
       _id: productTypes._id,
       productName: productTypes.productName,
       price: productTypes.price,
-      image: productTypes.image,
       quantity: 1,
     };
     // Add item to local storage
