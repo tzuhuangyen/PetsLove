@@ -208,12 +208,12 @@ const Shop = () => {
     );
   };
 
-  const handleAddToCart = (product) => {
+  const handleAddToCart = (productTypes) => {
     const newItem = {
-      _id: product._id,
-      productName: product.productName,
-      price: product.price,
-      image: product.image,
+      _id: productTypes._id,
+      productName: productTypes.productName,
+      price: productTypes.price,
+      image: productTypes.image,
       quantity: 1,
     };
     // Add item to local storage
@@ -253,6 +253,7 @@ const Shop = () => {
       );
       return;
     }
+    console.log('Sending request to add item to server cart:', item);
 
     try {
       const response = await axios.post(

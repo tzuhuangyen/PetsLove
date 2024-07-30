@@ -3,7 +3,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Scrollbar, A11y } from 'swiper/modules';
 // import '../../../node_modules/swiper/swiper-bundle.min.css';
 import footprint from '/images/footprint.png';
-import reviewers from '../../../../public/db.json';
+import reviewers from '/public/db.json';
 
 function IndexReview({ reviewer }) {
   return (

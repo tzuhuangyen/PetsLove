@@ -28,6 +28,8 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('token');
     setAuthState({ isAuthenticated: false, user: null });
+    // 清除 localStorage 中的所有數據
+    localStorage.clear();
     window.location.href = '/PetsLove/users/login';
   };
   return (

@@ -35,6 +35,11 @@ function Header() {
   const { authState } = useContext(AuthContext);
   console.log('anyone log in:', authState.isAuthenticated);
 
+  useEffect(() => {
+    const storedCart = JSON.parse(localStorage.getItem('cart')) || [];
+    setCartItems(storedCart);
+  }, [setCartItems]);
+
   const showDropdown = () => {
     clearTimeout(hideDropdownTimeout);
     setDropdownOpen(true);
@@ -58,13 +63,29 @@ function Header() {
     localStorage.setItem('cartItems', JSON.stringify(updateQtyCart));
   };
 
-  const handleDelete = (id) => {
-    console.log('Deleting item with id:', id);
+  const removeItemFromLocalStorage = (itemId) => {
+    let localstorageCart = JSON.parse(localStorage.getItem('cart')) || [];
+    localstorageCart = localstorageCart.filter((item) => item._id !== itemId);
 
-    const updateDeleteItem = cartItems.filter((item) => item._id !== id);
-    setCartItems(updateDeleteItem);
-    console.log('Cart after deletion:', updateDeleteItem);
-    localStorage.setItem('cartItems', JSON.stringify(updateDeleteItem));
+    localStorage.setItem('cart', JSON.stringify(localstorageCart));
+    setCartItems(localstorageCart); // 更新狀態
+  };
+  const handleDelete = async (itemId) => {
+    removeItemFromLocalStorage(itemId);
+    console.log('Deleting item with id:', id);
+    if (authState.isAuthenticated) {
+      try {
+        await axios.delete(`${backendUrl}/api/member/cart/${itemId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            data: { itemId },
+          },
+        });
+        console.log('Server cart updated successfully.');
+      } catch (error) {
+        console.error('Error updating server cart:', error);
+      }
+    }
   };
 
   return (

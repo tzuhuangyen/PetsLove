@@ -80,7 +80,7 @@ export const MemberCart = () => {
   const { handleNextStep } = useProgress();
   const navigate = useNavigate();
   //display localstorage cart items
-  const { cartItems, setCartItems } = useCart(); // Use cart context
+  const { cartItems = [], setCartItems } = useCart(); // Use cart context
   const { authState, token } = userAuth();
   const steps = ['Cart', 'Order Summary', 'Payment', 'Finalization'];
   const currentStep = 0;
