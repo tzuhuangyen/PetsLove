@@ -11,18 +11,6 @@ function AdminProductUpdate() {
   const [order, setOrder] = useState();
   const [price, setPrice] = useState();
 
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-  //   const updatedProduct = {
-  //     ...product,
-  //     productName: productName,
-  //     type: type,
-  //     order: order,
-  //     price: price,
-  //   };
-  //   onUpdate(updatedProduct);
-  // };
-
   return (
     <div>
       <h1>AdminProductUpdate</h1>

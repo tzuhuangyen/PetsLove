@@ -70,7 +70,7 @@ function ProductTable({ allImage }) {
                   <td>{index + 1}</td>
                   <td>
                     <img
-                      src={`${backendUrl}/admin/products/${product.image}`}
+                      src={`${backendUrl}/adminProducts/${product.image}`}
                       alt={`Product ${index + 1}`}
                       style={{ height: '100px', width: '100px' }}
                     />

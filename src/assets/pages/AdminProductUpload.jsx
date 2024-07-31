@@ -1,7 +1,7 @@
 import { backendUrl } from '../../../config.js';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Row, Col, Form, Button } from 'react-bootstrap';
+import { Col, Form, Button } from 'react-bootstrap';
 import ProductTable from './component/ProductTable';
 import { IoCloudUploadOutline } from 'react-icons/io5';
 import Swal from 'sweetalert2';
@@ -20,12 +20,12 @@ function AdminProductUpload() {
     order: '',
     price: '',
     is_enabled: 1,
-    imageUrl: '',
+    image: '',
   });
   const handleChange = (e) => {
     // console.log(e.target);
     const { value, name } = e.target;
-    if (['price'].includes(name)) {
+    if (name === 'price') {
       setNewProductData({ ...newProductData, [name]: Number(value) });
     } else if (name === 'is_enabled') {
       setNewProductData({
@@ -59,7 +59,7 @@ function AdminProductUpload() {
         }
       );
       console.log('Upload result:', result.data);
-      getAllImage();
+      getAllProductInfo();
       Swal.fire('Success', 'Product uploaded successfully', 'success');
     } catch (error) {
       console.error('Error uploading image:', error);
@@ -67,11 +67,11 @@ function AdminProductUpload() {
     }
   };
   //get all image products
-  const getAllImage = () => {
+  const getAllProductInfo = () => {
     axios
       .get(`${backendUrl}/api/admin/products`)
       .then((res) => {
-        console.log('All images:', res.data);
+        console.log('All Product Info:', res.data);
         setAllImage(res.data.data);
         console.log(res.data.data);
       })
@@ -79,7 +79,7 @@ function AdminProductUpload() {
   };
 
   useEffect(() => {
-    getAllImage();
+    getAllProductInfo();
   }, []);
 
   return (
