@@ -20,7 +20,6 @@ function AdminProductUpload() {
     order: '',
     price: '',
     is_enabled: 1,
-    image: '',
   });
   const handleChange = (e) => {
     // console.log(e.target);
