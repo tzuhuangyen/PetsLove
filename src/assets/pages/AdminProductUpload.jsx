@@ -21,6 +21,7 @@ function AdminProductUpload() {
     price: '',
     is_enabled: 1,
   });
+
   const handleChange = (e) => {
     // console.log(e.target);
     const { value, name } = e.target;

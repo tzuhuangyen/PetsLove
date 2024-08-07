@@ -1,14 +1,14 @@
 import { backendUrl } from '../../../config.js';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, Table, Button } from 'react-bootstrap';
+
 import { FiEdit2 } from 'react-icons/fi';
 import { MdOutlineDeleteForever } from 'react-icons/md';
 import { useOutletContext } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import ProductTable from './component/ProductTable';
-import { Nav, Row, Col } from 'react-bootstrap';
-
+import { Row, Col } from 'react-bootstrap';
+4;
 function AdminProducts() {
   const [allImage, setAllImage] = useState(null);
 
@@ -30,10 +30,7 @@ function AdminProducts() {
   return (
     <>
       <Row>
-        <Col md={8}>
-          <h1> Product List</h1>
-          <ProductTable allImage={allImage} />
-        </Col>
+        {' '}
         <Col md={2} className='mt-3'>
           <Link
             as={Link}
@@ -42,6 +39,10 @@ function AdminProducts() {
           >
             Add new product
           </Link>
+        </Col>
+        <Col md={8}>
+          <h1> Product List</h1>
+          <ProductTable allImage={allImage} />
         </Col>
       </Row>
     </>
