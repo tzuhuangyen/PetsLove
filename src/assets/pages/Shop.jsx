@@ -141,8 +141,6 @@ const Shop = () => {
         'Error details:',
         error.response ? error.response.data : error.message
       );
-
-      // 在這裡添加任何你想要處理錯誤的代碼，例如顯示錯誤提示給用戶或者重試請求等。
     }
   };
   useEffect(() => {
@@ -173,11 +171,15 @@ const Shop = () => {
               </div>
 
               <Link to={`/shop/product/${productType._id}`}>
-                <img
-                  src={`${backendUrl}/adminProducts/${productType.image}`}
-                  className='card-img-top object-fit product-img'
-                  alt={productType.productName}
-                />
+                {productType.image ? (
+                  <img
+                    src={`${backendUrl}/adminProducts/${productType.image}`}
+                    className='card-img-top object-fit product-img'
+                    alt={productType.name} // 添加 alt 属性用于无障碍访问
+                  />
+                ) : (
+                  <p>No image available</p> // 或者你可以显示一个默认图片
+                )}
               </Link>
               <div className='card-body'>
                 <p className='card-title'>
@@ -215,6 +217,8 @@ const Shop = () => {
       price: productTypes.price,
       quantity: 1,
     };
+    console.log('Calling addItemToServerCart with:', newItem);
+
     // Add item to local storage
     addItemToLocalstorage(newItem);
     // Add item to server cart
@@ -252,6 +256,7 @@ const Shop = () => {
       );
       return;
     }
+    console.log('Token:', token); // 检查 token 是否有效
     console.log('Sending request to add item to server cart:', item);
 
     try {
@@ -269,6 +274,7 @@ const Shop = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+      console.log('Request URL:', `${backendUrl}/api/users/member/cart`);
 
       console.log('Added item to server cart:', {
         productId,
