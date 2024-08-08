@@ -214,8 +214,9 @@ const Shop = () => {
     const newItem = {
       _id: productTypes._id,
       productName: productTypes.productName,
-      price: productTypes.price,
       quantity: 1,
+      price: productTypes.price,
+      image: productTypes.image,
     };
     console.log('Calling addItemToServerCart with:', newItem);
 
@@ -257,17 +258,17 @@ const Shop = () => {
       return;
     }
     console.log('Token:', token); // 检查 token 是否有效
-    console.log('Sending request to add item to server cart:', item);
+    console.log('Sending request to add item to server cart:', item.length);
 
     try {
       const response = await axios.post(
         `${backendUrl}/api/users/member/cart`,
         {
-          item: {
+          items: {
             productId: item._id,
             productName: item.productName,
-            price: item.price,
             quantity: item.quantity,
+            price: item.price,
           },
         },
         {
