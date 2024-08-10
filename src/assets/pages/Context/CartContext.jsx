@@ -8,11 +8,8 @@ export const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useLocalStorage(() => {
-    // 初始化時從 LocalStorage 獲取數據
-    const savedCartItems = localStorage.getItem('cartItems');
-    return savedCartItems ? JSON.parse(savedCartItems) : [];
-  });
+  const [cartItems, setCartItems] = useLocalStorage('cartItems', []);
+
   // Effect to sync local storage cart with context after login
   // 每次 cartItems 改變時同步更新 LocalStorage
   useEffect(() => {

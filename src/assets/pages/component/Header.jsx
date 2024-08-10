@@ -36,7 +36,7 @@ function Header() {
   console.log('anyone log in:', authState.isAuthenticated);
 
   useEffect(() => {
-    const storedCart = JSON.parse(localStorage.getItem('cart')) || [];
+    const storedCart = JSON.parse(localStorage.getItem('cartItems')) || [];
     setCartItems(storedCart);
   }, [setCartItems]);
 
