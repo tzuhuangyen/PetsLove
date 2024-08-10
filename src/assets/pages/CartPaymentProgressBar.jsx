@@ -192,7 +192,7 @@ export const MemberCart = () => {
                     />
                   ) : (
                     <Image
-                      src={`${backendUrl}/adminProducts/default.png`} // 提供一个默认图片路径
+                      src='../../../public/images/Logo.png' // 提供一个默认图片路径
                       fluid
                       style={{ maxHeight: '100px' }}
                       alt='Default Image'
