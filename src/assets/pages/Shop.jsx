@@ -54,7 +54,7 @@ const Shop = () => {
   //共用購物車狀態
   const [addItemToCart, setAddItemToCart] = useState([]);
   const token = localStorage.getItem('token');
-  const { cartItems, setCartItems } = useCart();
+  const { setCartItems } = useCart();
   const { authState } = userAuth();
 
   // 同步購物車函數 get user All db CartItems
@@ -250,7 +250,7 @@ const Shop = () => {
     console.log('add item to Localstorage:', localstorageCart);
   };
 
-  const addItemToServerCart = async (item) => {
+  const addItemToServerCart = async () => {
     if (!token) {
       console.warn(
         'User not authenticated. Unable to add item to server cart.'
@@ -258,30 +258,30 @@ const Shop = () => {
       return;
     }
     console.log('Token:', token); // 检查 token 是否有效
-    console.log('Sending request to add item to server cart:', item.length);
 
     try {
       const response = await axios.post(
         `${backendUrl}/api/users/member/cart`,
         {
-          items: {
-            productId: item._id,
-            productName: item.productName,
-            quantity: item.quantity,
-            price: item.price,
-          },
+          items: [
+            {
+              productId: item._id,
+              productName: item.productName,
+              quantity: item.quantity,
+              price: item.price,
+              image: item.image,
+            },
+          ],
         },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       console.log('Request URL:', `${backendUrl}/api/users/member/cart`);
-
       console.log('Added item to server cart:', {
-        productId,
-        productName,
-        quantity,
-        price,
+        productId: item._id,
+        productName: item.productName,
+        quantity: item.quantity,
+        price: item.price,
+        image: item.image,
       });
     } catch (error) {
       console.error('Error adding item to server cart:', error);
@@ -463,7 +463,7 @@ const Shop = () => {
     setText(''); // Clear the search input by setting the text state to an empty string
   };
   //component search box component
-  const SearchBox = ({ initData, setProductTypes }) => {
+  const SearchBox = () => {
     const [isSearching, setIsSearching] = useState(false);
     const inputRef = useRef(null); // Create a ref for the input element
 
