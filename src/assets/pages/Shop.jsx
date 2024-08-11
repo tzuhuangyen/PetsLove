@@ -210,14 +210,7 @@ const Shop = () => {
     );
   };
 
-  const handleAddToCart = (productTypes) => {
-    const newItem = {
-      _id: productTypes._id,
-      productName: productTypes.productName,
-      quantity: 1,
-      price: productTypes.price,
-      image: productTypes.image,
-    };
+  const handleAddToCart = async (req, res, next) => {
     console.log('Calling addItemToServerCart with:', newItem);
 
     // Add item to local storage
@@ -250,7 +243,8 @@ const Shop = () => {
     console.log('add item to Localstorage:', localstorageCart);
   };
 
-  const addItemToServerCart = async () => {
+  const addItemToServerCart = async (item) => {
+    const token = localStorage.getItem('token');
     if (!token) {
       console.warn(
         'User not authenticated. Unable to add item to server cart.'
@@ -267,7 +261,7 @@ const Shop = () => {
             {
               productId: item._id,
               productName: item.productName,
-              quantity: item.quantity,
+              quantity: 1,
               price: item.price,
               image: item.image,
             },
@@ -276,13 +270,7 @@ const Shop = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       console.log('Request URL:', `${backendUrl}/api/users/member/cart`);
-      console.log('Added item to server cart:', {
-        productId: item._id,
-        productName: item.productName,
-        quantity: item.quantity,
-        price: item.price,
-        image: item.image,
-      });
+      console.log('Added item to server cart:', item);
     } catch (error) {
       console.error('Error adding item to server cart:', error);
       console.error(
