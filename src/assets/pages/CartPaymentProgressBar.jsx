@@ -1,12 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   BrowserRouter as Router,
-  Route,
-  Routes,
   useNavigate,
   useLocation,
   Link,
-  Navigate,
 } from 'react-router-dom';
 
 import axios from 'axios';
@@ -38,8 +35,9 @@ import {
 import { backendUrl } from '../../../config.js';
 import { useProgress } from './Context/ProgressContext';
 import Confetti from 'react-confetti';
-import { useCart } from './Context/CartContext.jsx';
+import { CartContext } from './Context/CartContext.jsx';
 import { userAuth } from './Context/AuthContext.jsx';
+import EditAdd from './component/EditAdd';
 //訂單付款進度條
 export const ProgressBar = ({ steps, currentStep }) => {
   return (
@@ -80,7 +78,7 @@ export const MemberCart = () => {
   const { handleNextStep } = useProgress();
   const navigate = useNavigate();
   //display localstorage cart items
-  const { cartItems = [], setCartItems } = useCart(); // Use cart context
+  const { cartItems = [], setCartItems } = useContext(CartContext); // Use cart context
   const { authState, token } = userAuth();
   const steps = ['Cart', 'Order Summary', 'Payment', 'Finalization'];
   const currentStep = 0;
@@ -401,6 +399,11 @@ export const OrderSummary = () => {
   const { handleNextStep } = useProgress();
   const navigate = useNavigate();
 
+  const [isEditing, setIsEditing] = useState(false);
+  const handleEditClick = () => {
+    setIsEditing(true);
+  };
+
   const goToNextStep = () => {
     handleNextStep();
     navigate('/users/member/order-payment');
@@ -409,7 +412,7 @@ export const OrderSummary = () => {
     <Container className='order-summary mt-5'>
       <h2 className='text-center mb-4'>Order summary</h2>
       <Row className='mb-3'>
-        <Col md={4}>
+        <Col md={12}>
           <div className='order-section'>
             <div className='order-title d-flex align-items-center justify-content-between'>
               {' '}
@@ -419,19 +422,18 @@ export const OrderSummary = () => {
                 </span>
                 Delivery
               </h4>
-              <Button variant='link' className='edit-btn'>
+              <Button
+                variant='link'
+                className='edit-btn'
+                onClick={handleEditClick}
+              >
                 editing
               </Button>
             </div>
-
-            <p className='fw-bold mb-3'>
-              Personal collection at collection points
-            </p>
-            <p>easybox Bp. II district Budagyongye</p>
-            <p>Budagyongye Szilágyi Erzsébet 121 Bp, 1026</p>
+            <EditAdd isEditing={isEditing} setIsEditing={setIsEditing} />
           </div>
         </Col>
-        <Col md={4}>
+        {/* <Col md={4}>
           <div className='order-section'>
             <div className='order-title d-flex align-items-center justify-content-between'>
               {' '}
@@ -453,8 +455,8 @@ export const OrderSummary = () => {
             </p>
             <p>yan0912@hotmail.com</p>
           </div>
-        </Col>
-        <Col md={4}>
+        </Col> */}
+        {/* <Col md={6}>
           <div className='order-section'>
             <div className='order-title d-flex align-items-center justify-content-between'>
               {' '}
@@ -477,7 +479,7 @@ export const OrderSummary = () => {
               from bank to bank).
             </p>
           </div>
-        </Col>
+        </Col> */}
       </Row>
       <Row>
         <Col>

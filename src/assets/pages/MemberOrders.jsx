@@ -6,7 +6,7 @@ import { MdOutlineRateReview } from 'react-icons/md';
 
 //test orders list
 const OrdersPage = () => {
-  const orders = [
+  const allOrders = [
     {
       id: 1,
       date: '2024-06-15',
@@ -17,14 +17,21 @@ const OrdersPage = () => {
     {
       id: 2,
       date: '2024-06-16',
-      state: 'Processing',
+      state: 'shipped',
+      total: 150.0,
+      status: 'processing',
+    },
+    {
+      id: 3,
+      date: '2024-08-16',
+      state: 'processing',
       total: 150.0,
       status: 'processing',
     },
   ];
 
-  const renderOrders = () => {
-    return orders.map((order) => (
+  const renderAllOrders = () => {
+    return allOrders.map((order) => (
       <tr key={order.id}>
         <td>{order.id}</td>
         <td>{order.state}</td>
@@ -52,7 +59,51 @@ const OrdersPage = () => {
             <th>Action</th>
           </tr>
         </thead>
-        <tbody>{renderOrders()}</tbody>
+        <tbody>{renderAllOrders()}</tbody>
+      </Table>
+    </Container>
+  );
+};
+const ProcessOrdersPage = () => {
+  const processOrders = [
+    {
+      id: 1,
+      date: '2024-06-15',
+      state: 'Delivered',
+      total: 100.0,
+      status: 'processing',
+    },
+  ];
+
+  const renderProcessOrders = () => {
+    return processOrders.map((order) => (
+      <tr key={order.id}>
+        <td>{order.id}</td>
+        <td>{order.state}</td>
+        <td>${order.total.toFixed(2)}</td> <td>{order.date}</td>
+        <td>
+          {order.status === 'shipped' ? (
+            <Button variant='success'>Track</Button>
+          ) : (
+            <Button variant='info'>Track</Button>
+          )}
+        </td>
+      </tr>
+    ));
+  };
+  return (
+    <Container className='mt-5'>
+      <Table striped bordered hover>
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>State</th>
+            <th>Total</th>
+            <th>Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>{renderProcessOrders()}</tbody>
       </Table>
     </Container>
   );
@@ -102,6 +153,7 @@ export const MemberOrders = () => {
             <Tab.Pane eventKey='processing'>
               <h4>Processing Orders</h4>
               <p>
+                <ProcessOrdersPage />
                 <ImSad /> it is empty here
                 <CiShoppingCart />
               </p>

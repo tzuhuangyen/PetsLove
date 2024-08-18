@@ -19,9 +19,11 @@ import { RiAdminLine } from 'react-icons/ri';
 import { LiaBookSolid } from 'react-icons/lia';
 import { BsTrash, BsHeart } from 'react-icons/bs';
 
-import { useCart } from '../Context/CartContext.jsx';
+import { CartContext } from '../Context/CartContext.jsx';
 import { AuthContext } from '../Context/AuthContext.jsx';
 import { userAuth } from '../Context/AuthContext.jsx';
+// import Cart from './Cart.jsx';
+import { UserContext } from '../Context/UserContext.jsx';
 
 function Header() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -29,7 +31,7 @@ function Header() {
   const contextValue = useContext(AuthContext);
   console.log(contextValue); // Check what you're getting here
   //localstorage cart
-  const { cartItems, setCartItems } = useCart();
+  const { cartItems, setCartItems } = useContext(CartContext);
   console.log('Cart Items:', cartItems);
 
   const { authState } = useContext(AuthContext);
@@ -37,6 +39,7 @@ function Header() {
 
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem('cartItems')) || [];
+    console.log('Loaded cart from local storage:', storedCart); // Debug the loaded cart
     setCartItems(storedCart);
   }, [setCartItems]);
 
@@ -53,21 +56,24 @@ function Header() {
   };
 
   const handleQtyChange = async (id, quantity) => {
-    if (quantity < 1) {
+    if (isNaN(quantity) || quantity < 1) {
       quantity = 1; // Ensure quantity is at least 1
     }
     const updateQtyCart = cartItems.map((item) =>
       item._id === id ? { ...item, quantity: quantity } : item
     );
     setCartItems(updateQtyCart);
-    localStorage.setItem('cartItems', JSON.stringify(updateQtyCart));
+    console.log(
+      'Local storage cart items:',
+      JSON.parse(localStorage.getItem('cartItems'))
+    );
   };
 
   const removeItemFromLocalStorage = (itemId) => {
-    let localstorageCart = JSON.parse(localStorage.getItem('cart')) || [];
+    let localstorageCart = JSON.parse(localStorage.getItem('cartItems')) || [];
     localstorageCart = localstorageCart.filter((item) => item._id !== itemId);
 
-    localStorage.setItem('cart', JSON.stringify(localstorageCart));
+    localStorage.setItem('cartItems', JSON.stringify(localstorageCart));
     setCartItems(localstorageCart); // 更新狀態
   };
   const handleDelete = async (itemId) => {
@@ -116,6 +122,7 @@ function Header() {
                 <LiaBookSolid className='icon' size={32} />
                 <span> Blog</span>
               </Nav.Link>
+              {/* <Cart /> */}
               <div
                 className='cart-toggle'
                 onMouseEnter={showDropdown}
@@ -130,10 +137,10 @@ function Header() {
                   <CiShoppingCart size={32} className=' icon' />
                   <div className='nav-cart-count'>
                     {Array.isArray(cartItems)
-                      ? cartItems.reduce(
-                          (total, item) => total + (item.quantity || 0),
-                          0
-                        )
+                      ? cartItems.reduce((total, item) => {
+                          console.log('Item quantity:', item.quantity);
+                          return total + item.quantity;
+                        }, 0)
                       : 0}
                   </div>
                 </Nav.Link>
@@ -143,61 +150,62 @@ function Header() {
                 >
                   <div className='cart-dropdown '>
                     {cartItems && cartItems.length > 0 ? (
-                      cartItems.map((item) => (
-                        <Dropdown.Item key={item._id} className='p-0 '>
-                          <Card className='mb-3 border-0' key={item._id}>
-                            <Card.Body className='d-flex p-3'>
-                              <Image
-                                src={`${backendUrl}/adminProducts/${item.image}`}
-                                className='card-img-top object-fit product-img me-2'
-                                alt={item.productName}
-                                style={{ width: '60px', height: '60px' }}
-                              />
+                      cartItems.map((item) => {
+                        const price = Number(item.price) || 0;
+                        const quantity = Number(item.quantity) || 0;
+                        const totalPrice = price * quantity;
+                        return (
+                          <Dropdown.Item key={item._id} className='p-0 '>
+                            <Card className='mb-3 border-0' key={item._id}>
+                              <Card.Body className='d-flex p-3'>
+                                <Image
+                                  src={`${backendUrl}/adminProducts/${item.image}`}
+                                  className='card-img-top object-fit product-img me-2'
+                                  alt={item.productName}
+                                  style={{ width: '60px', height: '60px' }}
+                                />
 
-                              <div>
-                                <div className='p-0'>
-                                  <Card.Title>{item.productName}</Card.Title>
+                                <div>
+                                  <div className='p-0'>
+                                    <Card.Title>{item.productName}</Card.Title>
+                                  </div>
+                                  <ul className='d-flex align-items-center justify-content-around'>
+                                    <li>
+                                      {' '}
+                                      <Card.Text>{`€${price}/pc`}</Card.Text>
+                                    </li>
+                                    <li className='p-0'>
+                                      <Form.Control
+                                        className='countInput'
+                                        type='number'
+                                        value={item.quantity || 1}
+                                        onChange={(e) =>
+                                          handleQtyChange(
+                                            item._id,
+                                            parseInt(e.target.value, 10) || 1
+                                          )
+                                        }
+                                        min='1'
+                                      />
+                                    </li>
+
+                                    <li>
+                                      <Card.Text>€{totalPrice}</Card.Text>
+                                    </li>
+                                    <li>
+                                      <Button
+                                        onClick={() => handleDelete(item._id)}
+                                      >
+                                        <BsTrash />
+                                      </Button>
+                                    </li>
+                                  </ul>
                                 </div>
-                                <ul className='d-flex align-items-center justify-content-around'>
-                                  <li>
-                                    {' '}
-                                    <Card.Text>{`€${item.price}/pc`}</Card.Text>
-                                  </li>
-                                  <li className='p-0'>
-                                    <Form.Control
-                                      className='countInput'
-                                      type='number'
-                                      value={item.quantity}
-                                      onChange={(e) =>
-                                        handleQtyChange(
-                                          item._id,
-                                          parseInt(e.target.value)
-                                        )
-                                      }
-                                      min='1'
-                                    />
-                                  </li>
-
-                                  <li>
-                                    <Card.Text>
-                                      €
-                                      {Number(item.price) *
-                                        Number(item.quantity)}
-                                    </Card.Text>
-                                  </li>
-                                  <li>
-                                    <Button
-                                      onClick={() => handleDelete(item._id)}
-                                    >
-                                      <BsTrash />
-                                    </Button>
-                                  </li>
-                                </ul>
-                              </div>
-                            </Card.Body>
-                          </Card>
-                        </Dropdown.Item>
-                      ))
+                              </Card.Body>
+                            </Card>
+                          </Dropdown.Item>
+                        );
+                      })
                     ) : (
                       <Dropdown.Item href='#'>Your cart is empty</Dropdown.Item>
                     )}

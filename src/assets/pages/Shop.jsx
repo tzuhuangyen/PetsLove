@@ -21,7 +21,7 @@ import { IoMdHeart, IoMdHeartEmpty } from 'react-icons/io';
 import Container from 'react-bootstrap/Container';
 import Loading from './component/Loading';
 // import { CartContext } from './Context/CartContext.jsx';
-import { useCart } from './Context/CartContext.jsx';
+import { CartContext } from './Context/CartContext.jsx';
 import { userAuth } from './Context/AuthContext.jsx';
 
 //Debounce function
@@ -54,7 +54,7 @@ const Shop = () => {
   //共用購物車狀態
   const [addItemToCart, setAddItemToCart] = useState([]);
   const token = localStorage.getItem('token');
-  const { setCartItems } = useCart();
+  const { cartItems, setCartItems } = useContext(CartContext);
   const { authState } = userAuth();
 
   // 同步購物車函數 get user All db CartItems
@@ -210,67 +210,124 @@ const Shop = () => {
     );
   };
 
-  const handleAddToCart = async (req, res, next) => {
-    console.log('Calling addItemToServerCart with:', newItem);
+  // 檢查伺服器上購物車中是否已有該商品
+  const checkItemInServerCart = async (productId) => {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
 
-    // Add item to local storage
-    addItemToLocalstorage(newItem);
-    // Add item to server cart
-    if (authState.isAuthenticated) {
-      addItemToServerCart(newItem);
-      showAddToCartAlert();
+    try {
+      const response = await axios.get(`${backendUrl}/api/users/member/cart`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // 檢查是否有與傳入的 productId 匹配的商品
+      return response.data.items.find((item) => item.productId === productId);
+    } catch (error) {
+      console.error('Error checking item in server cart:', error);
+      return null;
+    }
+  };
+  // 更新伺服器端購物車中商品的數量
+  const updateServerCartItemQuantity = async (productId, newQuantity) => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      const response = await axios.put(
+        `${backendUrl}/api/users/member/cart`,
+        {
+          items: [
+            {
+              productId,
+              quantity: newQuantity,
+            },
+          ],
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      console.log('Updated item quantity in server cart:', response.data);
+    } catch (error) {
+      console.error('Error updating item quantity in server cart:', error);
+    }
+  };
+  const handleAddToCart = async (item) => {
+    try {
+      const existingItem = await checkItemInServerCart(item._id);
+      if (existingItem) {
+        await updateServerCartItemQuantity(
+          existingItem._id,
+          existingItem.quantity + 1
+        );
+      } else {
+        addItemToLocalstorage(item);
+        if (authState.isAuthenticated) {
+          addItemToServerCart(item);
+        }
+      }
+      showAddToCartAlert(item.productName);
+    } catch (error) {
+      console.error('Error handling add to cart:', error);
     }
   };
 
   //add item to localstorage
   const addItemToLocalstorage = (item) => {
-    const localstorageCart = JSON.parse(localStorage.getItem('cart')) || [];
+    const localstorageCart =
+      JSON.parse(localStorage.getItem('cartItems')) || [];
     const existingItem = localstorageCart.find(
       (cartItem) => cartItem._id === item._id
     );
 
     if (existingItem) {
-      existingItem.quantity += 1;
+      existingItem.quantity = (existingItem.quantity || 0) + 1;
     } else {
-      localstorageCart.push(item);
+      const newItem = { ...item, quantity: item.quantity || 1 };
+      localstorageCart.push(newItem);
+      console.log('Item being added in localstorage:', newItem);
+      console.log('Current cart items:', localstorageCart);
     }
 
     // 将更新后的购物车数组存回本地存储
     // Update local storage and state
-    localStorage.setItem('cart', JSON.stringify(localstorageCart));
+    localStorage.setItem('cartItems', JSON.stringify(localstorageCart));
     setCartItems(localstorageCart);
     showAddToCartAlert(item.productName);
     console.log('add item to Localstorage:', localstorageCart);
   };
-
+  //add new item to cart
   const addItemToServerCart = async (item) => {
     const token = localStorage.getItem('token');
-    if (!token) {
-      console.warn(
-        'User not authenticated. Unable to add item to server cart.'
-      );
-      return;
-    }
+    if (!token) return;
     console.log('Token:', token); // 检查 token 是否有效
 
     try {
-      const response = await axios.post(
-        `${backendUrl}/api/users/member/cart`,
+      // 檢查商品是否已存在於購物車中
+      const response = await axios.put(
+        `${backendUrl}/api/users/member/cart}`,
         {
           items: [
             {
               productId: item._id,
               productName: item.productName,
-              quantity: 1,
+              quantity: item.quantity || 1,
               price: item.price,
               image: item.image,
             },
           ],
         },
+
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log('Request URL:', `${backendUrl}/api/users/member/cart`);
-      console.log('Added item to server cart:', item);
+
+      console.log(
+        'Request URL:',
+        `${backendUrl}/api/users/member/cart/${item._id}`
+      );
+      console.log('Added item to server cart:', response.data);
+      console.log('Updated quantity in server cart:', response.data);
     } catch (error) {
       console.error('Error adding item to server cart:', error);
       console.error(

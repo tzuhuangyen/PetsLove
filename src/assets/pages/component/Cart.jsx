@@ -1,20 +1,20 @@
 //product page's cart component
 import React from 'react';
 import { useContext } from 'react';
-import { CartContext } from './Context';
+import { CartContext } from '../Context/CartContext';
 
 function Cart() {
-  const contextValue = useContext(CartContext);
-  const { state, dispatch } = contextValue;
-  // Check if state and state.cartList are defined before accessing
-  const cartList = state && state.cartList ? state.cartList : [];
+  const { cartItems, setCartItems } = useContext(CartContext);
+  const { state, dispatch } = useContext(CartContext);
+  // Check if state and state.cartItems are defined before accessing
+
   return (
     <div className='bg-light p-3'>
-      {/*        {JSON.stringify(state.cartList)}
+      {/*        {JSON.stringify(state.cartItems)}
        */}
       <table className='table align-middle'>
         <tbody>
-          {state.cartList.map((item) => {
+          {state.cartItems.map((item) => {
             return (
               <tr key={item.id} className='table-row'>
                 <td className='p-0'>

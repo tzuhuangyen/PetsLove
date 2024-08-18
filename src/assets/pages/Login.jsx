@@ -8,8 +8,9 @@ import React, {
   useState,
   useRef,
   forwardRef,
-  useContext,
   useEffect,
+  createContext,
+  useContext,
 } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom'; // 假設你使用了 React Router
@@ -51,6 +52,8 @@ function Login() {
   const [passwordVisible, setPasswordVisible] = useState(false); // State for password visibility
   const passwordInputRef = useRef(null);
   const { authState } = useContext(AuthContext);
+  const UserContext = createContext({});
+  const { username, setUsername } = useContext(UserContext);
   const [error, setError] = useState('');
   const {
     register,
@@ -64,86 +67,99 @@ function Login() {
   const { cartItems, setCartItems } = useContext(CartContext);
   const [token, setToken] = useState(null);
 
-  useEffect(() => {
-    console.log('authState.isAuthenticated:', authState.isAuthenticated);
-    console.log('cartItems:', cartItems);
-    console.log('token:', token);
+  // useEffect(() => {
+  //   console.log('authState.isAuthenticated:', authState.isAuthenticated);
+  //   console.log('cartItems:', cartItems);
+  //   console.log('token:', token);
+  //   // 1.用户登录后获取服务器上的购物车：
 
-    const syncUserCartWithServer = async () => {
-      console.log('Starting syncUserCartWithServer...');
+  // }, [authState.isAuthenticated, cartItems, token]);
+  const syncUserCartWithServer = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.warn('User not authenticated.');
+      return;
+    }
+    const localCart = JSON.parse(localStorage.getItem('cartItems')) || [];
+    console.log('Local cart:', localCart);
 
-      // 確認用戶是否已經登入
-      if (authState.isAuthenticated && token) {
-        try {
-          // Fetch the user's cart items from the server
-          console.log('Fetching user cart from server...');
-          const userCartFromServer = await fetchUserCartFromServer(token);
-          console.log('User cart from server:', userCartFromServer);
+    let serverCart = await fetchUserCartFromServer(token);
+    console.log('Server cart:', serverCart);
 
-          // Merge local cart with user's cart from server
-          console.log('Merging carts...');
-          const mergedCart = mergeCarts(cartItems, userCartFromServer);
-          console.log('Merged cart:', mergedCart);
+    if (!serverCart) {
+      await createServerCart(token, localCart);
+      serverCart = await fetchUserCartFromServer(token);
+    }
 
-          // Update server with the merged cart
-          console.log('Updating server cart...');
-          await updateServerCart(token, mergedCart);
-          console.log('Server cart updated successfully.');
+    const mergedCart = mergeCarts(serverCart, localCart);
+    console.log('Merged cart:', mergedCart);
 
-          // Set the merged cart to the state (if needed)
-          console.log('Setting merged cart to state...');
-          setCartItems(mergedCart);
+    await updateServerCart(token, mergedCart);
+    // Update local storage
+    localStorage.setItem('cart', JSON.stringify([]));
+    setCartItems(mergedCart);
+  };
 
-          // Clear local storage cart as it's now merged
-          console.log('Clearing local storage cart...');
-          localStorage.setItem('cart', JSON.stringify([]));
-        } catch (error) {
-          console.error('Error syncing user cart with server:', error);
-        }
-      } else {
-        console.log('User not authenticated or token not available.');
-      }
-    };
-
-    syncUserCartWithServer();
-  }, [authState.isAuthenticated, cartItems, token]);
-  // This function fetches the user's cart from the server using the token
+  // 1.用户登录后获取服务器上的购物车：
   const fetchUserCartFromServer = async (token) => {
     try {
       const response = await axios.get(`${backendUrl}/api/users/member/cart`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      // Assuming the server responds with the cart items in the body
-      // Check if cart items exist in the response data
-      const dataCartItems = response.data.cart?.items || [];
-      console.log('get user All db CartItems:', dataCartItems);
-      return dataCartItems;
+      return response.data; // 返回服务器上的购物车数据
     } catch (error) {
       console.error('Error fetching user cart from server:', error);
-      return []; // Return an empty array in case of error
+      return null; // Return an empty array in case of error
     }
   };
-  // This function updates the server with the merged cart
-  const updateServerCart = async (token, mergedCart) => {
-    // Implement this function based on how your server expects to receive the updated cart
-    // This is a placeholder showing a generic implementation
+  // 1-2如果用户没有购物车记录，则返回创建一个新的购物车。
+  const createServerCart = async (token, cartItems) => {
     try {
       await axios.post(
-        `${backendUrl}/api/users/member/updateCart`,
-        mergedCart,
+        `${backendUrl}/api/users/member/cart`,
+        { userId: authState.userId, items: cartItems },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log('Server cart updated successfully.');
+      console.log('Server cart created successfully:', response.data);
+      return response.data; // 返回创建的新购物车数据
     } catch (error) {
       console.error('Error updating cart on server:', error);
     }
   };
-  // Simplified merge function (you'll need to implement actual merging logic based on your needs)
-  const mergeCarts = (cartItems, userCartFromServer) => {
-    // Placeholder for merge logic. You need to implement this based on your application's requirements.
-    return [...cartItems, ...userCartFromServer]; // Simple example, might lead to duplicates
+  //合并购物车数据
+  const mergeCarts = (serverCart, localCart) => {
+    const mergedCart = new Map();
+    // 合并服务器购物车
+    serverCart.items.forEach((item) => {
+      mergedCart.set(item.productId.toString(), item);
+    });
+    // 合并本地购物车
+    localCart.forEach((item) => {
+      if (mergedCart.has(item.productId.toString())) {
+        const existingItem = mergedCart.get(item.productId.toString());
+        existingItem.quantity += item.quantity;
+      } else {
+        mergedCart.set(item.productId.toString(), { ...item });
+      }
+    });
+    return Array.from(mergedCart.values());
+  };
+  //更新服务器上的购物车
+  const updateServerCart = async (token, cartItems) => {
+    try {
+      const response = await axios.put(
+        `${backendUrl}/api/users/member/cart`,
+        { userId: authState.userId, items: cartItems },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      console.log('Server cart updated successfully.', response.data);
+    } catch (error) {
+      console.error('Error updating server cart:', error);
+    }
   };
 
   const handleLogIn = async (formData) => {
@@ -156,28 +172,32 @@ function Login() {
       // The server should send back a response containing the token
       const { token, userId } = response.data;
       if (token) {
+        await localStorage.setItem('token', token);
+        console.log('User logged in &token:', token);
         setToken(token); // 将 token 设置到状态中
 
-        localStorage.setItem('token', token);
-        console.log('User logged in & token:', token);
         login({ token }); // 登入成功，將令牌儲存至 localStorage，並更新 AuthContext
 
+        // Assuming AuthContext sets userId correctly
+        if (authState.userId) {
+          await syncUserCartWithServer();
+        } else {
+          console.error('User ID is null or undefined.');
+        }
         // Fetch cart from localStorage
-        const localCart = JSON.parse(localStorage.getItem('cart')) || [];
-
-        // After login, fetch the user's cart items from the server
-        const userCartFromServer = await fetchUserCartFromServer(userId);
-
-        // Merge the carts
-        const mergedCart = mergeCarts(localCart, userCartFromServer);
-
-        // Update the server with the merged cart (if necessary)
-        await updateServerCart(token, mergedCart);
-        setCartItems(mergedCart);
-        // Clear localStorage cart as it's now merged
-        localStorage.setItem('cart', JSON.stringify([]));
-
+        // After login, sync the user's cart with the server
+        await syncUserCartWithServer();
         showLoginAlert(formData.username);
+      } else if (!token) {
+        console.error('Token is missing from server response.');
+        setError('Login failed. Token is missing.');
+        showLoginErrorAlert();
+      } else if (!userId) {
+        console.error('User ID is missing from server response.');
+        setError('Login failed. User ID is missing.');
+        showLoginErrorAlert();
+      } else {
+        throw new Error('Login failed. User ID or Token is missing.');
       }
     } catch (error) {
       console.error('Error during login:', error);
@@ -222,7 +242,11 @@ function Login() {
         <form id='form' onSubmit={handleSubmit(onSubmit)}>
           <h2 className='text-center mb-5'>Log in</h2>
           <div>
+            <label htmlFor='username'>username</label>
+
             <Input
+              value={username}
+              onchange={(e) => setUsername(e.target.value)}
               {...register('username', { required: true })}
               register={register}
               errors={errors}
