@@ -69,7 +69,7 @@ const ProcessOrdersPage = () => {
     {
       id: 1,
       date: '2024-06-15',
-      state: 'Delivered',
+      state: 'Processing',
       total: 100.0,
       status: 'processing',
     },
@@ -104,6 +104,51 @@ const ProcessOrdersPage = () => {
           </tr>
         </thead>
         <tbody>{renderProcessOrders()}</tbody>
+      </Table>
+    </Container>
+  );
+};
+const ShippedOrdersPage = () => {
+  const shippedOrders = [
+    {
+      id: 1,
+      date: '2024-06-15',
+      state: 'Shipped',
+      total: 100.0,
+      status: 'Shipped',
+    },
+  ];
+
+  const renderShippedOrders = () => {
+    return shippedOrders.map((order) => (
+      <tr key={order.id}>
+        <td>{order.id}</td>
+        <td>{order.state}</td>
+        <td>${order.total.toFixed(2)}</td> <td>{order.date}</td>
+        <td>
+          <Button variant='success'>Track</Button>
+          {/* {order.status === 'shipped' ? (
+            <Button variant='success'>Track</Button>
+          ) : (
+            <Button variant='info'>Review</Button>
+          )} */}
+        </td>
+      </tr>
+    ));
+  };
+  return (
+    <Container className='mt-5'>
+      <Table striped bordered hover>
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>State</th>
+            <th>Total</th>
+            <th>Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>{renderShippedOrders()}</tbody>
       </Table>
     </Container>
   );
@@ -160,12 +205,10 @@ export const MemberOrders = () => {
               {/* Placeholder content for processing orders */}
             </Tab.Pane>
             <Tab.Pane eventKey='shipped'>
-              <h3>Shipped Orders</h3>
-
+              <ShippedOrdersPage />
               {/* Placeholder content for shipped orders */}
             </Tab.Pane>
             <Tab.Pane eventKey='review'>
-              <h3>Review Orders</h3>{' '}
               <p>
                 <ImSad /> it is empty here
                 <MdOutlineRateReview />
@@ -173,9 +216,8 @@ export const MemberOrders = () => {
               {/* Placeholder content for review orders */}
             </Tab.Pane>
             <Tab.Pane eventKey='return'>
-              <h3>Return Orders</h3>{' '}
               <p>
-                <ImSad /> it is empty here
+                it is empty here
                 <CiShoppingCart />
               </p>
               {/* Placeholder content for return orders */}

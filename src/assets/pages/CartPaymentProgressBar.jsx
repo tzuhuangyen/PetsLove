@@ -287,7 +287,7 @@ export const PaymentDetails = () => {
       <Card className='p-4'>
         <Form onSubmit={handleSubmit}>
           <Form.Group className='mb-3' controlId='formCardNumber'>
-            <Form.Label>Card number</Form.Label>
+            <Form.Label></Form.Label>
             <Form.Control
               type='text'
               placeholder='Card number'
@@ -298,7 +298,7 @@ export const PaymentDetails = () => {
           </Form.Group>
 
           <Form.Group className='mb-3' controlId='formCardName'>
-            <Form.Label>Name</Form.Label>
+            <Form.Label></Form.Label>
             <Form.Control
               type='text'
               placeholder='Name'
@@ -311,7 +311,7 @@ export const PaymentDetails = () => {
           <Row>
             <Col>
               <Form.Group className='mb-3' controlId='formCardExpiry'>
-                <Form.Label>expired</Form.Label>
+                <Form.Label></Form.Label>
                 <Form.Control
                   type='text'
                   placeholder='MM/YY'
@@ -323,7 +323,7 @@ export const PaymentDetails = () => {
             </Col>
             <Col>
               <Form.Group className='mb-3' controlId='formCardCVV'>
-                <Form.Label>CVV</Form.Label>
+                <Form.Label></Form.Label>
                 <Form.Control
                   type='text'
                   placeholder='CVV'

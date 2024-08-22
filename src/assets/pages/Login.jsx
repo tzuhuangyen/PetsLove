@@ -48,13 +48,15 @@ const Input = forwardRef(
 );
 
 function Login() {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const [passwordVisible, setPasswordVisible] = useState(false); // State for password visibility
   const passwordInputRef = useRef(null);
-  const { authState } = useContext(AuthContext);
+  const [error, setError] = useState('');
+  const [token, setToken] = useState(null);
+  const { login, authState } = useContext(AuthContext);
+  const { cartItems, setCartItems } = useContext(CartContext);
   const UserContext = createContext({});
   const { username, setUsername } = useContext(UserContext);
-  const [error, setError] = useState('');
   const {
     register,
     handleSubmit,
@@ -62,10 +64,6 @@ function Login() {
     getValues,
     formState: { errors },
   } = useForm({ mode: 'onTouched' });
-
-  const { login } = useContext(AuthContext);
-  const { cartItems, setCartItems } = useContext(CartContext);
-  const [token, setToken] = useState(null);
 
   // useEffect(() => {
   //   console.log('authState.isAuthenticated:', authState.isAuthenticated);
@@ -82,7 +80,6 @@ function Login() {
     }
     const localCart = JSON.parse(localStorage.getItem('cartItems')) || [];
     console.log('Local cart:', localCart);
-
     let serverCart = await fetchUserCartFromServer(token);
     console.log('Server cart:', serverCart);
 
@@ -92,12 +89,9 @@ function Login() {
     }
 
     const mergedCart = mergeCarts(serverCart, localCart);
-    console.log('Merged cart:', mergedCart);
-
     await updateServerCart(token, mergedCart);
-    // Update local storage
-    localStorage.setItem('cart', JSON.stringify([]));
     setCartItems(mergedCart);
+    console.log('Merged cart:', mergedCart);
   };
 
   // 1.用户登录后获取服务器上的购物车：
@@ -115,15 +109,15 @@ function Login() {
   // 1-2如果用户没有购物车记录，则返回创建一个新的购物车。
   const createServerCart = async (token, cartItems) => {
     try {
-      await axios.post(
+      const response = await axios.post(
         `${backendUrl}/api/users/member/cart`,
         { userId: authState.userId, items: cartItems },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log('Server cart created successfully:', response.data);
       return response.data; // 返回创建的新购物车数据
+      console.log('Server cart created successfully:', response.data);
     } catch (error) {
       console.error('Error updating cart on server:', error);
     }
@@ -168,15 +162,14 @@ function Login() {
         `${backendUrl}/api/users/login`,
         formData
       );
-      console.log('Login successful:', response);
-      // The server should send back a response containing the token
+      console.log('Login successful:', response.data);
       const { token, userId } = response.data;
+      // The server should send back a response containing the token
       if (token) {
-        await localStorage.setItem('token', token);
+        localStorage.setItem('token', token);
         console.log('User logged in &token:', token);
+        login({ token, userId });
         setToken(token); // 将 token 设置到状态中
-
-        login({ token }); // 登入成功，將令牌儲存至 localStorage，並更新 AuthContext
 
         // Assuming AuthContext sets userId correctly
         if (authState.userId) {
@@ -184,20 +177,6 @@ function Login() {
         } else {
           console.error('User ID is null or undefined.');
         }
-        // Fetch cart from localStorage
-        // After login, sync the user's cart with the server
-        await syncUserCartWithServer();
-        showLoginAlert(formData.username);
-      } else if (!token) {
-        console.error('Token is missing from server response.');
-        setError('Login failed. Token is missing.');
-        showLoginErrorAlert();
-      } else if (!userId) {
-        console.error('User ID is missing from server response.');
-        setError('Login failed. User ID is missing.');
-        showLoginErrorAlert();
-      } else {
-        throw new Error('Login failed. User ID or Token is missing.');
       }
     } catch (error) {
       console.error('Error during login:', error);
@@ -242,7 +221,7 @@ function Login() {
         <form id='form' onSubmit={handleSubmit(onSubmit)}>
           <h2 className='text-center mb-5'>Log in</h2>
           <div>
-            <label htmlFor='username'>username</label>
+            <label htmlFor='username'></label>
 
             <Input
               value={username}
