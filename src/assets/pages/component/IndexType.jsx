@@ -48,9 +48,9 @@ function IndexType() {
                       <img src={footprint} alt='' />
                     </li>
                   </ul>
-                  <button href='./product.html' className='btn '>
+                  <a href='/PetsLove/shop' className='btn'>
                     More Detail
-                  </button>
+                  </a>
                 </div>
               </div>
             </div>
@@ -82,7 +82,7 @@ function IndexType() {
                     <img src={footprint} alt='' />
                   </li>
                 </ul>
-                <a href='./product.html' className='btn'>
+                <a href='/PetsLove/shop' className='btn'>
                   More Detail
                 </a>
               </div>
@@ -113,7 +113,7 @@ function IndexType() {
                     <img src={footprint} alt='' />
                   </li>
                 </ul>
-                <a href='./product.html' className='btn'>
+                <a href='/PetsLove/shop' className='btn'>
                   More Detail
                 </a>
               </div>

@@ -212,14 +212,13 @@ const Shop = () => {
 
   const handleAddToCart = async (item) => {
     try {
+      // addItemToLocalstorage(item);
       const token = localStorage.getItem('token');
       if (authState.isAuthenticated && token) {
         await addItemToServerCart(item);
-      } else {
-        addItemToLocalstorage(item);
       }
     } catch (error) {
-      console.error('Error adding item to cart:', error);
+      console.error('Error adding item to server cart:', error);
     }
   };
 
