@@ -1,4 +1,4 @@
-(PetsLove website)[<https://tzuhuangyen.github.io/PetsLove/>]
+(PetsLove website)[[https://tzuhuangyen.github.io/PetsLove/](https://tzuhuangyen.github.io/PetsLove/)]
 
 PetsLove is a web application built with React, Node.js, and Express that allows users to browse and purchase pet products online. It features user authentication, a shopping cart, and various alert notifications using the SweetAlert2 library.
 
@@ -22,23 +22,19 @@ SweetAlert2 (for alert notifications)
 
 ## Installation
 
-1. Clone the repository: git clone https://github.com/your-username/PetsLove.git
-
+1. Clone the repository: git clone https://github.com/tzuhuangyen/PetsLove.git
 2. Install dependencies for the server: cd server && npm install
-
 3. Install dependencies for the client: cd ../client && npm install
 
 ## Configuration
 
 1. Create a .env file in the server directory and add your environment variables (e.g., database connection string, port number).
-
 2. Update the VITE_BACKEND_URL variable in the client/config.js file to point to your server's URL.
 
 ## Running the Application
 
 1. Start the server: cd server && npm start
 2. Start the client: cd ../client && npm run dev
-
 3. Open your browser and navigate to http://localhost:3000 (or the appropriate URL based on your configuration).
 
 ## Building for Production

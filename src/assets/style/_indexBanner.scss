@@ -334,7 +334,7 @@
 
     .card-img,
     .card-img-top {
-      height: 235px;
+      height: 250px;
     }
   }
 }
@@ -342,7 +342,7 @@
 .types {
   .card-img-overlay {
     height: 270px;
-    top: 15%;
+    top: 5%;
     transition: transform 0.5s ease;
     .card-title {
       text-align: center;
@@ -628,10 +628,12 @@
     img {
       height: 200px;
       border-radius: 16px;
+      padding-left: 18px;
+      padding-bottom: 18px;
     }
     .card-body {
       .card-title {
-        font-size: 1rem;
+        font-size: 24px;
         color: $primary;
       }
       span {
