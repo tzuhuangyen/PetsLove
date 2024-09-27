@@ -47,6 +47,10 @@ a {
   text-decoration: none;
   color: white;
   display: block;
+  &:link {
+    //設定還沒有瀏覽過的連結
+    color: #000;
+  }
 }
 
 button {

@@ -626,11 +626,13 @@
     }
 
     img {
-      height: 200px;
+      width: 100%;
+      height: auto;
       border-radius: 16px;
       padding-left: 18px;
       padding-bottom: 18px;
     }
+
     .card-body {
       .card-title {
         font-size: 24px;
@@ -670,7 +672,6 @@
       border: 1px solid $primary;
     }
     img {
-      height: 230px;
       border-radius: 16px;
       @include media-breakpoint-up(md) {
         padding-top: 18px;

@@ -11,7 +11,7 @@ import { UserProvider } from './assets/pages/Context/UserContext';
 import Index from './assets/pages/Index';
 import Header from './assets/pages/component/Header';
 import Shop from './assets/pages/Shop';
-import BlogDetail from './assets/pages/BlogDetail';
+import BlogArticles from './assets/pages/BlogArticles';
 import SignUp from './assets/pages/SignUp';
 import Login from './assets/pages/Login';
 import MemberIndex from './assets/pages/MemberIndex';
@@ -31,6 +31,7 @@ import ForgotPsw from './assets/pages/component/ForgotPsw';
 import ResetPsw from './assets/pages/component/ResetPsw';
 import PaymentRoutes from './PaymentRoutes';
 import { MemberOrders } from './assets/pages/MemberOrders';
+import BlogIndex from './assets/pages/BlogIndex';
 
 function App() {
   const [username, setUsername] = useState('Yennefer');
@@ -43,16 +44,17 @@ function App() {
             <Header />
             <Routes>
               <Route exact path='/' element={<Index />} />
+              {/* shop */}
               <Route path='/shop' element={<Shop />} />
               <Route
                 path='/shop/product/:productId'
                 element={<ProductDetail />}
               />
+              {/* user */}
               <Route path='/users/signup' element={<SignUp />} />
               <Route path='/users/login' element={<Login />} />
               <Route path='/users/forgotPsw' element={<ForgotPsw />} />
               <Route path='/users/resetPsw' element={<ResetPsw />} />
-
               <Route path='/users/member' element={<MemberIndex />}>
                 <Route index element={<MemberProfile />} />
                 <Route path='myProfile' element={<MemberProfile />} />
@@ -60,10 +62,13 @@ function App() {
                 <Route path='myWishlist' element={<MemberWishlist />} />
                 <Route path='/users/member/*' element={<PaymentRoutes />} />
               </Route>
-
               {/* <Route path="/favorite" element={<Favorite />} /> */}
-              <Route path='/blog' element={<IndexBlog />} />
-              <Route path='/blog/blogDetail' element={<BlogDetail />} />
+              {/* Blog */}
+              <Route path='/blog' element={<BlogIndex />}></Route>
+              <Route
+                path='/blog/articles/:articleId'
+                element={<BlogArticles />}
+              ></Route>
               <Route path='/admin' element={<AdminIndex />}>
                 <Route
                   path='/admin/products'
@@ -79,7 +84,6 @@ function App() {
                   element={<AdminAnalysis />}
                 ></Route>
               </Route>
-
               <Route
                 path='/admin/products/updatedProduct'
                 element={<AdminProductUpdate />}

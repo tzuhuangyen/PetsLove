@@ -1,4 +1,4 @@
-.blogDetail {
+.blogArticles {
   .categoryGroup {
     cursor: pointer;
   }
@@ -14,5 +14,10 @@
       color: #fff;
       background-color: $primary;
     }
+  }
+  .fixed-img-height {
+    height: 200px; /* 設置固定高度，根據需要調整 */
+    object-fit: cover; /* 確保圖片不變形，會裁剪多餘的部分 */
+    width: 100%; /* 確保圖片的寬度適應卡片 */
   }
 }
