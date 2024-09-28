@@ -8,10 +8,10 @@ import { FaSearch } from 'react-icons/fa';
 import { MdPets } from 'react-icons/md';
 import { PiFishLight } from 'react-icons/pi';
 
-import { Container, Row, Col, Card, Button, Form } from 'react-bootstrap';
+import { Container, Row, Col, Button, Form } from 'react-bootstrap';
 import InputGroup from 'react-bootstrap/InputGroup';
 import { jokesApiKey } from '../../../config';
-
+import BlogIndexSidebar from './BlogIndexSidebar';
 function BlogArticles() {
   const { articleId } = useParams(); // 提取路由參數
   const [article, setArticle] = useState({}); // State for article
@@ -292,81 +292,65 @@ function BlogArticles() {
   return (
     <>
       <Container fluid='md' className=' blogArticles'>
-        <Form
-          onSubmit={fetchNewsByKeyword}
-          className=' d-flex align-items-center justify-content-center'
-        >
-          <InputGroup className='mb-3 mt-3'>
-            <InputGroup.Text id='inputGroup-sizing-default'>
-              Search jokes by keyword
-            </InputGroup.Text>
-            <Form.Control
-              aria-label='Default'
-              aria-describedby='inputGroup-sizing-default'
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-              className='flex-grow-1'
-            />
-          </InputGroup>
-          <Button
-            type='submit'
-            className='p-2 d-flex align-items-center justify-content-center'
-          >
-            {' '}
-            <FaSearch />
-          </Button>
-        </Form>
-        {/* api jokes display */}
-        <h3 className='mb-2'>Result of Related Jokes</h3>
+        <Row>
+          <Col xs={12} md={9} className='mt-3'>
+            {/* display memes */}
+            <div>
+              <Form
+                onSubmit={fetchNewsByKeyword}
+                className=' d-flex align-items-center justify-content-center'
+              >
+                <Row className='w-100'>
+                  <Col
+                    xs={12}
+                    md={10}
+                    className='d-flex justify-content-center align-items-center'
+                  >
+                    <InputGroup className='mb-3 mt-3'>
+                      <InputGroup.Text id='inputGroup-sizing-default'>
+                        Search jokes by keyword
+                      </InputGroup.Text>
+                      <Form.Control
+                        aria-label='Default'
+                        aria-describedby='inputGroup-sizing-default'
+                        value={keyword}
+                        onChange={(e) => setKeyword(e.target.value)}
+                        className='flex-grow-1'
+                      />
+                    </InputGroup>
+                    <Button
+                      type='submit'
+                      className='p-2 d-flex align-items-center justify-content-center'
+                    >
+                      {' '}
+                      <FaSearch />
+                    </Button>
+                  </Col>
+                </Row>
+              </Form>
+              {/* api jokes display */}
+              <h3 className='mb-2'>Result of Related Jokes</h3>
 
-        {jokes.length > 0 ? (
-          jokes.map((item, index) => (
-            <ul key={item.id} className='lh-base'>
-              <PiFishLight />
+              {jokes.length > 0 ? (
+                jokes.map((item, index) => (
+                  <ul key={item.id} className='lh-base'>
+                    <PiFishLight />
 
-              <li className='mb-2'>{item.joke}</li>
-              <MdPets />
-            </ul>
-            // <Col xs={12} md={6} lg={4} className='mb-4' key={index}>
-            //   <Card className='shadow-sm d-flex flex-column h-100'>
-            //     <Card.Img
-            //       src={item.image || '/public/images/opss.jpg'}
-            //       className='fixed-height-img'
-            //       alt={item.title || 'Article Image'}
-            //     />
-            //     <Card.Body className='d-flex flex-column'>
-            //       <Card.Title>
-            //         {item.title || 'No title available'}
-            //       </Card.Title>
-            //       <Card.Subtitle className='mb-2 text-muted'>
-            //         <p>{item.author}</p>
-            //         <span>{item.publish_date || 'Unknown date'}</span>
-            //       </Card.Subtitle>
-            //       <Card.Text className='flex-grow-1'>
-            //         {truncateSummary(item.summary) || 'No summary available'}
-            //       </Card.Text>
-            //       <Button variant='primary' className='mt-auto'>
-            //         <a
-            //           href={item.url}
-            //           target='_blank'
-            //           rel='noopener noreferrer'
-            //         >
-            //           See more
-            //         </a>
-            //       </Button>
-            //     </Card.Body>
-            //   </Card>
-            // </Col>
-          ))
-        ) : (
-          <p>Not laugh today yet? search jokes now </p>
-        )}
-
-        {/* main article area */}
-        <Row className='mb-4'>
-          <h1 className='mt-4 mb-4'>{article.title}</h1>
-          <Col xs={12} md={9}>
+                    <li className='mb-2'>{item.joke}</li>
+                    <MdPets />
+                  </ul>
+                ))
+              ) : (
+                <p>Not laugh today yet? search jokes now </p>
+              )}
+            </div>
+            {/* display articles */}
+            <h1 className='mt-4 mb-4'>{article.title}</h1>
             <div dangerouslySetInnerHTML={{ __html: article.content }} />
+          </Col>
+          {/* sidebar */}
+          <Col xs={12} md={3} className='mt-4'>
+            <BlogIndexSidebar />
           </Col>
         </Row>
       </Container>

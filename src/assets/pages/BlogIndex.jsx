@@ -19,7 +19,7 @@ const BlogIndex = () => {
           </Col>
 
           {/* blog index sidebar area */}
-          <Col xs={12} md={3} className='mt-5'>
+          <Col sm={12} md={3} className='mt-5 '>
             <BlogIndexSidebar />
           </Col>
           {/* 新闻列表展示 */}
