@@ -4,6 +4,8 @@ import { Container, Row, Col, Card, Image, Button } from 'react-bootstrap';
 import IndexBlog from './component/IndexBlog';
 import BlogTopPicks from './BlogTopPicks';
 import BlogIndexSidebar from './BlogIndexSidebar';
+import BlogMemes from './BlogMemes';
+
 const BlogIndex = () => {
   return (
     <>
@@ -12,6 +14,7 @@ const BlogIndex = () => {
           {/* main article area */}
           <Col xs={12} md={9}>
             <Outlet />
+            <BlogMemes />
             <IndexBlog />
           </Col>
 
@@ -74,7 +77,7 @@ const BlogIndex = () => {
             </section>
           </Col> */}
         </Row>
-
+        {/* BlogTopPicks */}
         <Row className='mb-4'>
           <h3 className='mb-3'>Our Top Picks for Pets Treats</h3>
           <BlogTopPicks />

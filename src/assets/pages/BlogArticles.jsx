@@ -5,21 +5,27 @@ import dogImg1 from '/images/blog1.jpg';
 import dogImg2 from '/images/blog2.jpg';
 import dogImg3 from '/images/blog3.jpg';
 import { FaSearch } from 'react-icons/fa';
+import { MdPets } from 'react-icons/md';
+import { PiFishLight } from 'react-icons/pi';
+
 import { Container, Row, Col, Card, Button, Form } from 'react-bootstrap';
 import InputGroup from 'react-bootstrap/InputGroup';
-import { newsApiKey } from '../../../config';
+import { jokesApiKey } from '../../../config';
 
 function BlogArticles() {
   const { articleId } = useParams(); // 提取路由參數
   const [article, setArticle] = useState({}); // State for article
   const [keyword, setKeyword] = useState('');
-  const [news, setNews] = useState([]);
-  const NewsAPIBASE_URL = 'https://api.worldnewsapi.com';
+  const [jokes, setJokes] = useState([]);
+  const jokesAPIBASE_URL = 'https://api.humorapi.com';
+
+  // 在組件加載時滾動到頂部
   useEffect(() => {
-    window.scrollTo(0, 0); // 在組件加載時滾動到頂部
+    window.scrollTo(0, 0);
   }, []);
+
+  //get article data by ID
   const getArticleById = (id) => {
-    // 這是模擬的一個函數，你可以根據你的資料來源替換
     const articles = [
       {
         id: 'article1',
@@ -252,27 +258,28 @@ function BlogArticles() {
     window.scrollTo(0, 0); // Scroll to top on mount
   }, [articleId]); // Dependency array with articleId
 
-  // Fetch news based on keyword
+  // Set the clicked article to be displayed
+  const handleArticleClick = (item) => {
+    setSelectedArticle(item);
+  };
+  // Fetch jokes based on keyword
   const fetchNewsByKeyword = async (event) => {
     event.preventDefault();
     try {
-      const url = `${NewsAPIBASE_URL}/search-news?text=${keyword}&language=en`;
+      const url = `${jokesAPIBASE_URL}/jokes/search?number=3&keywords=${keyword}&include-tags=animal`;
+
       const response = await axios.get(url, {
         headers: {
-          'x-api-key': newsApiKey,
+          'x-api-key': jokesApiKey,
           'Content-Type': 'application/json',
         },
       });
-      const articles = response.data.news.slice(0, 3);
-      console.log('articles:', articles);
-      setNews(articles);
+      const articles = response.data.jokes.slice(0, 3);
+      console.log('Jokes:', articles);
+      setJokes(articles);
     } catch (error) {
-      console.error('Error fetching news:', error);
+      console.error('Error fetching jokes:', error);
     }
-  };
-
-  const handleArticleClick = (item) => {
-    setSelectedArticle(item); // Set the clicked article to be displayed
   };
   // helper function to truncate the summary text
   const truncateSummary = (summary) => {
@@ -285,10 +292,13 @@ function BlogArticles() {
   return (
     <>
       <Container fluid='md' className=' blogArticles'>
-        <Form onSubmit={fetchNewsByKeyword} className=' d-flex w-100'>
+        <Form
+          onSubmit={fetchNewsByKeyword}
+          className=' d-flex align-items-center justify-content-center'
+        >
           <InputGroup className='mb-3 mt-3'>
             <InputGroup.Text id='inputGroup-sizing-default'>
-              Search news by keyword
+              Search jokes by keyword
             </InputGroup.Text>
             <Form.Control
               aria-label='Default'
@@ -298,52 +308,59 @@ function BlogArticles() {
               className='flex-grow-1'
             />
           </InputGroup>
-          <Button type='submit' className='p-0'>
+          <Button
+            type='submit'
+            className='p-2 d-flex align-items-center justify-content-center'
+          >
             {' '}
             <FaSearch />
           </Button>
         </Form>
-        {/* api news display */}
-        <h3>Result of Related News</h3>
+        {/* api jokes display */}
+        <h3 className='mb-2'>Result of Related Jokes</h3>
 
-        <Row>
-          {news.length > 0 ? (
-            news.map((item, index) => (
-              <Col xs={12} md={6} lg={4} className='mb-4' key={index}>
-                <Card className='shadow-sm d-flex flex-column h-100'>
-                  <Card.Img
-                    src={item.image || '/images/opss.jpg'}
-                    className='img-fluid'
-                    alt={item.title || 'Article Image'}
-                  />
-                  <Card.Body className='d-flex flex-column'>
-                    <Card.Title>
-                      {item.title || 'No title available'}
-                    </Card.Title>
-                    <Card.Subtitle className='mb-2 text-muted'>
-                      <p>{item.author}</p>
-                      <span>{item.publish_date || 'Unknown date'}</span>
-                    </Card.Subtitle>
-                    <Card.Text className='flex-grow-1'>
-                      {truncateSummary(item.summary) || 'No summary available'}
-                    </Card.Text>
-                    <Button variant='primary' className='mt-auto'>
-                      <a
-                        href={item.url}
-                        target='_blank'
-                        rel='noopener noreferrer'
-                      >
-                        See more
-                      </a>
-                    </Button>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))
-          ) : (
-            <p>No news available</p>
-          )}
-        </Row>
+        {jokes.length > 0 ? (
+          jokes.map((item, index) => (
+            <ul key={item.id} className='lh-base'>
+              <PiFishLight />
+
+              <li className='mb-2'>{item.joke}</li>
+              <MdPets />
+            </ul>
+            // <Col xs={12} md={6} lg={4} className='mb-4' key={index}>
+            //   <Card className='shadow-sm d-flex flex-column h-100'>
+            //     <Card.Img
+            //       src={item.image || '/public/images/opss.jpg'}
+            //       className='fixed-height-img'
+            //       alt={item.title || 'Article Image'}
+            //     />
+            //     <Card.Body className='d-flex flex-column'>
+            //       <Card.Title>
+            //         {item.title || 'No title available'}
+            //       </Card.Title>
+            //       <Card.Subtitle className='mb-2 text-muted'>
+            //         <p>{item.author}</p>
+            //         <span>{item.publish_date || 'Unknown date'}</span>
+            //       </Card.Subtitle>
+            //       <Card.Text className='flex-grow-1'>
+            //         {truncateSummary(item.summary) || 'No summary available'}
+            //       </Card.Text>
+            //       <Button variant='primary' className='mt-auto'>
+            //         <a
+            //           href={item.url}
+            //           target='_blank'
+            //           rel='noopener noreferrer'
+            //         >
+            //           See more
+            //         </a>
+            //       </Button>
+            //     </Card.Body>
+            //   </Card>
+            // </Col>
+          ))
+        ) : (
+          <p>Not laugh today yet? search jokes now </p>
+        )}
 
         {/* main article area */}
         <Row className='mb-4'>

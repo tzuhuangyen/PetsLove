@@ -6,7 +6,7 @@ const BlogIndexSidebar = () => {
       <div className='categoryGroup'>
         <h4>other articles</h4>
         <ul>
-          {['Health', 'Pets Treats', 'vet', 'Toys'].map((category) => (
+          {['Cat', 'Dog', 'Puppy', 'Pets'].map((category) => (
             <li className='categoryGroup-item' key={category}>
               <a href='#' onClick={() => fetchNewsByCategory(category)}>
                 {category}
