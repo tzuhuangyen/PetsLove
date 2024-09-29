@@ -43,11 +43,7 @@ const BlogMemes = () => {
   };
 
   // Function to load next page of memes
-  const loadNextPage = () => {
-    const nextPage = page + 1;
-    setPage(nextPage);
-    fetchMemesByKeyword(null, nextPage);
-  };
+
   return (
     <>
       {' '}
@@ -59,7 +55,7 @@ const BlogMemes = () => {
         >
           <InputGroup className='mb-3 mt-3'>
             <InputGroup.Text id='inputGroup-sizing-default'>
-              Search memes by keyword
+              Search animal memes by keyword
             </InputGroup.Text>
             <Form.Control
               aria-label='Default'
@@ -81,13 +77,13 @@ const BlogMemes = () => {
 
         <Row>
           {memes.map((meme) => (
-            <Col xs={12} md={6} key={meme.id}>
-              <Card className='mb-4'>
+            <Col xs={12} md={6} key={meme.id} className='mb-4'>
+              <Card className='w-100'>
                 <Card.Img
                   variant='top'
                   src={meme.url}
-                  type={meme.type}
                   alt='memes'
+                  className='rounded'
                 />
                 <Card.Body>
                   <Card.Text>{meme.description}</Card.Text>
@@ -96,7 +92,6 @@ const BlogMemes = () => {
             </Col>
           ))}
         </Row>
-        {hasMore && <Button onClick={loadNextPage}>Load More</Button>}
       </Container>
     </>
   );

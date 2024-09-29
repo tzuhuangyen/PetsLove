@@ -4,25 +4,19 @@ import axios from 'axios';
 import dogImg1 from '/images/blog1.jpg';
 import dogImg2 from '/images/blog2.jpg';
 import dogImg3 from '/images/blog3.jpg';
-import { FaSearch } from 'react-icons/fa';
-import { MdPets } from 'react-icons/md';
-import { PiFishLight } from 'react-icons/pi';
 
 import { Container, Row, Col, Button, Form } from 'react-bootstrap';
-import InputGroup from 'react-bootstrap/InputGroup';
-import { jokesApiKey } from '../../../config';
 import BlogIndexSidebar from './BlogIndexSidebar';
+import JokeSearch from './component/JokeSearch';
+
 function BlogArticles() {
   const { articleId } = useParams(); // 提取路由參數
   const [article, setArticle] = useState({}); // State for article
-  const [keyword, setKeyword] = useState('');
   const [jokes, setJokes] = useState([]);
-  const jokesAPIBASE_URL = 'https://api.humorapi.com';
-
   // 在組件加載時滾動到頂部
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+  // useEffect(() => {
+  //   window.scrollTo(0, 0);
+  // }, []);
 
   //get article data by ID
   const getArticleById = (id) => {
@@ -258,92 +252,13 @@ function BlogArticles() {
     window.scrollTo(0, 0); // Scroll to top on mount
   }, [articleId]); // Dependency array with articleId
 
-  // Set the clicked article to be displayed
-  const handleArticleClick = (item) => {
-    setSelectedArticle(item);
-  };
-  // Fetch jokes based on keyword
-  const fetchNewsByKeyword = async (event) => {
-    event.preventDefault();
-    try {
-      const url = `${jokesAPIBASE_URL}/jokes/search?number=3&keywords=${keyword}&include-tags=animal`;
-
-      const response = await axios.get(url, {
-        headers: {
-          'x-api-key': jokesApiKey,
-          'Content-Type': 'application/json',
-        },
-      });
-      const articles = response.data.jokes.slice(0, 3);
-      console.log('Jokes:', articles);
-      setJokes(articles);
-    } catch (error) {
-      console.error('Error fetching jokes:', error);
-    }
-  };
-  // helper function to truncate the summary text
-  const truncateSummary = (summary) => {
-    if (summary.length > 300) {
-      return summary.slice(0, 250) + '...'; // Append ellipsis if truncated
-    }
-    return summary;
-  };
-
   return (
     <>
       <Container fluid='md' className=' blogArticles'>
         <Row>
           <Col xs={12} md={9} className='mt-3'>
-            {/* display memes */}
-            <div>
-              <Form
-                onSubmit={fetchNewsByKeyword}
-                className=' d-flex align-items-center justify-content-center'
-              >
-                <Row className='w-100'>
-                  <Col
-                    xs={12}
-                    md={10}
-                    className='d-flex justify-content-center align-items-center'
-                  >
-                    <InputGroup className='mb-3 mt-3'>
-                      <InputGroup.Text id='inputGroup-sizing-default'>
-                        Search jokes by keyword
-                      </InputGroup.Text>
-                      <Form.Control
-                        aria-label='Default'
-                        aria-describedby='inputGroup-sizing-default'
-                        value={keyword}
-                        onChange={(e) => setKeyword(e.target.value)}
-                        className='flex-grow-1'
-                      />
-                    </InputGroup>
-                    <Button
-                      type='submit'
-                      className='p-2 d-flex align-items-center justify-content-center'
-                    >
-                      {' '}
-                      <FaSearch />
-                    </Button>
-                  </Col>
-                </Row>
-              </Form>
-              {/* api jokes display */}
-              <h3 className='mb-2'>Result of Related Jokes</h3>
-
-              {jokes.length > 0 ? (
-                jokes.map((item, index) => (
-                  <ul key={item.id} className='lh-base'>
-                    <PiFishLight />
-
-                    <li className='mb-2'>{item.joke}</li>
-                    <MdPets />
-                  </ul>
-                ))
-              ) : (
-                <p>Not laugh today yet? search jokes now </p>
-              )}
-            </div>
+            {/* fetch search jokes */}
+            <JokeSearch setJokes={setJokes} />
             {/* display articles */}
             <h1 className='mt-4 mb-4'>{article.title}</h1>
             <div dangerouslySetInnerHTML={{ __html: article.content }} />

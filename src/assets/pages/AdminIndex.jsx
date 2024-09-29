@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, useLocation, Link } from 'react-router-dom';
 import { Container, Nav, Row, Col } from 'react-bootstrap';
-
+import AdminAnalysis from './AdminAnalysis';
 function AdminIndex() {
   const [isLoading, setIsLoading] = useState(false);
 

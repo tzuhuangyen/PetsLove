@@ -69,6 +69,7 @@ function App() {
                 path='/blog/articles/:articleId'
                 element={<BlogArticles />}
               ></Route>
+              {/* admin */}
               <Route path='/admin' element={<AdminIndex />}>
                 <Route
                   path='/admin/products'
@@ -88,6 +89,7 @@ function App() {
                 path='/admin/products/updatedProduct'
                 element={<AdminProductUpdate />}
               ></Route>
+              <Route path='/admin/analysis' element={<AdminAnalysis />}></Route>
             </Routes>
           </CartProvider>
         </UserProvider>
