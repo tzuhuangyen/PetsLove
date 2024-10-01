@@ -39,60 +39,53 @@ function App() {
   return (
     <>
       <AuthProvider>
-        <UserProvider value={{ username, setUsername }}>
-          <CartProvider>
-            <Header />
-            <Routes>
-              <Route exact path='/' element={<Index />} />
-              {/* shop */}
-              <Route path='/shop' element={<Shop />} />
+        <CartProvider>
+          <Header />
+          <Routes>
+            <Route exact path='/' element={<Index />} />
+            {/* shop */}
+            <Route path='/shop' element={<Shop />} />
+            <Route
+              path='/shop/product/:productId'
+              element={<ProductDetail />}
+            />
+            {/* user */}
+
+            <Route path='/users/signup' element={<SignUp />} />
+            <Route path='/users/login' element={<Login />} />
+            <Route path='/users/forgotPsw' element={<ForgotPsw />} />
+            <Route path='/users/resetPsw' element={<ResetPsw />} />
+            <Route path='/users/member' element={<MemberIndex />}>
+              <Route index element={<MemberProfile />} />
+              <Route path='myProfile' element={<MemberProfile />} />
+              <Route path='myOrders' element={<MemberOrders />} />
+              <Route path='myWishlist' element={<MemberWishlist />} />
+              <Route path='/users/member/*' element={<PaymentRoutes />} />
+            </Route>
+            {/* <Route path="/favorite" element={<Favorite />} /> */}
+            {/* Blog */}
+            <Route path='/blog' element={<BlogIndex />}></Route>
+            <Route
+              path='/blog/articles/:articleId'
+              element={<BlogArticles />}
+            ></Route>
+            {/* admin */}
+            <Route path='/admin' element={<AdminIndex />}>
+              <Route path='/admin/products' element={<AdminProducts />}></Route>
               <Route
-                path='/shop/product/:productId'
-                element={<ProductDetail />}
-              />
-              {/* user */}
-              <Route path='/users/signup' element={<SignUp />} />
-              <Route path='/users/login' element={<Login />} />
-              <Route path='/users/forgotPsw' element={<ForgotPsw />} />
-              <Route path='/users/resetPsw' element={<ResetPsw />} />
-              <Route path='/users/member' element={<MemberIndex />}>
-                <Route index element={<MemberProfile />} />
-                <Route path='myProfile' element={<MemberProfile />} />
-                <Route path='myOrders' element={<MemberOrders />} />
-                <Route path='myWishlist' element={<MemberWishlist />} />
-                <Route path='/users/member/*' element={<PaymentRoutes />} />
-              </Route>
-              {/* <Route path="/favorite" element={<Favorite />} /> */}
-              {/* Blog */}
-              <Route path='/blog' element={<BlogIndex />}></Route>
-              <Route
-                path='/blog/articles/:articleId'
-                element={<BlogArticles />}
+                path='/admin/products/uploadProduct'
+                element={<AdminProductUpload />}
               ></Route>
-              {/* admin */}
-              <Route path='/admin' element={<AdminIndex />}>
-                <Route
-                  path='/admin/products'
-                  element={<AdminProducts />}
-                ></Route>
-                <Route
-                  path='/admin/products/uploadProduct'
-                  element={<AdminProductUpload />}
-                ></Route>
-                <Route path='/admin/orders' element={<AdminOrders />}></Route>
-                <Route
-                  path='/admin/analysis'
-                  element={<AdminAnalysis />}
-                ></Route>
-              </Route>
-              <Route
-                path='/admin/products/updatedProduct'
-                element={<AdminProductUpdate />}
-              ></Route>
+              <Route path='/admin/orders' element={<AdminOrders />}></Route>
               <Route path='/admin/analysis' element={<AdminAnalysis />}></Route>
-            </Routes>
-          </CartProvider>
-        </UserProvider>
+            </Route>
+            <Route
+              path='/admin/products/updatedProduct'
+              element={<AdminProductUpdate />}
+            ></Route>
+            <Route path='/admin/analysis' element={<AdminAnalysis />}></Route>
+          </Routes>
+        </CartProvider>
       </AuthProvider>
       <Footer />
     </>

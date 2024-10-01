@@ -54,7 +54,7 @@ export const showSignUpErrorAlert = (username) => {
     text: "Let's go to Login",
     icon: 'info',
     html: `
-    <a href=PetsLove/users/login" style="color:white; text-decoration:none; display:inline-block; padding:10px 20px; background-color:#3085d6; border-radius:5px;">Login</a>
+    <a href=PetsLove/users/login style="color:white; text-decoration:none; display:inline-block; padding:10px 20px; background-color:#3085d6; border-radius:5px;">Login</a>
   `,
 
     footer: `

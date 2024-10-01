@@ -22,7 +22,7 @@ import Container from 'react-bootstrap/Container';
 import Loading from './component/Loading';
 // import { CartContext } from './Context/CartContext.jsx';
 import { CartContext } from './Context/CartContext.jsx';
-import { userAuth } from './Context/AuthContext.jsx';
+import { useAuth } from './Context/AuthContext.jsx';
 
 //Debounce function
 function debounce(func, wait) {
@@ -55,7 +55,7 @@ const Shop = () => {
   const [addItemToCart, setAddItemToCart] = useState([]);
   const token = localStorage.getItem('token');
   const { cartItems, setCartItems } = useContext(CartContext);
-  const { authState } = userAuth();
+  const { authState } = useAuth();
 
   // 同步購物車函數 get user All db CartItems
   // const fetchUserCartFromServer = async (token) => {

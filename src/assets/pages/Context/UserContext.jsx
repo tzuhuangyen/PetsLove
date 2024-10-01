@@ -3,8 +3,10 @@ import React, { useState, createContext, useContext } from 'react';
 export const UserContext = createContext({});
 
 export const UserProvider = ({ children }) => {
-  const [username, setUsername] = useState(null);
-  console.log('UserProvider value:', { username, setUsername });
+  const [username, setUsername] = useState({
+    name: 'User',
+    profilePicture: 'user.jpg',
+  });
 
   return (
     <UserContext.Provider value={{ username, setUsername }}>
@@ -12,3 +14,6 @@ export const UserProvider = ({ children }) => {
     </UserContext.Provider>
   );
 };
+export function useUserContext() {
+  return useContext(UserContext);
+}

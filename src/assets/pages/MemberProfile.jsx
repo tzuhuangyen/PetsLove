@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Col } from 'react-bootstrap';
 import { backendUrl } from '../../../config';
 import DeleteAccount from '../pages/component/DeleteAccount';
 import { showUpdatePswAlert, showUpdatePswErrorAlert } from '../../swal';
+import { useAuth } from '../pages/Context/AuthContext';
 //change user's information, delete account, log out,
 function MemberProfile() {
   //input oldPsw
@@ -19,6 +20,8 @@ function MemberProfile() {
   const [userId, setUserId] = useState(null); // 在组件中定义状态来存储用户ID
   const navigate = useNavigate();
   const [error, setError] = useState('');
+  const { authState } = useAuth();
+  const username = authState.username;
   //用于从令牌中解析出用户ID：
   // useEffect(() => {
   //   const token = localStorage.getItem('token');
@@ -164,80 +167,80 @@ function MemberProfile() {
 
   return (
     <>
-      <Col md={9}>
-        {' '}
-        <h2 className=' mb-4'>User Profile</h2>
-        <section className='mb-5 mt-5'>
-          <div className='p-4' style={{ backgroundColor: '#faf0fd' }}>
-            <h3 className=' mb-4'>Change Password</h3>
-            <form
-              id='form'
-              onSubmit={handleSubmit}
-              className='display-flex flex-column'
-            >
-              <div>
-                {error && (
-                  <div style={{ color: 'red', marginBottom: '10px' }}>
-                    {error}
-                  </div>
-                )}
+      {' '}
+      <h2 className=' mb-4'>User Profile</h2>
+      <p>{username ? `Hello, ${username}` : 'Loading...'}</p>
+      <div id='welcome-message'></div>
+      <section className='mb-5 mt-5'>
+        <div className='p-4' style={{ backgroundColor: '#faf0fd' }}>
+          <h3 className=' mb-4'>Change Password</h3>
+          <form
+            id='form'
+            onSubmit={handleSubmit}
+            className='display-flex flex-column'
+          >
+            <div>
+              {error && (
+                <div style={{ color: 'red', marginBottom: '10px' }}>
+                  {error}
+                </div>
+              )}
 
-                <label className='form-label' htmlFor='password'>
-                  Enter old password
-                </label>
-                <input
-                  className='form-control'
-                  type='password'
-                  name='password'
-                  value={oldPassword}
-                  onChange={(e) => setOldPassword(e.target.value)}
-                  required
-                />
-                <label className='form-label' htmlFor='newPassword'>
-                  Enter new password
-                </label>
-                <input
-                  className='form-control'
-                  id='newPassword'
-                  type='password'
-                  value={newPassword} // 将密码与 state 中的 password 变量绑定
-                  onChange={handleNewPasswordChange}
-                  required
-                />
-                {newPasswordError && (
-                  <div style={{ color: 'red', marginBottom: '10px' }}>
-                    {newPasswordError}
-                  </div>
-                )}
-                <label className='form-label' htmlFor='confirmNewPassword'>
-                  confirm new password
-                </label>
-                <input
-                  className='form-control'
-                  id='confirmNewPassword'
-                  type='password'
-                  value={confirmNewPassword} // This should be confirmNewPassword, not handleConfirmPasswordChange
-                  onChange={handleConfirmNewPasswordChange} // Use the correct handler here
-                  required
-                />
-                {confirmNewPasswordError && (
-                  <div style={{ color: 'red', marginBottom: '10px' }}>
-                    {confirmNewPasswordError}
-                  </div>
-                )}
-              </div>
+              <label className='form-label' htmlFor='password'>
+                Enter old password
+              </label>
+              <input
+                className='form-control'
+                type='password'
+                name='password'
+                value={oldPassword}
+                onChange={(e) => setOldPassword(e.target.value)}
+                required
+              />
+              <label className='form-label' htmlFor='newPassword'>
+                Enter new password
+              </label>
+              <input
+                className='form-control'
+                id='newPassword'
+                type='password'
+                value={newPassword} // 将密码与 state 中的 password 变量绑定
+                onChange={handleNewPasswordChange}
+                required
+              />
+              {newPasswordError && (
+                <div style={{ color: 'red', marginBottom: '10px' }}>
+                  {newPasswordError}
+                </div>
+              )}
+              <label className='form-label' htmlFor='confirmNewPassword'>
+                confirm new password
+              </label>
+              <input
+                className='form-control'
+                id='confirmNewPassword'
+                type='password'
+                value={confirmNewPassword} // This should be confirmNewPassword, not handleConfirmPasswordChange
+                onChange={handleConfirmNewPasswordChange} // Use the correct handler here
+                required
+              />
+              {confirmNewPasswordError && (
+                <div style={{ color: 'red', marginBottom: '10px' }}>
+                  {confirmNewPasswordError}
+                </div>
+              )}
+            </div>
 
-              <button className='mt-4 me-4' type='button'>
-                CANCEL
-              </button>
-              <button className='mt-4' type='submit'>
-                Update Password
-              </button>
-            </form>
-          </div>
-        </section>
-        <DeleteAccount />
-      </Col>
+            <button className='mt-4 me-4' type='button'>
+              CANCEL
+            </button>
+            <button className='mt-4' type='submit'>
+              Update Password
+            </button>
+          </form>
+        </div>
+      </section>
+      <DeleteAccount />
     </>
   );
 }

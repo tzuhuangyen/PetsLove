@@ -3,10 +3,10 @@
 import { Link } from 'react-router-dom';
 import { ListGroup } from 'react-bootstrap';
 import React from 'react';
-import { userAuth } from '../Context/AuthContext';
+import { useAuth } from '../Context/AuthContext';
 
 const Logout = () => {
-  const { authState, logout } = userAuth();
+  const { authState, logout } = useAuth();
   console.log('anyone log in:', authState.isAuthenticated);
   //logout from db base
 

@@ -20,22 +20,23 @@ import { LiaBookSolid } from 'react-icons/lia';
 import { BsTrash, BsHeart } from 'react-icons/bs';
 
 import { CartContext } from '../Context/CartContext.jsx';
-import { AuthContext } from '../Context/AuthContext.jsx';
-import { userAuth } from '../Context/AuthContext.jsx';
+// import { AuthContext } from '../Context/AuthContext.jsx';
+import { useAuth } from '../Context/AuthContext.jsx';
 // import Cart from './Cart.jsx';
-import { UserContext } from '../Context/UserContext.jsx';
 
 function Header() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   let hideDropdownTimeout;
-  const contextValue = useContext(AuthContext);
-  console.log(contextValue); // Check what you're getting here
+
   //localstorage cart
   const { cartItems, setCartItems } = useContext(CartContext);
   console.log('Cart Items:', cartItems);
 
-  const { authState } = useContext(AuthContext);
-  console.log('anyone log in:', authState.isAuthenticated);
+  const { authState } = useAuth();
+  if (!authState) {
+    console.error('authState is undefined'); // 可以加个调试信息
+  }
+  console.log('anyone log in:', authState?.isAuthenticated);
 
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem('cartItems')) || [];
@@ -218,12 +219,15 @@ function Header() {
                   className='nav-link'
                   eventKey={2}
                   as={Link}
+                  onClick={() =>
+                    console.log('Navigating to My Profile', authState)
+                  } // Debug line
                 >
                   <CiUser className='nav-login-btn icon' />
                 </Nav.Link>
               ) : (
                 <Nav.Link
-                  to='/users/login '
+                  to='/users/login'
                   className='nav-link'
                   eventKey={2}
                   as={Link}
