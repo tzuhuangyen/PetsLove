@@ -19,7 +19,7 @@ import { RiAdminLine } from 'react-icons/ri';
 import { LiaBookSolid } from 'react-icons/lia';
 import { BsTrash, BsHeart } from 'react-icons/bs';
 
-import { CartContext } from '../Context/CartContext.jsx';
+import { useCart } from '../Context/CartContext.jsx';
 // import { AuthContext } from '../Context/AuthContext.jsx';
 import { useAuth } from '../Context/AuthContext.jsx';
 // import Cart from './Cart.jsx';
@@ -29,8 +29,7 @@ function Header() {
   let hideDropdownTimeout;
 
   //localstorage cart
-  const { cartItems, setCartItems } = useContext(CartContext);
-  console.log('Cart Items:', cartItems);
+  const { cartItems, setCartItems } = useCart();
 
   const { authState } = useAuth();
   if (!authState) {
@@ -65,7 +64,7 @@ function Header() {
     );
     setCartItems(updateQtyCart);
     console.log(
-      'Local storage cart items:',
+      'handle Local storage cart items QtyChange:',
       JSON.parse(localStorage.getItem('cartItems'))
     );
   };
@@ -139,7 +138,10 @@ function Header() {
                   <div className='nav-cart-count'>
                     {Array.isArray(cartItems)
                       ? cartItems.reduce((total, item) => {
-                          console.log('Item quantity:', item.quantity);
+                          console.log(
+                            'Item quantity show in the header:',
+                            item.quantity
+                          );
                           return total + item.quantity;
                         }, 0)
                       : 0}

@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom'; // 假設你使用了 React Router
 import { FaEye } from 'react-icons/fa';
 import { PiEyeClosedBold } from 'react-icons/pi';
 import { useAuth } from '../pages/Context/AuthContext';
-import { CartContext } from '../pages/Context/CartContext';
+import { useCart } from '../pages/Context/CartContext';
 
 import {
   showLoginAlert,
@@ -54,7 +54,7 @@ function Login() {
   const passwordInputRef = useRef(null);
   const { login, authState } = useAuth();
   const [error, setError] = useState('');
-  const { cartItems, setCartItems } = useContext(CartContext);
+  const { cartItems, setCartItems } = useCart();
 
   // useEffect(() => {
   //   console.log('authState.isAuthenticated:', authState.isAuthenticated);
@@ -111,39 +111,6 @@ function Login() {
   //     console.log('Server cart created successfully:', response.data);
   //   } catch (error) {
   //     console.error('Error updating cart on server:', error);
-  //   }
-  // };
-  //合并购物车数据
-  // const mergeCarts = (serverCart, localCart) => {
-  //   const mergedCart = new Map();
-  //   // 合并服务器购物车
-  //   serverCart.items.forEach((item) => {
-  //     mergedCart.set(item.productId.toString(), item);
-  //   });
-  //   // 合并本地购物车
-  //   localCart.forEach((item) => {
-  //     if (mergedCart.has(item.productId.toString())) {
-  //       const existingItem = mergedCart.get(item.productId.toString());
-  //       existingItem.quantity += item.quantity;
-  //     } else {
-  //       mergedCart.set(item.productId.toString(), { ...item });
-  //     }
-  //   });
-  //   return Array.from(mergedCart.values());
-  // };
-  //更新服务器上的购物车
-  // const updateServerCart = async (token, cartItems) => {
-  //   try {
-  //     const response = await axios.put(
-  //       `${backendUrl}/api/users/member/cart`,
-  //       { userId: authState.userId, items: cartItems },
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       }
-  //     );
-  //     console.log('Server cart updated successfully.', response.data);
-  //   } catch (error) {
-  //     console.error('Error updating server cart:', error);
   //   }
   // };
 

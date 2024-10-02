@@ -1,11 +1,11 @@
 //product page's cart component
 import React from 'react';
-import { useContext } from 'react';
-import { CartContext } from '../Context/CartContext';
+
+import { useCart } from '../Context/CartContext';
 
 function Cart() {
-  const { cartItems, setCartItems } = useContext(CartContext);
-  const { state, dispatch } = useContext(CartContext);
+  const { cartItems, setCartItems } = useCart();
+  const { state, dispatch } = useCart();
   // Check if state and state.cartItems are defined before accessing
 
   return (

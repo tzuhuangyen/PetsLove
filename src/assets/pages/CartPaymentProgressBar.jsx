@@ -35,7 +35,7 @@ import {
 import { backendUrl } from '../../../config.js';
 import { useProgress } from './Context/ProgressContext';
 import Confetti from 'react-confetti';
-import { CartContext } from './Context/CartContext.jsx';
+import { useCart } from './Context/CartContext.jsx';
 import { useAuth } from './Context/AuthContext.jsx';
 import EditAdd from './component/EditAdd';
 //訂單付款進度條
@@ -78,7 +78,7 @@ export const MemberCart = () => {
   const { handleNextStep } = useProgress();
   const navigate = useNavigate();
   //display localstorage cart items
-  const { cartItems = [], setCartItems } = useContext(CartContext); // Use cart context
+  const { cartItems = [], setCartItems } = useCar(); // Use cart context
   const { authState, token } = useAuth();
   const steps = ['Cart', 'Order Summary', 'Payment', 'Finalization'];
   const currentStep = 0;
