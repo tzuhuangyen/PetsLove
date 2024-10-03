@@ -1,17 +1,11 @@
 import axios from 'axios';
-import React, {
-  useState,
-  useRef,
-  forwardRef,
-  useEffect,
-  useContext,
-} from 'react';
+import React, { useState, useRef, forwardRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom'; // 假設你使用了 React Router
 import { FaEye } from 'react-icons/fa';
 import { PiEyeClosedBold } from 'react-icons/pi';
 import { useAuth } from '../pages/Context/AuthContext';
-import { useCart } from '../pages/Context/CartContext';
+import { useCart } from './Context/CartContext.jsx';
 
 import {
   showLoginAlert,
@@ -56,78 +50,22 @@ function Login() {
   const [error, setError] = useState('');
   const { cartItems, setCartItems } = useCart();
 
-  // useEffect(() => {
-  //   console.log('authState.isAuthenticated:', authState.isAuthenticated);
-  //   console.log('cartItems:', cartItems);
-  //   console.log('token:', token);
-  //   // 1.用户登录后获取服务器上的购物车：
-
-  // }, [authState.isAuthenticated, cartItems, token]);
-  // const syncUserCartWithServer = async () => {
-  //   const token = localStorage.getItem('token');
-  //   if (!token) {
-  //     console.warn('User not authenticated.');
-  //     return;
-  //   }
-  //   const localCart = JSON.parse(localStorage.getItem('cartItems')) || [];
-  //   console.log('Local cart:', localCart);
-  //   let serverCart = await fetchUserCartFromServer(token);
-  //   console.log('Server cart:', serverCart);
-
-  //   if (!serverCart) {
-  //     await createServerCart(token, localCart);
-  //     serverCart = await fetchUserCartFromServer(token);
-  //   }
-
-  //   const mergedCart = mergeCarts(serverCart, localCart);
-  //   await updateServerCart(token, mergedCart);
-  //   setCartItems(mergedCart);
-  //   console.log('Merged cart:', mergedCart);
-  // };
-
-  // 1.用户登录后获取服务器上的购物车：
-  // const fetchUserCartFromServer = async (token) => {
-  //   try {
-  //     const response = await axios.get(`${backendUrl}/api/users/member/cart`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     });
-  //     return response.data; // 返回服务器上的购物车数据
-  //   } catch (error) {
-  //     console.error('Error fetching user cart from server:', error);
-  //     return null; // Return an empty array in case of error
-  //   }
-  // };
-  // 1-2如果用户没有购物车记录，则返回创建一个新的购物车。
-  // const createServerCart = async (token, cartItems) => {
-  //   try {
-  //     const response = await axios.post(
-  //       `${backendUrl}/api/users/member/cart`,
-  //       { userId: authState.userId, items: cartItems },
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       }
-  //     );
-  //     return response.data; // 返回创建的新购物车数据
-  //     console.log('Server cart created successfully:', response.data);
-  //   } catch (error) {
-  //     console.error('Error updating cart on server:', error);
-  //   }
-  // };
-
   const onSubmit = async (data) => {
     console.log('Submitting form with from data:', data);
     try {
       await login(data); // Wait for the login to complete
       console.log('Login successful data:', data);
+      showLoginAlert();
     } catch (error) {
       setError('Login failed, please check your credentials.');
+      showLoginErrorAlert();
       console.error(
         'Login failed:',
         error.response ? error.response.data : error.message
       );
     }
   };
-  // Simplified toggleVisibility function
+  //  toggleVisibility function
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
     passwordInputRef.current.focus(); // 切换后重新聚焦到密码输入框

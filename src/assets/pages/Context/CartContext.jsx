@@ -6,7 +6,7 @@ import { useLocalStorage } from '../useLocalStorage';
 export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useLocalStorage('cartItems', []);
+  const [cartItems, setCartItems] = useState([]);
   //use localstorage to store Favorites items
   const [favorites, setFavorites] = useState(() => {
     const storedFavorites = localStorage.getItem('favorites');
@@ -18,6 +18,9 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem('favorites', JSON.stringify(favorites));
   }, [favorites]);
 
+  useEffect(() => {
+    console.log('Updated cartItems:', cartItems);
+  }, [cartItems]);
   // const toggleFavorite = (productId) => {
   //   const updatedFavorites = [...favorites];
   //   const index = updatedFavorites.indexOf(productId);

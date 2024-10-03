@@ -44,15 +44,14 @@ const SignUp = () => {
   //取出表單內的資料並送至數據庫
   const handleSignUp = async (formData) => {
     try {
+      console.log('Form Data to submit:', formData);
       const response = await axios.post(
         `${backendUrl}/api/users/signup`,
         formData
       );
-      console.log('Form Data to submit:', formData);
-      // console.log('Username:', formData.username);
-      console.log('User token created:', response.data);
+      console.log('Signup successful:', response.data);
       showSignUpAlert(formData.username);
-
+      // 延时跳转到登录页面
       setTimeout(() => {
         navigate('/users/login');
       }, 500);

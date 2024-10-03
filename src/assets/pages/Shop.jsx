@@ -5,13 +5,7 @@ import {
   showRemoveFromCartAlert,
   showConfirmationAlert,
 } from '../../swal.js';
-import React, {
-  useState,
-  useEffect,
-  useReducer,
-  useRef,
-  useContext,
-} from 'react';
+import React, { useState, useEffect, useReducer, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Container from 'react-bootstrap/Container';
 
@@ -41,7 +35,7 @@ const Shop = () => {
 
   //共用購物車狀態
   const [addItemToCart, setAddItemToCart] = useState([]);
-  const token = localStorage.getItem('token');
+
   const { cartItems, setCartItems } = useCart();
   const { authState } = useAuth();
 

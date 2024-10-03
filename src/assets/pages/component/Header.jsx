@@ -1,5 +1,5 @@
 import { backendUrl } from '../../../../config.js';
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import Logo from '/images/Logo.png';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
@@ -20,9 +20,7 @@ import { LiaBookSolid } from 'react-icons/lia';
 import { BsTrash, BsHeart } from 'react-icons/bs';
 
 import { useCart } from '../Context/CartContext.jsx';
-// import { AuthContext } from '../Context/AuthContext.jsx';
 import { useAuth } from '../Context/AuthContext.jsx';
-// import Cart from './Cart.jsx';
 
 function Header() {
   const [dropdownOpen, setDropdownOpen] = useState(false);

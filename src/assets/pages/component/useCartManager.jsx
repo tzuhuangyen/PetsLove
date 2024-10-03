@@ -1,14 +1,17 @@
+import React from 'react';
+console.log('React version:', React.version);
+
 import { backendUrl } from '../../../../config.js';
 import axios from 'axios';
 import { useCart } from '../Context/CartContext.jsx';
 import { useAuth } from '../Context/AuthContext.jsx';
 import { showAddToCartAlert } from '../../../swal.js';
-// CartManager 作為一個 React 組件
-const CartManager = () => {
-  const { setCartItems } = useCart();
-  const { token, authState } = useAuth();
 
-  // 將之前的功能搬進來
+export const useCartManager = () => {
+  const { cartItem, setCartItems } = useCart();
+  const { authState } = useAuth();
+  const token = authState.token;
+
   const addItemToLocalstorage = (item) => {
     const localstorageCart =
       JSON.parse(localStorage.getItem('cartItems')) || [];
@@ -18,6 +21,7 @@ const CartManager = () => {
 
     if (existingItem) {
       existingItem.quantity = (existingItem.quantity || 0) + 1;
+      console.log('Item quantity updated in localstorage:', existingItem);
     } else {
       localstorageCart.push({ ...item, quantity: 1 });
       console.log('Item being added in localstorage:', item);
@@ -25,16 +29,28 @@ const CartManager = () => {
     }
 
     localStorage.setItem('cartItems', JSON.stringify(localstorageCart));
-    setCartItems(localstorageCart);
+    setCartItems([...localstorageCart]);
+    console.log('Updated cart items in localstorage:', localstorageCart);
+
     showAddToCartAlert(item.productName);
   };
 
   const addItemToServerCart = async (item) => {
+    console.log('Request body:', {
+      items: [
+        {
+          productId: item._id,
+          productName: item.productName,
+          quantity: item.quantity || 1,
+          price: item.price,
+          image: item.image,
+        },
+      ],
+    });
     if (!token) return;
-    console.log('Token:', token); // 检查 token 是否有效
     if (!item._id || !item.productName || !item.price) {
       console.error('Invalid item data:', item);
-      return;
+      return null;
     }
     try {
       const response = await axios.post(
@@ -52,51 +68,93 @@ const CartManager = () => {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      console.log('Added item to server cart full response:', response);
       console.log('Added item to server cart:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Error adding item to server cart:', error);
+      console.error('Error adding item to server cart:', error.response);
+      return null;
     }
   };
 
   const fetchUserCartFromServer = async () => {
     try {
+      console.log('Fetching cart with token:', token);
+
       const response = await axios.get(`${backendUrl}/api/users/member/cart`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const dataCartItems = response.data.cart?.items || [];
-      return dataCartItems;
+      if (
+        response.status === 200 &&
+        (!response.data.cart || response.data.cart.items.length === 0)
+      ) {
+        console.log('User does not have a cart yet.');
+        return []; // 返回一個空的購物車陣列
+      }
+      console.log('Cart data:', response.data);
+      return response.data;
     } catch (error) {
-      console.error('Error fetching user cart from server:', error);
-      return [];
+      if (error.response) {
+        // 伺服器返回的錯誤
+        if (error.response.status === 404) {
+          console.log('404, No cart found for this user.');
+          return await createServerCart([]); // 返回空的購物車陣列
+        }
+        console.error(
+          'Error fetching user cart from server:',
+          error.response.data
+        );
+      } else {
+        console.error('Error fetching user cart from server:', error.message);
+      }
+      return null;
+    }
+  };
+
+  // 1-2如果用户没有购物车记录，则返回创建一个新的购物车。
+  const createServerCart = async (cartItems) => {
+    try {
+      const response = await axios.post(
+        `${backendUrl}/api/users/member/cart`,
+        { items: cartItems },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      console.log('Server cart created successfully:', response.data);
+      return response.data; // 返回创建的新购物车数据
+    } catch (error) {
+      console.error('Error updating cart on server:', error);
     }
   };
 
   const mergeCarts = (serverCart, localCart) => {
-    const mergedCart = new Map();
-    serverCart.items.forEach((item) => {
-      mergedCart.set(item.productId.toString(), item);
-    });
-    localCart.forEach((item) => {
-      if (mergedCart.has(item.productId.toString())) {
-        const existingItem = mergedCart.get(item.productId.toString());
-        existingItem.quantity += item.quantity;
-      } else {
-        mergedCart.set(item.productId.toString(), { ...item });
+    const mergedCart = [...serverCart]; // 假设服务器购物车数据结构正确
+    localCart.forEach((localItem) => {
+      if (
+        !serverCart.find(
+          (serverItem) => serverItem.productId === localItem.productId
+        )
+      ) {
+        mergedCart.push(localItem); // 将本地购物车中没有的商品添加到服务器购物车
       }
     });
-    return Array.from(mergedCart.values());
+    return mergedCart;
   };
 
   const syncUserCartWithServer = async () => {
     if (authState.isAuthenticated && token) {
       try {
         const localCart = JSON.parse(localStorage.getItem('cartItems')) || [];
-        const serverCart = await fetchUserCartFromServer();
+        let serverCart = await fetchUserCartFromServer();
+        if (!serverCart || serverCart.length === 0) {
+          await createServerCart(localCart);
+          serverCart = await fetchUserCartFromServer();
+        }
 
         const mergedCart = mergeCarts(serverCart, localCart);
-        setCartItems(mergedCart);
         await updateServerCart(mergedCart);
+        setCartItems(mergedCart);
         localStorage.removeItem('cartItems'); // 清空本地存儲
       } catch (error) {
         console.error('Error syncing user cart with server:', error);
@@ -128,9 +186,4 @@ const CartManager = () => {
     syncUserCartWithServer,
     mergeCarts,
   };
-};
-
-export const useCartManager = () => {
-  const cartManager = CartManager();
-  return cartManager;
 };

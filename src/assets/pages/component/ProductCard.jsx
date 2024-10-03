@@ -1,30 +1,45 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { backendUrl } from '../../../../config.js';
 import { Link } from 'react-router-dom';
 import { CiShoppingCart } from 'react-icons/ci';
 import { IoMdHeart, IoMdHeartEmpty } from 'react-icons/io';
-
-import { useCartManager } from '../../pages/component/CartManager.jsx';
 import { useAuth } from '../Context/AuthContext.jsx';
 import { useCart } from '../Context/CartContext.jsx';
+import { useCartManager } from '../component/useCartManager';
+
 //component create products card
 export default function ProductCard({ productTypes }) {
   //toggleFavorite function
-  const { toggleFavorite, favorites, setCartItems } = useCart();
+  const { toggleFavorite, favorites, cartItems, setCartItems } = useCart();
   const { authState } = useAuth();
-  const { addItemToLocalstorage, addItemToServerCart } = useCartManager();
+  const { addItemToLocalstorage } = useCartManager();
+  const { addItemToServerCart } = useCartManager();
+  useEffect(() => {
+    console.log('Updated cartItems:', cartItems); // 每次 cartItems 更新时触发
+  }, [cartItems]);
 
   //user not login's localstorage cart
   const handleAddToCart = async (item) => {
+    console.log('Item to add:', item); // 確認輸入
     if (!authState.isAuthenticated) {
       // 用戶未登入，添加到本地存儲
-      addItemToLocalstorage(item, setCartItems);
+      addItemToLocalstorage(item);
+      console.log('Current cart items in state:', item);
     } else {
-      // 用戶已登入，添加到伺服器
       try {
-        await addItemToServerCart(item);
+        console.log('User authenticated, adding to server cart...');
+
+        const response = await addItemToServerCart(item);
+        if (response) {
+          console.log('Server cart response:', response);
+        } else {
+          console.log('No response from server cart'); // 如果 response 為 null
+        }
       } catch (error) {
-        console.error('Error adding item to server cart:', error);
+        console.error(
+          'Error adding item to server cart:',
+          error.response ? error.response.data : error.message
+        );
       }
     }
   };

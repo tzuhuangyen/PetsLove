@@ -1,5 +1,5 @@
 import React from 'react';
-import { useCart } from '../../pages/Context/CartContext.jsx';
+import { useCart } from '../../pages/Context/CartContext';
 import { MdFavoriteBorder } from 'react-icons/md';
 
 const FilterFavorites = ({ setProductTypes, initData }) => {

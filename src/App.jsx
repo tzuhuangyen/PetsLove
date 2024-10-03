@@ -4,7 +4,6 @@ import './assets/all.scss';
 import React, { useReducer, useState } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { AuthProvider } from './assets/pages/Context/AuthContext';
-import { CartProvider } from './assets/pages/Context/CartContext';
 import { UserProvider } from './assets/pages/Context/UserContext';
 
 // import Home from './assets/pages/Home';
@@ -32,10 +31,8 @@ import ResetPsw from './assets/pages/component/ResetPsw';
 import PaymentRoutes from './PaymentRoutes';
 import { MemberOrders } from './assets/pages/MemberOrders';
 import BlogIndex from './assets/pages/BlogIndex';
-
+import { CartProvider } from '/src/assets/pages/Context/CartContext';
 function App() {
-  const [username, setUsername] = useState('Yennefer');
-
   return (
     <>
       <AuthProvider>
