@@ -20,18 +20,22 @@ export default function ProductCard({ productTypes }) {
 
   //user not login's localstorage cart
   const handleAddToCart = async (item) => {
-    console.log('Item to add:', item); // 確認輸入
+    console.log('Item to add:', item);
+    if (!item._id || !item.productName || !item.price) {
+      console.error('Invalid item data:', item);
+      return;
+    }
     if (!authState.isAuthenticated) {
       // 用戶未登入，添加到本地存儲
       addItemToLocalstorage(item);
-      console.log('Current cart items in state:', item);
+      console.log('Item added to local storage:', item);
     } else {
       try {
         console.log('User authenticated, adding to server cart...');
 
         const response = await addItemToServerCart(item);
-        if (response) {
-          console.log('Server cart response:', response);
+        if (response && response.data) {
+          console.log('Added to Server cart:', response.data);
         } else {
           console.log('No response from server cart'); // 如果 response 為 null
         }

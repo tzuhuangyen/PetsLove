@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { backendUrl } from '../../../../config';
 import { useCartManager } from '../component/useCartManager';
+
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -12,6 +13,7 @@ export const AuthProvider = ({ children }) => {
     token: null,
     username: '',
   });
+  const { fetchUserCartFromServer, syncUserCartWithServer } = useCartManager();
 
   const login = async ({ username, password }) => {
     console.log('Login attempt with:', username, password);
@@ -38,8 +40,9 @@ export const AuthProvider = ({ children }) => {
       console.log('Token being used:', token);
       console.log('Navigating to myProfile');
       navigate('/users/member/myProfile');
-      const { fetchUserCartFromServer } = useCartManager();
-      await fetchUserCartFromServer();
+
+      //sync local cart to server
+      await syncUserCartWithServer(token, userId);
     } catch (error) {
       if (error.response) {
         console.error('Login error (response):', error.response.data);

@@ -30,6 +30,15 @@ export default defineConfig(({ mode }) => {
       // 指定 HTML 模板文件的路径
       // template: path.resolve(__dirname, 'client/index.html'),
     },
+    server: {
+      proxy: {
+        '/api': {
+          target: 'https://serverpetslove-update.onrender.com',
+          changeOrigin: true,
+          secure: false,
+        },
+      },
+    },
   };
 });
 // ViteReactPlugin()

@@ -47,6 +47,8 @@ export const useCartManager = () => {
         },
       ],
     });
+    console.log('Token sent to server:', token);
+
     if (!token) return;
     if (!item._id || !item.productName || !item.price) {
       console.error('Invalid item data:', item);
@@ -68,7 +70,6 @@ export const useCartManager = () => {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log('Added item to server cart full response:', response);
       console.log('Added item to server cart:', response.data);
       return response.data;
     } catch (error) {
@@ -92,7 +93,7 @@ export const useCartManager = () => {
         return []; // 返回一個空的購物車陣列
       }
       console.log('Cart data:', response.data);
-      return response.data;
+      return response.data.cart.items;
     } catch (error) {
       if (error.response) {
         // 伺服器返回的錯誤
@@ -174,6 +175,17 @@ export const useCartManager = () => {
       console.log('Server cart updated successfully.', response.data);
     } catch (error) {
       console.error('Error updating server cart:', error);
+      if (error.response) {
+        // 伺服器返回的錯誤
+        console.error('Server response:', error.response.data);
+        console.error('Error status:', error.response.status);
+      } else if (error.request) {
+        // 請求已發送但沒有收到回應
+        console.error('No response received:', error.request);
+      } else {
+        // 其他錯誤
+        console.error('Error message:', error.message);
+      }
     }
   };
 
