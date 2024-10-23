@@ -13,7 +13,6 @@ export const AuthProvider = ({ children }) => {
     token: null,
     username: '',
   });
-  const { fetchUserCartFromServer, syncUserCartWithServer } = useCartManager();
 
   const login = async ({ username, password }) => {
     console.log('Login attempt with:', username, password);
@@ -40,9 +39,6 @@ export const AuthProvider = ({ children }) => {
       console.log('Token being used:', token);
       console.log('Navigating to myProfile');
       navigate('/users/member/myProfile');
-
-      //sync local cart to server
-      await syncUserCartWithServer(token, userId);
     } catch (error) {
       if (error.response) {
         console.error('Login error (response):', error.response.data);
@@ -57,9 +53,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
-    localStorage.removeItem('Navigating to myProfile');
-    setAuthState(null);
-
+    setAuthState({ isAuthenticated: false, token: null, username: '' });
     navigate('/users/login');
   };
 

@@ -18,34 +18,19 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem('favorites', JSON.stringify(favorites));
   }, [favorites]);
 
-  useEffect(() => {
-    console.log('Updated cartItems:', cartItems);
-  }, [cartItems]);
-  // const toggleFavorite = (productId) => {
-  //   const updatedFavorites = [...favorites];
-  //   const index = updatedFavorites.indexOf(productId);
-
-  //   if (index !== -1) {
-  //     updatedFavorites.splice(index, 1);
-  //   } else {
-  //     updatedFavorites.push(productId);
-  //   }
-
-  //   setFavorites(updatedFavorites);
-  //   localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
-  // };
-
   const toggleFavorite = (productId) => {
     setFavorites((prevFavorites) => {
       const isFavorite = prevFavorites.includes(productId);
-      const updatedFavorites = isFavorite
+      return isFavorite
         ? prevFavorites.filter((id) => id !== productId)
         : [...prevFavorites, productId];
-
-      // 保存到 localStorage 由 useEffect 负责
-      return updatedFavorites;
     });
   };
+
+  useEffect(() => {
+    console.log('Updated cartItems:', cartItems);
+  }, [cartItems]);
+
   return (
     <CartContext.Provider
       value={{ cartItems, setCartItems, favorites, toggleFavorite }}

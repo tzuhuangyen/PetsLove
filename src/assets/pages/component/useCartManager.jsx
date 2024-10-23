@@ -1,15 +1,44 @@
 import React from 'react';
-console.log('React version:', React.version);
-
 import { backendUrl } from '../../../../config.js';
 import axios from 'axios';
 import { useCart } from '../Context/CartContext.jsx';
 import { useAuth } from '../Context/AuthContext.jsx';
 import { showAddToCartAlert } from '../../../swal.js';
+import { useCallback } from 'react';
+
+const updateServerCart = async (cartItems) => {
+  try {
+    const response = await axios.put(
+      `${backendUrl}/api/users/member/cart`,
+      { userId: authState.userId, items: cartItems },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    console.log('Server cart updated successfully.', response.data);
+  } catch (error) {
+    console.error('Error updating server cart:', error);
+    if (error.response) {
+      // 伺服器返回的錯誤
+      console.error('Server response:', error.response.data);
+      console.error('Error status:', error.response.status);
+    } else if (error.request) {
+      // 請求已發送但沒有收到回應
+      console.error('No response received:', error.request);
+    } else {
+      // 其他錯誤
+      console.error('Error message:', error.message);
+    }
+  }
+};
 
 export const useCartManager = () => {
-  const { cartItem, setCartItems } = useCart();
-  const { authState } = useAuth();
+  const { cartItem = [], setCartItems } = useCart() || {
+    cartItem: [],
+    setCartItems: () => {},
+  };
+  const { authState = { isAuthenticated: false } } = useAuth();
+
   const token = authState.token;
 
   const addItemToLocalstorage = (item) => {
@@ -92,7 +121,7 @@ export const useCartManager = () => {
         console.log('User does not have a cart yet.');
         return []; // 返回一個空的購物車陣列
       }
-      console.log('Cart data:', response.data);
+      console.log('fetch User Cart From Server:', response.data);
       return response.data.cart.items;
     } catch (error) {
       if (error.response) {
@@ -137,13 +166,19 @@ export const useCartManager = () => {
           (serverItem) => serverItem.productId === localItem.productId
         )
       ) {
+        const { productId, productName, quantity, price, image } = localItem;
+        if (!productId || !productName || !quantity || !price) {
+          console.error('Invalid item data:', localItem);
+          return; // 忽略無效項目
+        }
+
         mergedCart.push(localItem); // 将本地购物车中没有的商品添加到服务器购物车
       }
     });
     return mergedCart;
   };
 
-  const syncUserCartWithServer = async () => {
+  const syncUserCartWithServer = useCallback(async () => {
     if (authState.isAuthenticated && token) {
       try {
         const localCart = JSON.parse(localStorage.getItem('cartItems')) || [];
@@ -153,43 +188,26 @@ export const useCartManager = () => {
           serverCart = await fetchUserCartFromServer();
         }
 
-        const mergedCart = mergeCarts(serverCart, localCart);
-        await updateServerCart(mergedCart);
-        setCartItems(mergedCart);
-        localStorage.removeItem('cartItems'); // 清空本地存儲
+        if (JSON.stringify(localCart) !== JSON.stringify(serverCart)) {
+          const mergedCart = mergeCarts(serverCart, localCart);
+          await updateServerCart(mergedCart);
+          setCartItems(mergedCart);
+          localStorage.removeItem('cartItems'); // 清空本地存儲
+        } else {
+          console.log('Local cart is already in sync with server.');
+        }
       } catch (error) {
         console.error('Error syncing user cart with server:', error);
       }
     }
-  };
+  }, [
+    authState.isAuthenticated,
+    token,
+    fetchUserCartFromServer,
+    updateServerCart,
+    createServerCart,
+  ]);
 
-  const updateServerCart = async (cartItems) => {
-    try {
-      const response = await axios.put(
-        `${backendUrl}/api/users/member/cart`,
-        { userId: authState.userId, items: cartItems },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      console.log('Server cart updated successfully.', response.data);
-    } catch (error) {
-      console.error('Error updating server cart:', error);
-      if (error.response) {
-        // 伺服器返回的錯誤
-        console.error('Server response:', error.response.data);
-        console.error('Error status:', error.response.status);
-      } else if (error.request) {
-        // 請求已發送但沒有收到回應
-        console.error('No response received:', error.request);
-      } else {
-        // 其他錯誤
-        console.error('Error message:', error.message);
-      }
-    }
-  };
-
-  // 根據需要可以返回其他東西，或不返回
   return {
     updateServerCart,
     addItemToLocalstorage,
