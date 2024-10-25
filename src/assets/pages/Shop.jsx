@@ -1,19 +1,8 @@
 import { backendUrl } from '../../../config.js';
 import axios from 'axios';
-import {
-  showAddToCartAlert,
-  showRemoveFromCartAlert,
-  showConfirmationAlert,
-} from '../../swal.js';
-import React, { useState, useEffect, useReducer, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Container from 'react-bootstrap/Container';
-
-import { CiShoppingCart } from 'react-icons/ci';
-import { FaSearch } from 'react-icons/fa';
-import { LuBeef } from 'react-icons/lu';
-import { GiDuck, GiChickenOven } from 'react-icons/gi';
-import { IoMdHeart, IoMdHeartEmpty } from 'react-icons/io';
 import { Nav, Row, Col } from 'react-bootstrap';
 import { useCart } from './Context/CartContext.jsx';
 import { useAuth } from './Context/AuthContext.jsx';
@@ -33,15 +22,7 @@ const Shop = () => {
   const [isLoading, setIsLoading] = useState(false);
   const isLoadingRef = useRef(false);
 
-  //共用購物車狀態
-  const [addItemToCart, setAddItemToCart] = useState([]);
-
-  const { cartItems, setCartItems } = useCart();
-  const { authState } = useAuth();
-
   //get all products data
-
-  //取得產品
   useEffect(() => {
     const getAllData = async () => {
       setIsLoading(true);

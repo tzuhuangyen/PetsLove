@@ -66,11 +66,11 @@ export const showSignUpErrorAlert = (username) => {
 };
 
 //login
-export const showLoginAlert = (username) => {
+export const showLoginAlert = () => {
   Swal.fire({
     position: 'center',
     title: 'User logged in successfully',
-    text: `Welcome Back,${username}!`,
+    text: `Welcome Back!`,
     icon: 'success',
     showConfirmButton: false,
     timer: 3000,

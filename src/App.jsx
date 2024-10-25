@@ -2,7 +2,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import './assets/all.scss';
 import React, { useReducer, useState } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './assets/pages/Context/AuthContext';
 
 // import Home from './assets/pages/Home';
@@ -31,13 +31,11 @@ import PaymentRoutes from './PaymentRoutes';
 import { MemberOrders } from './assets/pages/MemberOrders';
 import BlogIndex from './assets/pages/BlogIndex';
 import { CartProvider } from './assets/pages/Context/CartContext';
-import SyncCartOnAuthChange from './assets/pages/component/SyncCartOnAuthChange';
 function App() {
   return (
     <>
       <AuthProvider>
         <CartProvider>
-          <SyncCartOnAuthChange />
           <Header />
           <Routes>
             <Route exact path='/' element={<Index />} />

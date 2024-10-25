@@ -10,9 +10,18 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
   const [authState, setAuthState] = useState({
     isAuthenticated: false,
-    token: null,
+    token: localStorage.getItem('token'),
     username: '',
+    userId: localStorage.getItem('userId'), // 初次渲染時從本地存儲讀取 userId
   });
+
+  // 监听本地存储的 userId，并在 AuthProvider 初始化时同步 authState
+  useEffect(() => {
+    const storedUserId = localStorage.getItem('userId');
+    if (storedUserId && authState.userId !== storedUserId) {
+      setAuthState((prev) => ({ ...prev, userId: storedUserId }));
+    }
+  }, []);
 
   const login = async ({ username, password }) => {
     console.log('Login attempt with:', username, password);
@@ -34,25 +43,23 @@ export const AuthProvider = ({ children }) => {
         isAuthenticated: true,
         token,
         username: loggedInUsername, // 将用户名存储到 authState 中
+        userId,
       });
+      console.log('Updated auth state:', authState);
       console.log('Token after login:', localStorage.getItem('token'));
       console.log('Token being used:', token);
       console.log('Navigating to myProfile');
       navigate('/users/member/myProfile');
     } catch (error) {
-      if (error.response) {
-        console.error('Login error (response):', error.response.data);
-      } else if (error.request) {
-        console.error('Login error (request):', error.request);
-      } else {
-        console.error('Login error:', error.message);
-      }
+      console.error('Login error:', error.response?.data || error.message);
     }
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
+    localStorage.removeItem('userId');
+
     setAuthState({ isAuthenticated: false, token: null, username: '' });
     navigate('/users/login');
   };

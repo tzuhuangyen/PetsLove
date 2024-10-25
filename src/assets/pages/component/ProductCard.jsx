@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import { backendUrl } from '../../../../config.js';
 import { Link } from 'react-router-dom';
 import { CiShoppingCart } from 'react-icons/ci';
@@ -12,41 +13,11 @@ export default function ProductCard({ productTypes }) {
   //toggleFavorite function
   const { toggleFavorite, favorites, cartItems, setCartItems } = useCart();
   const { authState } = useAuth();
-  const { addItemToLocalstorage } = useCartManager();
-  const { addItemToServerCart } = useCartManager();
+  const { handleAddToCart } = useCartManager();
+
   useEffect(() => {
     console.log('Updated cartItems:', cartItems); // 每次 cartItems 更新时触发
   }, [cartItems]);
-
-  //user not login's localstorage cart
-  const handleAddToCart = async (item) => {
-    console.log('Item to add:', item);
-    if (!item._id || !item.productName || !item.price) {
-      console.error('Invalid item data:', item);
-      return;
-    }
-    if (!authState.isAuthenticated) {
-      // 用戶未登入，添加到本地存儲
-      addItemToLocalstorage(item);
-      console.log('Item added to local storage:', item);
-    } else {
-      try {
-        console.log('User authenticated, adding to server cart...');
-
-        const response = await addItemToServerCart(item);
-        if (response && response.data) {
-          console.log('Added to Server cart:', response.data);
-        } else {
-          console.log('No response from server cart'); // 如果 response 為 null
-        }
-      } catch (error) {
-        console.error(
-          'Error adding item to server cart:',
-          error.response ? error.response.data : error.message
-        );
-      }
-    }
-  };
 
   return (
     <>

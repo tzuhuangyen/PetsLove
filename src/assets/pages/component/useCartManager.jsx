@@ -1,92 +1,114 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { backendUrl } from '../../../../config.js';
 import axios from 'axios';
 import { useCart } from '../Context/CartContext.jsx';
 import { useAuth } from '../Context/AuthContext.jsx';
 import { showAddToCartAlert } from '../../../swal.js';
 import { useCallback } from 'react';
-
-const updateServerCart = async (cartItems) => {
-  try {
-    const response = await axios.put(
-      `${backendUrl}/api/users/member/cart`,
-      { userId: authState.userId, items: cartItems },
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-    console.log('Server cart updated successfully.', response.data);
-  } catch (error) {
-    console.error('Error updating server cart:', error);
-    if (error.response) {
-      // 伺服器返回的錯誤
-      console.error('Server response:', error.response.data);
-      console.error('Error status:', error.response.status);
-    } else if (error.request) {
-      // 請求已發送但沒有收到回應
-      console.error('No response received:', error.request);
-    } else {
-      // 其他錯誤
-      console.error('Error message:', error.message);
-    }
-  }
-};
+import { useNavigate } from 'react-router-dom';
 
 export const useCartManager = () => {
   const { cartItem = [], setCartItems } = useCart() || {
     cartItem: [],
     setCartItems: () => {},
   };
-  const { authState = { isAuthenticated: false } } = useAuth();
-
+  const { authState } = useAuth();
   const token = authState.token;
+  const navigate = useNavigate();
 
-  const addItemToLocalstorage = (item) => {
-    const localstorageCart =
-      JSON.parse(localStorage.getItem('cartItems')) || [];
-    const existingItem = localstorageCart.find(
-      (cartItem) => cartItem._id === item._id
-    );
-
-    if (existingItem) {
-      existingItem.quantity = (existingItem.quantity || 0) + 1;
-      console.log('Item quantity updated in localstorage:', existingItem);
-    } else {
-      localstorageCart.push({ ...item, quantity: 1 });
-      console.log('Item being added in localstorage:', item);
-      console.log('Current cart items:', localstorageCart);
+  useEffect(() => {
+    if (!authState.userId) {
+      console.log('Waiting for userId to be available...');
     }
+  }, [authState.userId]);
 
-    localStorage.setItem('cartItems', JSON.stringify(localstorageCart));
-    setCartItems([...localstorageCart]);
-    console.log('Updated cart items in localstorage:', localstorageCart);
-
-    showAddToCartAlert(item.productName);
+  const handleAddToCart = async (item) => {
+    console.log('Item to add:', item);
+    if (!item._id || !item.productName || !item.price) {
+      console.error('Invalid item data:', item);
+      return;
+    }
+    // 检查用户是否已登录
+    if (!authState.userId) {
+      console.error('Cannot add item to cart: userId is not available.');
+      navigate('/users/login'); // 如果未登入，引導用戶到登入頁面
+      return; // 停止執行
+    }
+    try {
+      console.log('User authenticated, adding to server cart...');
+      const cartResponse = await addItemToServerCart(item);
+      if (cartResponse) {
+        console.log('Added to Server cart:', cartResponse);
+        setCartItems(cartResponse.items); // 更新购物车项
+      } else {
+        console.log('No response from server cart'); // 如果 response 為 null
+      }
+    } catch (error) {
+      console.error('Error adding item to server cart:', error.message);
+    }
   };
 
   const addItemToServerCart = async (item) => {
-    console.log('Request body:', {
-      items: [
-        {
-          productId: item._id,
-          productName: item.productName,
-          quantity: item.quantity || 1,
-          price: item.price,
-          image: item.image,
-        },
-      ],
-    });
-    console.log('Token sent to server:', token);
-
-    if (!token) return;
-    if (!item._id || !item.productName || !item.price) {
+    if (!token || !item._id || !item.productName || !item.price) {
       console.error('Invalid item data:', item);
       return null;
     }
+
     try {
+      const response = await axios.get(`${backendUrl}/api/users/member/cart`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      // 如果购物车存在，则更新
+      if (
+        response.status === 200 &&
+        response.data.cart &&
+        response.data.cart.items
+      ) {
+        return await updateServerCart(response.data.cart.items, item); // 返回更新后的购物车
+      } else {
+        // 如果购物车不存在，则创建新的购物车
+        console.log('Cart not found. Creating a new cart.');
+        return await createServerCart(item); // 返回新创建的购物车
+      }
+    } catch (error) {
+      console.error('Error adding item to server cart:', error.message);
+      // 如果獲取購物車時出現404錯誤，直接創建新的購物車
+      if (error.response && error.response.status === 404) {
+        console.log('Cart not found (404). Creating a new cart.');
+        return await createServerCart(item); // 直接創建新購物車
+      }
+      return null;
+    }
+  };
+
+  // 1-2如果用户没有购物车记录，则返回创建一个新的购物车。
+  const createServerCart = async (item) => {
+    try {
+      const { userId } = authState || {};
+      if (!userId) {
+        console.error('No userId available, cannot create cart.');
+        return null; // 返回空
+      }
+      // 確認在發送請求前 userId 不是 null
+      console.log('Creating cart for userId:', authState.userId);
+      // 添加一個額外的console來檢查請求體的結構
+      console.log('Request body about to be sent:', {
+        userId: authState.userId, // 應該是非空的 userId
+        items: [
+          {
+            productId: item._id,
+            productName: item.productName,
+            quantity: item.quantity || 1,
+            price: item.price,
+            image: item.image,
+          },
+        ],
+      });
+
       const response = await axios.post(
         `${backendUrl}/api/users/member/cart`,
         {
+          userId: authState.userId,
           items: [
             {
               productId: item._id,
@@ -99,121 +121,56 @@ export const useCartManager = () => {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log('Added item to server cart:', response.data);
-      return response.data;
-    } catch (error) {
-      console.error('Error adding item to server cart:', error.response);
-      return null;
-    }
-  };
+      console.log('Request body:', {
+        userId: authState.userId, // 確認發送請求時的 userId
 
-  const fetchUserCartFromServer = async () => {
-    try {
-      console.log('Fetching cart with token:', token);
-
-      const response = await axios.get(`${backendUrl}/api/users/member/cart`, {
-        headers: { Authorization: `Bearer ${token}` },
+        items: [
+          {
+            productId: item._id,
+            productName: item.productName,
+            quantity: item.quantity || 1,
+            price: item.price,
+            image: item.image,
+          },
+        ],
       });
-      if (
-        response.status === 200 &&
-        (!response.data.cart || response.data.cart.items.length === 0)
-      ) {
-        console.log('User does not have a cart yet.');
-        return []; // 返回一個空的購物車陣列
-      }
-      console.log('fetch User Cart From Server:', response.data);
-      return response.data.cart.items;
+      console.log('Server cart created successfully:', response.data);
+      return response.data; // 返回创建的新购物车数据
     } catch (error) {
-      if (error.response) {
-        // 伺服器返回的錯誤
-        if (error.response.status === 404) {
-          console.log('404, No cart found for this user.');
-          return await createServerCart([]); // 返回空的購物車陣列
-        }
-        console.error(
-          'Error fetching user cart from server:',
-          error.response.data
-        );
-      } else {
-        console.error('Error fetching user cart from server:', error.message);
-      }
+      console.error(
+        'Error creating cart on server:',
+        error.response?.data || error.message
+      );
       return null;
     }
   };
 
-  // 1-2如果用户没有购物车记录，则返回创建一个新的购物车。
-  const createServerCart = async (cartItems) => {
+  const updateServerCart = async (cartItems, item) => {
     try {
-      const response = await axios.post(
+      const updatedItems = cartItems.map((cartItem) => {
+        if (cartItem.productId === item._id) {
+          return { ...cartItem, quantity: cartItem.quantity + 1 }; // 增加数量
+        }
+        return cartItem;
+      });
+
+      const response = await axios.put(
         `${backendUrl}/api/users/member/cart`,
-        { items: cartItems },
+        { userId: authState.userId, items: updatedItems },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log('Server cart created successfully:', response.data);
-      return response.data; // 返回创建的新购物车数据
+      console.log('Server cart updated successfully.', response.data);
     } catch (error) {
-      console.error('Error updating cart on server:', error);
+      console.error(
+        'Error updating server cart:',
+        error.response?.data || error.message
+      );
+      return null;
     }
   };
-
-  const mergeCarts = (serverCart, localCart) => {
-    const mergedCart = [...serverCart]; // 假设服务器购物车数据结构正确
-    localCart.forEach((localItem) => {
-      if (
-        !serverCart.find(
-          (serverItem) => serverItem.productId === localItem.productId
-        )
-      ) {
-        const { productId, productName, quantity, price, image } = localItem;
-        if (!productId || !productName || !quantity || !price) {
-          console.error('Invalid item data:', localItem);
-          return; // 忽略無效項目
-        }
-
-        mergedCart.push(localItem); // 将本地购物车中没有的商品添加到服务器购物车
-      }
-    });
-    return mergedCart;
-  };
-
-  const syncUserCartWithServer = useCallback(async () => {
-    if (authState.isAuthenticated && token) {
-      try {
-        const localCart = JSON.parse(localStorage.getItem('cartItems')) || [];
-        let serverCart = await fetchUserCartFromServer();
-        if (!serverCart || serverCart.length === 0) {
-          await createServerCart(localCart);
-          serverCart = await fetchUserCartFromServer();
-        }
-
-        if (JSON.stringify(localCart) !== JSON.stringify(serverCart)) {
-          const mergedCart = mergeCarts(serverCart, localCart);
-          await updateServerCart(mergedCart);
-          setCartItems(mergedCart);
-          localStorage.removeItem('cartItems'); // 清空本地存儲
-        } else {
-          console.log('Local cart is already in sync with server.');
-        }
-      } catch (error) {
-        console.error('Error syncing user cart with server:', error);
-      }
-    }
-  }, [
-    authState.isAuthenticated,
-    token,
-    fetchUserCartFromServer,
-    updateServerCart,
-    createServerCart,
-  ]);
-
   return {
-    updateServerCart,
-    addItemToLocalstorage,
-    addItemToServerCart,
-    fetchUserCartFromServer,
-    syncUserCartWithServer,
-    mergeCarts,
+    handleAddToCart,
   };
 };
