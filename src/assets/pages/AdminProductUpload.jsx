@@ -85,7 +85,7 @@ function AdminProductUpload() {
   return (
     <Col md={9}>
       <Form onSubmit={uploadImage}>
-        <h1 className='text-center mb-5'>Add Product</h1>
+        <h1 className='text-center mb-5'>Admin Product Upload </h1>
         {/* <pre>{JSON.stringify(newProductData)}</pre> */}
         <input
           type='file'

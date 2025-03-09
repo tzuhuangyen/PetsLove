@@ -12,7 +12,7 @@ function AdminProductUpdate() {
   const [price, setPrice] = useState();
 
   return (
-    <div>
+    <>
       <h1>AdminProductUpdate</h1>
 
       <Form>
@@ -56,7 +56,7 @@ function AdminProductUpdate() {
           Update Product
         </Button>
       </Form>
-    </div>
+    </>
   );
 }
 
