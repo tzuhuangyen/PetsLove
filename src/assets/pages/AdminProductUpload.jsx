@@ -50,7 +50,7 @@ function AdminProductUpload() {
 
     try {
       const result = await axios.post(
-        `${backendUrl}/api/api/admin/products/uploadProduct`,
+        `${backendUrl}/api/admin/products/uploadProduct`,
         formData,
         {
           headers: {
