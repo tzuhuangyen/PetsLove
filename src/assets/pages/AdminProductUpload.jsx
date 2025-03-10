@@ -9,7 +9,7 @@ import Swal from 'sweetalert2';
 function AdminProductUpload() {
   // const [file, setFile] = useState(null); // 追加 file 状态来存储选择的文件
   const [image, setImage] = useState(null);
-  const [allImage, setAllImage] = useState(null);
+  const [allImage, setAllImage] = useState([]);
   // const [productName, setProductName] = useState('');
   // const [type, setType] = useState('');
   // const [order, setOrder] = useState('');
@@ -67,15 +67,14 @@ function AdminProductUpload() {
     }
   };
   //get all image products
-  const getAllProductInfo = () => {
-    axios
-      .get(`${backendUrl}/api/admin/products`)
-      .then((res) => {
-        console.log('All Product Info:', res.data);
-        setAllImage(res.data.data);
-        console.log(res.data.data);
-      })
-      .catch((err) => console.log(err));
+  const getAllProductInfo = async () => {
+    try {
+      const response = await axios.get(`${backendUrl}/api/admin/products`);
+      console.log('All Product Info:', response.data);
+      setAllImage(response.data.data); // 假設 API 返回的數據結構是 { data: [...] }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
   };
 
   useEffect(() => {

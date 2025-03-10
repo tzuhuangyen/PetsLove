@@ -34,15 +34,14 @@ function ProductTable({ allImage }) {
 
   const handleDelete = async (product) => {
     try {
-      //呼叫 onDelete 函式，將 id 作為參數傳遞
-      // 在前端執行刪除操作
-      onDelete(product._id);
-      // 印出產品的 ID
+      const product = productData.product;
       console.log('Product ID:', product._id);
+
       // 向後端發送刪除請求
       await axios.delete(
         `${backendUrl}/api/admin/products/deleteProduct/${product._id}`
       );
+      window.location.reload();
     } catch (error) {
       console.error('Error deleting product:', error);
     }
@@ -70,7 +69,7 @@ function ProductTable({ allImage }) {
                   <td>{index + 1}</td>
                   <td>
                     <img
-                      src={`${backendUrl}/adminProducts/${product.image}`}
+                      src={product.imageUrl}
                       alt={`Product ${index + 1}`}
                       style={{ height: '100px', width: '100px' }}
                     />
@@ -86,7 +85,7 @@ function ProductTable({ allImage }) {
                         <TiEdit />
                       </a>
                     </Button>
-                    <Button onClick={() => handleDelete({ product, onDelete })}>
+                    <Button onClick={() => handleDelete({ product })}>
                       <MdDeleteForever />
                     </Button>
                   </td>

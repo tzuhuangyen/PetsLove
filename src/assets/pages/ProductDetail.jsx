@@ -60,7 +60,11 @@ function ProductDetail() {
             <div className='col-12 col-md-6'>
               <img
                 className='product-detail-img card-img-top'
-                src={`${backendUrl}/adminProducts/${product.image}`} // 修正图片的 src 属性
+                src={`${backendUrl}/adminProducts/${
+                  product.image.startsWith('/')
+                    ? product.image.substring(1)
+                    : product.image
+                }`}
                 alt={product.productName}
               />
             </div>
