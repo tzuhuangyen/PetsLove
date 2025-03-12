@@ -76,7 +76,7 @@ function App() {
               <Route path='/admin/analysis' element={<AdminAnalysis />}></Route>
             </Route>
             <Route
-              path='/admin/products/updatedProduct'
+              path='/admin/products/updatedProduct/:productId'
               element={<AdminProductUpdate />}
             ></Route>
             <Route path='/admin/analysis' element={<AdminAnalysis />}></Route>

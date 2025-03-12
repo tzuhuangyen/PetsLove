@@ -72,7 +72,7 @@ export default function FilterCategory({ setProductTypes, initData }) {
           <li
             className='categoryGroup-item'
             id='filter-chicken'
-            onClick={() => handleFilters('chicken')}
+            onClick={() => handleFilters('Chicken')}
           >
             <GiChickenOven />
             chicken
@@ -80,7 +80,7 @@ export default function FilterCategory({ setProductTypes, initData }) {
           <li
             className='categoryGroup-item'
             id='filter-beef'
-            onClick={() => handleFilters('beef')}
+            onClick={() => handleFilters('Beef')}
           >
             <LuBeef />
             beef

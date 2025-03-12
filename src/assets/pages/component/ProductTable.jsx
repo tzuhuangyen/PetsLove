@@ -5,6 +5,7 @@ import { TiEdit } from 'react-icons/ti';
 import { MdDeleteForever } from 'react-icons/md';
 
 import { backendUrl } from '../../../../config';
+import { Link } from 'react-router-dom';
 
 function ProductTable({ allImage }) {
   //handleEditProduct
@@ -24,14 +25,14 @@ function ProductTable({ allImage }) {
   //     console.error('Error updating product:', error);
   //   }
   // };
-  // const handleEditClick = ({ productId }) => {
-  //   // Navigate to AdminProductUpdate page with the productId
-  //   // Example URL: /adminProductUpdate/:productId
-  //   // Replace '/adminProductUpdate' with your actual route path
-  //   // You may also need to pass additional parameters if required
-  //   // For example, you can use template literals to generate dynamic URLs
-  //   window.location.href = `/admin/products/updatedProduct/${productId}`;
-  // };
+  const handleEditClick = ({ productId }) => {
+    // Navigate to AdminProductUpdate page with the productId
+    // Example URL: /adminProductUpdate/:productId
+    // Replace '/adminProductUpdate' with your actual route path
+    // You may also need to pass additional parameters if required
+    // For example, you can use template literals to generate dynamic URLs
+    window.location.href = `/admin/products/updatedProduct/${productId}`;
+  };
 
   // Add useEffect for debugging
   useEffect(() => {
@@ -88,11 +89,12 @@ function ProductTable({ allImage }) {
                   <td>{product.order}</td>
                   <td>{product.price}</td>
                   <td>
-                    <Button>
-                      <a href={`/admin/products/updatedProduct/${product._id}`}>
-                        {' '}
-                        <TiEdit />
-                      </a>
+                    <Button
+                      as={Link}
+                      to={`/admin/products/updatedProduct/${product._id}`}
+                      className='me-2'
+                    >
+                      <TiEdit />
                     </Button>
                     <Button onClick={() => handleDelete({ product })}>
                       <MdDeleteForever />

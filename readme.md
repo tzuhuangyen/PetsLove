@@ -4,12 +4,14 @@ PetsLove is a web application built with React, Node.js, and Express that allows
 
 ## Features
 
-User registration and login
-Browse and search for pet products
-Add products to the shopping cart
-Checkout process (not implemented yet)
-User profile management (update password, etc.)
-Alert notifications for various actions (adding to cart, removing from cart, successful login/logout, etc.)
+- admin CURD products
+- Axios (for API requests)
+- User registration and login, JWT (for authentication)
+- Browse/search/filter/sort and favorite for products
+- Add products to the shopping cart
+- Checkout process (not implemented yet)
+- User profile management (update password, etc.)
+- Alert notifications for various actions (adding to cart, removing from cart, successful login/logout, etc.)
 
 ## Technologies Used
 
@@ -17,8 +19,10 @@ React
 Node.js
 Express
 MongoDB (or another database)
+MulterCloudinary (for image storage)
 Vite (build tool)
 SweetAlert2 (for alert notifications)
+Render
 
 ## Installation
 
