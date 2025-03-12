@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Spinner } from 'react-bootstrap';
 
 import { backendUrl } from '../../../config.js';
 console.log('Backend URL:', backendUrl);
@@ -30,6 +31,8 @@ const Input = ({ register, errors, id, labelText, type, rules }) => {
 //sign up component
 const SignUp = () => {
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false); // 添加提交狀態
+
   //通過最小的重新渲染來提高性能
   const {
     handleSubmit,
@@ -43,6 +46,8 @@ const SignUp = () => {
 
   //取出表單內的資料並送至數據庫
   const handleSignUp = async (formData) => {
+    setIsSubmitting(true); // 開始提交，顯示加載狀態
+
     try {
       console.log('Form Data to submit:', formData);
       const response = await axios.post(
@@ -50,16 +55,44 @@ const SignUp = () => {
         formData
       );
       console.log('Signup successful:', response.data);
-      showSignUpAlert(formData.username);
-      // 延时跳转到登录页面
-      setTimeout(() => {
+      if (response.data && response.data.token) {
+        localStorage.setItem('token', response.data.token);
+
+        if (response.data.user) {
+          localStorage.setItem('user', JSON.stringify(response.data.user));
+        }
+        await showSignUpAlert(formData.username);
+        // 延时跳转到登录页面
+        setTimeout(() => {
+          navigate('/users/login');
+        }, 500);
+      } else {
+        // 如果後端沒有返回令牌，則顯示成功訊息後導航到登錄頁面
+        await showSignUpAlert(formData.username);
         navigate('/users/login');
-      }, 500);
-    } catch (error) {
-      if (error.response) {
-        console.error('Error signing up:', error.response);
-        showSignUpErrorAlert();
       }
+    } catch (error) {
+      console.error('Error signing up:', error);
+
+      if (error.response) {
+        const errorMessage =
+          error.response.data.message || 'Registration failed';
+        // 處理特定錯誤
+        if (error.response.status === 400 && errorMessage.includes('exists')) {
+          // 如果是電子郵件已存在的錯誤
+          setError('username', {
+            type: 'manual',
+            message: 'This email is already registered',
+          });
+        }
+
+        showSignUpErrorAlert(errorMessage);
+      } else {
+        // 處理網絡錯誤或其他未知錯誤
+        showSignUpErrorAlert('Network error. Please try again later.');
+      }
+    } finally {
+      setIsSubmitting(false); // 無論成功或失敗，都結束提交狀態
     }
   };
 
@@ -124,7 +157,9 @@ const SignUp = () => {
                 },
               }}
             />
-            {errors.password && <p>Password is required.</p>}
+            {errors.password && (
+              <p className='text-danger'>{errors.password.message}</p>
+            )}
           </div>
           <div>
             <Input
@@ -148,10 +183,31 @@ const SignUp = () => {
                 },
               }}
             />
-            {errors.password && <p>Password is required.</p>}
+            {errors.confirmPassword && (
+              <p className='text-danger'>{errors.confirmPassword.message}</p>
+            )}
           </div>
-          <button type='submit' value='Sign Up' className='form--submit'>
-            Sign Up
+          <button
+            type='submit'
+            value='Sign Up'
+            className='form--submit'
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <Spinner
+                  as='span'
+                  animation='border'
+                  size='sm'
+                  role='status'
+                  aria-hidden='true'
+                  className='me-2'
+                />
+                Signing Up...
+              </>
+            ) : (
+              'Sign Up'
+            )}
           </button>
         </form>
 

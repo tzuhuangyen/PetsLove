@@ -41,8 +41,8 @@ export const showConfirmationAlert = (actionDescription, actionCallback) => {
 //signup
 export const showSignUpAlert = (username) => {
   Swal.fire({
-    title: 'Congratulations!',
-    text: `${username} has been registration.`,
+    title: 'Congratulations!Registration Successful',
+    text: `Welcome ${username} Your account has been created successfully.`,
     icon: 'success',
     confirmButtonText: 'OK',
   });
