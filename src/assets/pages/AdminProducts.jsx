@@ -18,7 +18,7 @@ function AdminProducts() {
       .then((res) => {
         console.log('All images:', res.data);
         setAllImage(res.data.data);
-        console.log(res.data.data);
+        console.log('All product:', res.data.data);
       })
       .catch((err) => console.log(err));
   };

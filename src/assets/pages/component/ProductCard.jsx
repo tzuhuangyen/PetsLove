@@ -39,7 +39,7 @@ export default function ProductCard({ productTypes }) {
             <Link to={`/shop/product/${productType._id}`}>
               {productType.image ? (
                 <img
-                  src={`${backendUrl}/adminProducts/${productType.image}`}
+                  src={`${backendUrl}/api/admin/products/image/${productType._id}`}
                   className='card-img-top object-fit product-img'
                   alt={productType.name} // 添加 alt 属性用于无障碍访问
                 />

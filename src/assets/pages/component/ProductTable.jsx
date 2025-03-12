@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import axios from 'axios';
 import { Table, Button } from 'react-bootstrap';
 import { TiEdit } from 'react-icons/ti';
 import { MdDeleteForever } from 'react-icons/md';
 
 import { backendUrl } from '../../../../config';
+
 function ProductTable({ allImage }) {
   //handleEditProduct
   // const handleEditProduct = async (productId) => {
@@ -32,20 +33,28 @@ function ProductTable({ allImage }) {
   //   window.location.href = `/admin/products/updatedProduct/${productId}`;
   // };
 
-  const handleDelete = async (product) => {
+  // Add useEffect for debugging
+  useEffect(() => {
+    console.log('ProductTable rendered with allImage:', allImage);
+    if (allImage && allImage.length > 0) {
+      console.log('First product:', allImage[0]);
+    }
+  }, [allImage]);
+
+  const handleDelete = async (productData) => {
     try {
-      const product = productData.product;
-      console.log('Product ID:', product._id);
+      console.log('Product ID:', productData.product._id);
 
       // 向後端發送刪除請求
       await axios.delete(
-        `${backendUrl}/api/admin/products/deleteProduct/${product._id}`
+        `${backendUrl}/api/admin/products/deleteProduct/${productData.product._id}`
       );
       window.location.reload();
     } catch (error) {
       console.error('Error deleting product:', error);
     }
   };
+
   return (
     <>
       <div>
@@ -69,7 +78,7 @@ function ProductTable({ allImage }) {
                   <td>{index + 1}</td>
                   <td>
                     <img
-                      src={product.imageUrl}
+                      src={`${backendUrl}/api/admin/products/image/${product._id}`}
                       alt={`Product ${index + 1}`}
                       style={{ height: '100px', width: '100px' }}
                     />
@@ -80,7 +89,7 @@ function ProductTable({ allImage }) {
                   <td>{product.price}</td>
                   <td>
                     <Button>
-                      <a href='/admin/products/updatedProduct'>
+                      <a href={`/admin/products/updatedProduct/${product._id}`}>
                         {' '}
                         <TiEdit />
                       </a>
