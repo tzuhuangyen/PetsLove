@@ -2,7 +2,7 @@ import { backendUrl } from '../../../config.js';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Col, Form, Button, Row, Card } from 'react-bootstrap';
+import { Col, Form, Button, Row, Card, Alert, Spinner } from 'react-bootstrap';
 import { IoCloudUploadOutline } from 'react-icons/io5';
 import { IoArrowBackOutline } from 'react-icons/io5';
 import Swal from 'sweetalert2';
@@ -13,9 +13,11 @@ function AdminProductUpdate() {
   const { productId } = useParams(); // 從 URL 獲取產品 ID
   const navigate = useNavigate(); // 用於導航
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [image, setImage] = useState(null);
   const [currentImage, setCurrentImage] = useState(null);
   const [error, setError] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null); // 新增圖片預覽狀態
 
   const [productData, setProductData] = useState({
     productName: '',
@@ -77,11 +79,23 @@ function AdminProductUpdate() {
     }
   };
   const handleImageChange = (e) => {
-    setImage(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+      // 創建圖片預覽
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
+
   const handleUpdate = async (e) => {
     e.preventDefault();
     setError(null);
+    setSubmitting(true);
+
     try {
       // 如果只更新產品資訊而不更新圖片
       if (!image) {
@@ -109,6 +123,7 @@ function AdminProductUpdate() {
         productId,
         productData,
         imageFile: image.name,
+        imageSize: Math.round(image.size / 1024) + 'KB',
       });
       const response = await axios.patch(
         `${backendUrl}/api/admin/products/updateProduct/${productId}`,
@@ -117,6 +132,7 @@ function AdminProductUpdate() {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
+          timeout: 60000,
         }
       );
 
@@ -133,6 +149,8 @@ function AdminProductUpdate() {
       setError('Failed to update product: ' + errorMessage);
 
       Swal.fire('Error', 'Failed to update product', 'error');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -166,7 +184,7 @@ function AdminProductUpdate() {
             <Form.Group className='mb-3'>
               <Form.Label>Current Image</Form.Label>
               <div>
-                {currentImage && (
+                {currentImage && !imagePreview && (
                   <img
                     src={currentImage}
                     alt='Current product'
@@ -192,9 +210,28 @@ function AdminProductUpdate() {
                 onChange={handleImageChange}
               />
               {image && (
-                <small className='text-success'>
-                  New image selected: {image.name}
+                <small className='text-success d-block mt-1'>
+                  New image selected: {image.name} (
+                  {Math.round(image.size / 1024)} KB)
                 </small>
+              )}
+              {/* 显示图片预览 */}
+              {imagePreview && (
+                <div className='mt-3'>
+                  <p>New image preview:</p>
+                  <img
+                    src={imagePreview}
+                    alt='New image preview'
+                    style={{
+                      height: '150px',
+                      width: '150px',
+                      objectFit: 'cover',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      padding: '5px',
+                    }}
+                  />
+                </div>
               )}
             </Form.Group>
 
@@ -269,17 +306,23 @@ function AdminProductUpdate() {
             <Card.Header>Product Preview</Card.Header>
             <Card.Body>
               <div className='text-center mb-3'>
-                {currentImage && (
+                {imagePreview ? (
+                  <img
+                    src={imagePreview}
+                    alt='New product preview'
+                    style={{ maxWidth: '100%', height: 'auto' }}
+                  />
+                ) : currentImage ? (
                   <img
                     src={currentImage}
-                    alt='Product preview'
+                    alt='Current product preview'
                     style={{ maxWidth: '100%', height: 'auto' }}
                     onError={(e) => {
                       e.target.src =
                         'https://via.placeholder.com/200?text=No+Image';
                     }}
                   />
-                )}
+                ) : null}
               </div>
               <h5>{productData.productName}</h5>
               <p>

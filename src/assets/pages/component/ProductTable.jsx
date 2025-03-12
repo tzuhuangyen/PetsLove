@@ -7,24 +7,15 @@ import { MdDeleteForever } from 'react-icons/md';
 import { backendUrl } from '../../../../config';
 import { Link } from 'react-router-dom';
 
-function ProductTable({ allImage }) {
-  //handleEditProduct
-  // const handleEditProduct = async (productId) => {
-  //   try {
-  //     const updatedProduct = await axios.patch(
-  //       `${backendUrl}/api/admin/products/updateProduct/${productId}`,
-  //       {
-  //         productName: 'NewName',
-  //         type: 'NewType',
-  //         order: 'NewOrder',
-  //         price: 'NewPrice',
-  //       }
-  //     );
-  //     console.log('Product updated successfully:', updatedProduct.data);
-  //   } catch (error) {
-  //     console.error('Error updating product:', error);
-  //   }
-  // };
+function ProductTable({ allImage, onProductUpdated }) {
+  // Add debugging to see what data we're working with
+  useEffect(() => {
+    console.log('ProductTable rendered with allImage:', allImage);
+    if (allImage && allImage.length > 0) {
+      console.log('First product:', allImage[0]);
+    }
+  }, [allImage]);
+
   const handleEditClick = ({ productId }) => {
     // Navigate to AdminProductUpdate page with the productId
     // Example URL: /adminProductUpdate/:productId
@@ -55,7 +46,11 @@ function ProductTable({ allImage }) {
       console.error('Error deleting product:', error);
     }
   };
-
+  // 添加防止圖片緩存的函數
+  const getImageUrl = (productId) => {
+    const timestamp = new Date().getTime();
+    return `${backendUrl}/api/admin/products/image/${productId}?_t=${timestamp}`;
+  };
   return (
     <>
       <div>
@@ -79,7 +74,7 @@ function ProductTable({ allImage }) {
                   <td>{index + 1}</td>
                   <td>
                     <img
-                      src={`${backendUrl}/api/admin/products/image/${product._id}`}
+                      src={getImageUrl(product._id)}
                       alt={`Product ${index + 1}`}
                       style={{ height: '100px', width: '100px' }}
                     />
