@@ -136,6 +136,8 @@ function Header() {
                   <div className='nav-cart-count'>
                     {Array.isArray(cartItems)
                       ? cartItems.reduce((total, item) => {
+                          const quantity = parseInt(item.quantity, 10) || 1;
+
                           console.log(
                             'Item quantity show in the header:',
                             item.quantity

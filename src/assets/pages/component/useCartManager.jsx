@@ -8,7 +8,7 @@ import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export const useCartManager = () => {
-  const { cartItem = [], setCartItems } = useCart() || {
+  const { cartItems = [], setCartItems } = useCart() || {
     cartItem: [],
     setCartItems: () => {},
   };
@@ -37,9 +37,11 @@ export const useCartManager = () => {
     try {
       console.log('User authenticated, adding to server cart...');
       const cartResponse = await addItemToServerCart(item);
-      if (cartResponse) {
+      if (cartResponse && cartResponse.items) {
         console.log('Added to Server cart:', cartResponse);
         setCartItems(cartResponse.items); // 更新购物车项
+        localStorage.setItem('cartItems', JSON.stringify(cartResponse.items));
+        showAddToCartAlert(item.productName);
       } else {
         console.log('No response from server cart'); // 如果 response 為 null
       }
@@ -147,13 +149,34 @@ export const useCartManager = () => {
 
   const updateServerCart = async (cartItems, item) => {
     try {
-      const updatedItems = cartItems.map((cartItem) => {
-        if (cartItem.productId === item._id) {
-          return { ...cartItem, quantity: cartItem.quantity + 1 }; // 增加数量
-        }
-        return cartItem;
-      });
+      // Check if the item already exists in the cart
+      const existingItemIndex = cartItems.findIndex(
+        (cartItem) => cartItem.productId === item._id
+      );
 
+      let updatedItems;
+
+      if (existingItemIndex !== -1) {
+        // If item exists, increase quantity
+        updatedItems = cartItems.map((cartItem, index) => {
+          if (index === existingItemIndex) {
+            return { ...cartItem, quantity: cartItem.quantity + 1 };
+          }
+          return cartItem;
+        });
+      } else {
+        // If item doesn't exist, add it
+        updatedItems = [
+          ...cartItems,
+          {
+            productId: item._id,
+            productName: item.productName,
+            quantity: 1,
+            price: item.price,
+            image: item.image,
+          },
+        ];
+      }
       const response = await axios.put(
         `${backendUrl}/api/users/member/cart`,
         { userId: authState.userId, items: updatedItems },
@@ -162,6 +185,7 @@ export const useCartManager = () => {
         }
       );
       console.log('Server cart updated successfully.', response.data);
+      return response.data; // Return the updated cart data
     } catch (error) {
       console.error(
         'Error updating server cart:',
@@ -170,7 +194,43 @@ export const useCartManager = () => {
       return null;
     }
   };
+  // Add a function to load cart from server
+  const loadCartFromServer = async () => {
+    if (!authState.isAuthenticated || !token) {
+      console.log('User not authenticated, cannot load cart');
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${backendUrl}/api/users/member/cart`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (
+        response.status === 200 &&
+        response.data.cart &&
+        response.data.cart.items
+      ) {
+        console.log('Loaded cart from server:', response.data.cart.items);
+        setCartItems(response.data.cart.items);
+        localStorage.setItem(
+          'cartItems',
+          JSON.stringify(response.data.cart.items)
+        );
+      }
+    } catch (error) {
+      console.error('Error loading cart from server:', error.message);
+      if (error.response && error.response.status === 404) {
+        console.log('No cart found on server');
+        // Clear local cart if server has no cart
+        setCartItems([]);
+        localStorage.setItem('cartItems', JSON.stringify([]));
+      }
+    }
+  };
+
   return {
     handleAddToCart,
+    loadCartFromServer,
   };
 };
