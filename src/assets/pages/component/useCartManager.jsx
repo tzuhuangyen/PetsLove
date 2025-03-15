@@ -94,6 +94,18 @@ export const useCartManager = () => {
       // 確認在發送請求前 userId 不是 null
       console.log('Creating cart for userId:', authState.userId);
       // 添加一個額外的console來檢查請求體的結構
+      const requestBody = {
+        userId: authState.userId,
+        items: [
+          {
+            productId: item._id,
+            productName: item.productName,
+            quantity: item.quantity || 1,
+            price: item.price,
+            image: item.image,
+          },
+        ],
+      };
       console.log('Request body about to be sent:', {
         userId: authState.userId, // 應該是非空的 userId
         items: [
@@ -106,22 +118,18 @@ export const useCartManager = () => {
           },
         ],
       });
+      console.log('API endpoint:', `${backendUrl}/api/users/member/cart`);
+      console.log('Authorization token:', token);
 
       const response = await axios.post(
         `${backendUrl}/api/users/member/cart`,
+        requestBody,
         {
-          userId: authState.userId,
-          items: [
-            {
-              productId: item._id,
-              productName: item.productName,
-              quantity: item.quantity || 1,
-              price: item.price,
-              image: item.image,
-            },
-          ],
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
       );
       console.log('Request body:', {
         userId: authState.userId, // 確認發送請求時的 userId
@@ -136,13 +144,60 @@ export const useCartManager = () => {
           },
         ],
       });
+      console.log('Server response status:', response.status);
+
       console.log('Server cart created successfully:', response.data);
-      return response.data; // 返回创建的新购物车数据
+
+      if (response.data) {
+        console.log('Server cart created successfully:', response.data);
+
+        let cartItems;
+        if (response.data.data && response.data.data.cart) {
+          // 如果響應格式是 { success: true, data: { cart: { items: [...] } } }
+          cartItems = response.data.data.cart.items;
+          console.log('Cart items from response.data.data.cart:', cartItems);
+        } else if (response.data.cart && response.data.cart.items) {
+          // 如果響應格式是 { cart: { items: [...] } }
+          cartItems = response.data.cart.items;
+          console.log('Cart items from response.data.cart:', cartItems);
+        } else if (response.data.items) {
+          // 如果響應格式是 { items: [...] }
+          cartItems = response.data.items;
+          console.log('Cart items from response.data:', cartItems);
+        }
+        if (cartItems) {
+          // 更新本地存儲和狀態
+          localStorage.setItem('cartItems', JSON.stringify(cartItems));
+          setCartItems(cartItems);
+          return { items: cartItems };
+        } else {
+          console.error('Response data missing items array:', response.data);
+          return null;
+        }
+      } else {
+        console.error('Empty response data from server');
+        return null;
+      }
     } catch (error) {
-      console.error(
-        'Error creating cart on server:',
-        error.response?.data || error.message
-      );
+      console.error('Error creating cart on server:');
+
+      if (error.response) {
+        // 服務器回應了請求，但返回了錯誤狀態碼
+        console.error(
+          'Server responded with error status:',
+          error.response.status
+        );
+        console.error('Error response data:', error.response.data);
+        console.error('Error response headers:', error.response.headers);
+      } else if (error.request) {
+        // 請求已發送但沒有收到回應
+        console.error('No response received from server:', error.request);
+      } else {
+        // 設置請求時發生錯誤
+        console.error('Error message:', error.message);
+      }
+      console.error('Error config:', error.config);
+
       return null;
     }
   };
@@ -177,6 +232,7 @@ export const useCartManager = () => {
           },
         ];
       }
+
       const response = await axios.put(
         `${backendUrl}/api/users/member/cart`,
         { userId: authState.userId, items: updatedItems },
@@ -185,7 +241,29 @@ export const useCartManager = () => {
         }
       );
       console.log('Server cart updated successfully.', response.data);
-      return response.data; // Return the updated cart data
+
+      // 處理不同的響應格式
+      let cartItems;
+      if (response.data.data && response.data.data.cart) {
+        // 如果響應格式是 { success: true, data: { cart: { items: [...] } } }
+        cartItems = response.data.data.cart.items;
+      } else if (response.data.cart && response.data.cart.items) {
+        // 如果響應格式是 { cart: { items: [...] } }
+        cartItems = response.data.cart.items;
+      } else if (response.data.items) {
+        // 如果響應格式是 { items: [...] }
+        cartItems = response.data.items;
+      }
+
+      if (cartItems) {
+        // 更新本地存儲和狀態
+        localStorage.setItem('cartItems', JSON.stringify(cartItems));
+        setCartItems(cartItems);
+        return { items: cartItems };
+      } else {
+        console.error('Response data missing items array:', response.data);
+        return null;
+      }
     } catch (error) {
       console.error(
         'Error updating server cart:',
@@ -195,7 +273,7 @@ export const useCartManager = () => {
     }
   };
   // Add a function to load cart from server
-  const loadCartFromServer = async () => {
+  const loadCartFromServer = async (cartItems, item) => {
     if (!authState.isAuthenticated || !token) {
       console.log('User not authenticated, cannot load cart');
       return;
@@ -228,7 +306,46 @@ export const useCartManager = () => {
       }
     }
   };
+  // 添加刪除購物車項目的函數
+  const handleDeleteCartItem = async (itemId) => {
+    try {
+      if (!authState.isAuthenticated || !token) {
+        console.error('User not authenticated, cannot delete cart item');
+        return;
+      }
 
+      console.log('Deleting item with id:', itemId);
+
+      // 先從本地購物車中刪除
+      const updatedCartItems = cartItems.filter(
+        (item) => item.productId !== itemId && item._id !== itemId
+      );
+
+      localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
+      setCartItems(updatedCartItems);
+
+      // 然後從服務器購物車中刪除
+      try {
+        // 注意：這裡的 API 路徑應該與後端一致
+        // 根據您的後端代碼，刪除購物車項目的 API 路徑應該是 /api/users/member/cart/{id}
+        const response = await axios.delete(
+          `${backendUrl}/api/users/member/cart/${itemId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        console.log('Item deleted from server cart:', response.data);
+      } catch (error) {
+        console.error('Error deleting item from server cart:', error.message);
+        if (error.response) {
+          console.error('Server error response:', error.response.data);
+        }
+      }
+    } catch (error) {
+      console.error('Error in handleDeleteCartItem:', error);
+    }
+  };
   return {
     handleAddToCart,
     loadCartFromServer,
