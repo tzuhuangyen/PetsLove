@@ -1,5 +1,8 @@
 // swal.js
 import Swal from 'sweetalert2';
+
+const BASE_URL = '/PetsLove';
+
 //Shop.jsx
 export const showAddToCartAlert = (productName) => {
   Swal.fire({
@@ -54,12 +57,12 @@ export const showSignUpErrorAlert = (username) => {
     text: "Let's go to Login",
     icon: 'info',
     html: `
-    <a href=PetsLove/users/login style="color:white; text-decoration:none; display:inline-block; padding:10px 20px; background-color:#3085d6; border-radius:5px;">Login</a>
+    <a href="${BASE_URL}/users/login" style="color:white; text-decoration:none; display:inline-block; padding:10px 20px; background-color:#3085d6; border-radius:5px;">Login</a>
   `,
 
     footer: `
     
-    <a href=PetsLove/users/users/forgotPsw">click here if you forgot password</a>
+    <a href="${BASE_URL}/users/forgotPsw">click here if you forgot password</a>
   `,
     showConfirmButton: false, // Hide the default confirm button
   });
