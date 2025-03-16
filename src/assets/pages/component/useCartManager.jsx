@@ -22,6 +22,16 @@ export const useCartManager = () => {
     }
   }, [authState.userId]);
 
+  // Add this useEffect to log important values for debugging
+  useEffect(() => {
+    console.log('Backend URL:', backendUrl);
+    console.log('Auth state:', {
+      isAuthenticated: authState.isAuthenticated,
+      hasToken: !!token,
+      hasUserId: !!authState.userId,
+    });
+  }, [authState, token]);
+
   const handleAddToCart = async (item) => {
     console.log('Item to add:', item);
     if (!item._id || !item.productName || !item.price) {
@@ -57,9 +67,16 @@ export const useCartManager = () => {
     }
 
     try {
+      console.log(`Fetching cart from ${backendUrl}/api/users/member/cart`);
       const response = await axios.get(`${backendUrl}/api/users/member/cart`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log(
+        'Cart fetch response:',
+        response.status,
+        response.data.cart.items
+      );
+
       // 如果购物车存在，则更新
       if (
         response.status === 200 &&
@@ -74,6 +91,19 @@ export const useCartManager = () => {
       }
     } catch (error) {
       console.error('Error adding item to server cart:', error.message);
+      // 如果獲取購物車時出現404錯誤，直接創建新的購物車
+      if (error.response) {
+        console.error(
+          'Server response:',
+          error.response.status,
+          error.response.data
+        );
+      } else if (error.request) {
+        console.error('No response received from server');
+      } else {
+        console.error('Error message:', error.message);
+      }
+
       // 如果獲取購物車時出現404錯誤，直接創建新的購物車
       if (error.response && error.response.status === 404) {
         console.log('Cart not found (404). Creating a new cart.');
@@ -160,11 +190,21 @@ export const useCartManager = () => {
           // 如果響應格式是 { cart: { items: [...] } }
           cartItems = response.data.cart.items;
           console.log('Cart items from response.data.cart:', cartItems);
-        } else if (response.data.items) {
-          // 如果響應格式是 { items: [...] }
-          cartItems = response.data.items;
-          console.log('Cart items from response.data:', cartItems);
+        } else {
+          // Try to handle any other response format
+          console.log('Unexpected response format, trying to extract items');
+          console.log('Full response:', JSON.stringify(response.data));
+
+          // If we can't find items in the expected places, try to find an array that might be the items
+          for (const key in response.data) {
+            if (Array.isArray(response.data[key])) {
+              cartItems = response.data[key];
+              console.log(`Found array in response.data.${key}:`, cartItems);
+              break;
+            }
+          }
         }
+
         if (cartItems) {
           // 更新本地存儲和狀態
           localStorage.setItem('cartItems', JSON.stringify(cartItems));
@@ -204,10 +244,13 @@ export const useCartManager = () => {
 
   const updateServerCart = async (cartItems, item) => {
     try {
+      console.log('Starting updateServerCart with items:', cartItems);
+      console.log('Item to add/update:', item);
       // Check if the item already exists in the cart
       const existingItemIndex = cartItems.findIndex(
         (cartItem) => cartItem.productId === item._id
       );
+      console.log('Existing item index:', existingItemIndex);
 
       let updatedItems;
 
@@ -215,7 +258,7 @@ export const useCartManager = () => {
         // If item exists, increase quantity
         updatedItems = cartItems.map((cartItem, index) => {
           if (index === existingItemIndex) {
-            return { ...cartItem, quantity: cartItem.quantity + 1 };
+            return { ...cartItem, quantity: (cartItem.quantity || 1) + 1 };
           }
           return cartItem;
         });
@@ -232,36 +275,96 @@ export const useCartManager = () => {
           },
         ];
       }
+      console.log('Updated items to send to server:', updatedItems);
+      console.log('PUT request to:', `${backendUrl}/api/users/member/cart`);
+
+      const requestBody = {
+        userId: authState.userId,
+        items: updatedItems,
+      };
+
+      console.log('Request body:', requestBody);
 
       const response = await axios.put(
         `${backendUrl}/api/users/member/cart`,
-        { userId: authState.userId, items: updatedItems },
+        requestBody,
+        // { userId: authState.userId, items: updatedItems },
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
         }
       );
+      console.log('Server cart update response status:', response.status);
+
       console.log('Server cart updated successfully.', response.data);
 
       // 處理不同的響應格式
-      let cartItems;
-      if (response.data.data && response.data.data.cart) {
+      let updatedCartItems = null;
+
+      if (
+        response.data.data &&
+        response.data.data.cart &&
+        response.data.data.cart.items
+      ) {
         // 如果響應格式是 { success: true, data: { cart: { items: [...] } } }
-        cartItems = response.data.data.cart.items;
+        updatedCartItems = response.data.data.cart.items;
+        console.log('Found cart items in response.data.data.cart.items');
       } else if (response.data.cart && response.data.cart.items) {
         // 如果響應格式是 { cart: { items: [...] } }
-        cartItems = response.data.cart.items;
+        updatedCartItems = response.data.cart.items;
+        console.log('Found cart items in response.data.cart.items');
       } else if (response.data.items) {
         // 如果響應格式是 { items: [...] }
-        cartItems = response.data.items;
-      }
+        updatedCartItems = response.data.items;
+        console.log('Found cart items in response.data.items');
+      } else {
+        console.log(
+          'Trying to find cart items in response:',
+          JSON.stringify(response.data)
+        );
+        const findArrayInObject = (obj, path = '') => {
+          if (!obj || typeof obj !== 'object') return null;
 
-      if (cartItems) {
+          for (const key in obj) {
+            const currentPath = path ? `${path}.${key}` : key;
+
+            if (Array.isArray(obj[key])) {
+              console.log(`Found array at ${currentPath}:`, obj[key]);
+              return obj[key];
+            } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+              const result = findArrayInObject(obj[key], currentPath);
+              if (result) return result;
+            }
+          }
+          return null;
+        };
+        updatedCartItems = findArrayInObject(response.data);
+        // If we still can't find an array, use the updated items we sent
+        if (!updatedCartItems) {
+          console.log(
+            'Could not find cart items in response, using local updated items'
+          );
+          updatedCartItems = updatedItems;
+        }
+      }
+      if (updatedCartItems) {
+        console.log('Final updated cart items:', updatedCartItems);
         // 更新本地存儲和狀態
-        localStorage.setItem('cartItems', JSON.stringify(cartItems));
-        setCartItems(cartItems);
-        return { items: cartItems };
+        localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
+        setCartItems(updatedCartItems);
+        return { items: updatedCartItems };
       } else {
         console.error('Response data missing items array:', response.data);
+        // If we can't extract cart items from the response, but the request was successful,
+        // return the items we sent to the server
+        if (response.status >= 200 && response.status < 300) {
+          console.log('Using local updated items as fallback');
+          localStorage.setItem('cartItems', JSON.stringify(updatedItems));
+          setCartItems(updatedItems);
+          return { items: updatedItems };
+        }
         return null;
       }
     } catch (error) {
@@ -269,6 +372,18 @@ export const useCartManager = () => {
         'Error updating server cart:',
         error.response?.data || error.message
       );
+      if (error.response) {
+        console.error(
+          'Server responded with error status:',
+          error.response.status
+        );
+        console.error('Error response data:', error.response.data);
+      } else if (error.request) {
+        console.error('No response received from server:', error.request);
+      } else {
+        console.error('Error message:', error.message);
+      }
+
       return null;
     }
   };

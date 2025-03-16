@@ -15,14 +15,14 @@ PetsLove is a web application built with React, Node.js, and Express that allows
 
 ## Technologies Used
 
-React
-Node.js
-Express
-MongoDB (or another database)
-MulterCloudinary (for image storage)
-Vite (build tool)
-SweetAlert2 (for alert notifications)
-Render
+- React
+- Node.js
+- Express
+- MongoDB
+- Multer Cloudinary (for image storage)
+- Vite (build tool)
+- SweetAlert2 (for alert notifications)
+- Render
 
 ## Installation
 
