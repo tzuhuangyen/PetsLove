@@ -34,9 +34,15 @@ export const useCartManager = () => {
 
   const handleAddToCart = async (item) => {
     console.log('Item to add:', item);
+    console.log('Image path in item:', item.image); // Add this line
+
     if (!item._id || !item.productName || !item.price) {
       console.error('Invalid item data:', item);
       return;
+    } // Ensure the item has an image property, even if it's empty
+    if (!item.image) {
+      console.warn('Item has no image, setting to empty string');
+      item = { ...item, image: '' };
     }
     // 检查用户是否已登录
     if (!authState.userId) {
@@ -132,7 +138,7 @@ export const useCartManager = () => {
             productName: item.productName,
             quantity: item.quantity || 1,
             price: item.price,
-            image: item.image,
+            image: item._id || '',
           },
         ],
       };
@@ -271,7 +277,7 @@ export const useCartManager = () => {
             productName: item.productName,
             quantity: 1,
             price: item.price,
-            image: item.image,
+            image: item.image || '',
           },
         ];
       }
@@ -464,5 +470,6 @@ export const useCartManager = () => {
   return {
     handleAddToCart,
     loadCartFromServer,
+    handleDeleteCartItem,
   };
 };

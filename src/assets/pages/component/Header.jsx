@@ -101,6 +101,17 @@ function Header() {
       }
     }
   };
+  // Helper function to get image URL with fallback
+  const getProductImageUrl = (item) => {
+    // Use productId for image URL if available, otherwise use a placeholder
+    if (!item || (!item.productId && !item._id)) {
+      return '/images/footprint.png';
+    }
+
+    // Use productId if available, otherwise fall back to _id
+    const productId = item.productId || item._id;
+    return `${backendUrl}/api/admin/products/image/${productId}`;
+  };
 
   return (
     <div className='header'>
@@ -162,12 +173,18 @@ function Header() {
                             <Card className='mb-3 border-0' key={item._id}>
                               <Card.Body className='d-flex p-3'>
                                 <Image
-                                  src={`${backendUrl}/adminProducts/${item.image}`}
+                                  src={getProductImageUrl(item)}
                                   className='card-img-top object-fit product-img me-2'
                                   alt={item.productName}
                                   style={{ width: '60px', height: '60px' }}
+                                  onError={(e) => {
+                                    e.target.onerror = null; // Prevent infinite error loop
+                                    e.target.src = '/images/footprint.png';
+                                    console.log(
+                                      `Image load failed for ${item.productName}, using placeholder`
+                                    );
+                                  }}
                                 />
-
                                 <div>
                                   <div className='p-0'>
                                     <Card.Title>{item.productName}</Card.Title>

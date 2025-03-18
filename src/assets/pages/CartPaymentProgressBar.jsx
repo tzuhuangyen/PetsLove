@@ -82,6 +82,7 @@ export const MemberCart = () => {
   const { authState, token } = useAuth();
   const steps = ['Cart', 'Order Summary', 'Payment', 'Finalization'];
   const currentStep = 0;
+  const [failedImages, setFailedImages] = useState({});
 
   const goToNextStep = () => {
     const { handleNextStep } = useProgress();
@@ -101,24 +102,14 @@ export const MemberCart = () => {
       item._id === id ? { ...item, quantity: quantity } : item
     );
     setCartItems(updatedCartItems);
-    // try {
-    //   await axios.patch(
-    //     `${backendUrl}/api/users/member/cart/${id}`,
-    //     { quantity: quantity },
-    //     {
-    //       headers: { Authorization: `Bearer ${token}` },
-    //     }
-    //   );
-    //   console.log('Quantity updated');
-    // } catch (error) {
-    //   console.error('Error updating quantity:', error);
-    // }
+    localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
   };
 
   const handleDelete = (_id) => {
     console.log('Deleting item with id:', _id);
     const updateDeleteItem = cartItems.filter((item) => item._id !== _id);
     setCartItems(updateDeleteItem);
+    localStorage.setItem('cartItems', JSON.stringify(updateDeleteItem));
     console.log('Cart after deletion:', updateDeleteItem);
   };
 
@@ -148,13 +139,28 @@ export const MemberCart = () => {
         // Check if cart items exist in the response data
         const userCartItems = response.data.cart?.items || [];
         console.log('get user All db userCartItems:', userCartItems);
-        const serveUserCartItems = userCartItems.map((item) => ({
-          ...item,
-          image: item.image || 'default.png', // 确保每个 item 都有一个有效的 image
-        }));
-        console.log('Validated cart items:', serveUserCartItems);
-        setCartItems(serveUserCartItems);
-        return serveUserCartItems;
+
+        if (userCartItems.length > 0) {
+          // Process each item to ensure it has the correct structure
+          const serveUserCartItems = userCartItems.map((item) => {
+            // Ensure each item has the required fields
+            return {
+              ...item,
+              image: item.image || 'default.png',
+              _id: item._id || item.productId, // Ensure _id exists
+              productId: item.productId || item._id, // Ensure productId exists
+              quantity: item.quantity || 1,
+              price: item.price || 0,
+              productName: item.productName || 'Unknown Product',
+            };
+          });
+          console.log('Validated cart items:', serveUserCartItems);
+          setCartItems(serveUserCartItems);
+          return serveUserCartItems;
+        } else {
+          console.log('No cart items found in server response');
+          return [];
+        }
       }
     } catch (error) {
       console.error('Error fetching db cartItems:', error);
@@ -166,6 +172,47 @@ export const MemberCart = () => {
       return [];
     }
   };
+
+  // Add this inside the MemberCart component, just before the return statement:
+
+  useEffect(() => {
+    console.log('Current cart items:', cartItems);
+    if (cartItems && cartItems.length > 0) {
+      console.log('First cart item structure:', cartItems[0]);
+      console.log(
+        'Image URL for first item:',
+        getProductImageUrl(cartItems[0])
+      );
+    }
+  }, [cartItems]);
+
+  // Helper function to get product image URL
+  const getProductImageUrl = (item) => {
+    if (!item) {
+      console.log('No item provided to getProductImageUrl');
+      return '/images/footprint.png';
+    }
+
+    // Log the item structure to debug
+    console.log('Getting image URL for item:', {
+      id: item._id,
+      productId: item.productId,
+      image: item.image,
+    });
+
+    // Use productId if available, otherwise fall back to _id
+    const productId = item.productId || item._id;
+
+    if (!productId) {
+      console.log('No productId found for item');
+      return '/images/footprint.png';
+    }
+
+    const imageUrl = `${backendUrl}/api/admin/products/image/${productId}`;
+    console.log('Generated image URL:', imageUrl);
+    return imageUrl;
+  };
+
   const totalAmount = cartItems?.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0
@@ -181,19 +228,28 @@ export const MemberCart = () => {
             <Card.Body>
               <Row className='d-flex align-items-center'>
                 <Col md={2}>
-                  {item.image ? (
-                    <Image
-                      src={`${backendUrl}/adminProducts/${item.image}`}
-                      fluid
-                      style={{ maxHeight: '100px' }}
-                      alt={item.productName}
+                  {' '}
+                  {/* Try direct img tag instead of React-Bootstrap Image component */}
+                  {failedImages[item._id] ? (
+                    <img
+                      src='/images/Logo.png'
+                      alt={item.productName || 'Product'}
+                      style={{
+                        maxHeight: '100px',
+                        maxWidth: '100%',
+                        objectFit: 'contain',
+                      }}
                     />
                   ) : (
-                    <Image
-                      src='../../../public/images/Logo.png' // 提供一个默认图片路径
-                      fluid
-                      style={{ maxHeight: '100px' }}
-                      alt='Default Image'
+                    <img
+                      src={getProductImageUrl(item)}
+                      alt={item.productName || 'Product'}
+                      style={{
+                        maxHeight: '100px',
+                        maxWidth: '100%',
+                        objectFit: 'contain',
+                      }}
+                      onError={() => handleImageError(item._id)}
                     />
                   )}
                 </Col>
