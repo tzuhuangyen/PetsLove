@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import {
   BrowserRouter as Router,
   useNavigate,
@@ -20,9 +20,10 @@ import {
   InputGroup,
   FormControl,
   Alert,
+  Spinner,
 } from 'react-bootstrap';
 
-import { BsTrash, BsHeart } from 'react-icons/bs';
+import { BsTrash, BsHeart, BsArrowClockwise } from 'react-icons/bs';
 import {
   FaRegCheckCircle,
   FaCheckCircle,
@@ -30,6 +31,7 @@ import {
   FaBolt,
   FaLock,
   FaTimes,
+  FaSync,
 } from 'react-icons/fa';
 
 import { backendUrl } from '../../../config.js';
@@ -38,6 +40,7 @@ import Confetti from 'react-confetti';
 import { useCart } from './Context/CartContext.jsx';
 import { useAuth } from './Context/AuthContext.jsx';
 import EditAdd from './component/EditAdd';
+
 //訂單付款進度條
 export const ProgressBar = ({ steps, currentStep }) => {
   return (
@@ -61,255 +64,519 @@ export const ProgressBar = ({ steps, currentStep }) => {
     </div>
   );
 };
-// 購物車列表組件
-/**
- * The `MemberCart` component represents the shopping cart page for a logged-in user.
- * It fetches the user's cart items from the backend, displays them, and allows the user to update quantities and remove items.
- * The component also handles the checkout process, navigating the user to the order summary page if they are logged in, or the login page if they are not.
- */
-/**
- * The `PaymentDetails` component represents the payment details page of the checkout process.
- * It allows the user to enter their credit card information, which is then processed for the payment.
- * The component uses the `useProgress` hook to handle the progress of the checkout process, and navigates the user to the next step (order finalization) when the payment details are submitted.
- */
+
 //會員購物車頁面
 export const MemberCart = () => {
   const location = useLocation();
   const { handleNextStep } = useProgress();
   const navigate = useNavigate();
-  //display localstorage cart items
-  const { cartItems = [], setCartItems } = useCart(); // Use cart context
-  const { authState, token } = useAuth();
+
+  // Use cart context
+  const {
+    cartItems,
+    setCartItems,
+    updateCartItemQuantity,
+    removeFromCart,
+    syncCartWithServer,
+    verifyCartWithServer,
+    isUpdating,
+    updateError,
+    lastSyncTime,
+  } = useCart();
+
+  const { authState } = useAuth();
   const steps = ['Cart', 'Order Summary', 'Payment', 'Finalization'];
   const currentStep = 0;
   const [failedImages, setFailedImages] = useState({});
+  const [actionStatus, setActionStatus] = useState({
+    action: null,
+    success: false,
+    message: '',
+    timestamp: null,
+  });
 
-  const goToNextStep = () => {
-    const { handleNextStep } = useProgress();
-    handleNextStep();
-    navigate('/users/member/order-summary');
-  };
-  useEffect(() => {
-    getUsersAllCartItems();
-  }, [token]);
-
+  // Handle quantity change
   const handleQtyChange = async (id, quantity) => {
     if (quantity < 1) {
-      quantity = 1; // 確保數量至少為1
+      quantity = 1;
     }
-    // Update quantity in the local state
-    const updatedCartItems = cartItems.map((item) =>
-      item._id === id ? { ...item, quantity: quantity } : item
+
+    console.log(`MemberCart: Changing quantity for item ${id} to ${quantity}`);
+    setActionStatus({
+      action: 'update',
+      success: false,
+      message: `Updating quantity...`,
+      timestamp: new Date().toISOString(),
+    });
+
+    try {
+      // First update local state for immediate UI feedback
+      const updatedItems = cartItems.map((item) =>
+        item._id === id || item.productId === id ? { ...item, quantity } : item
+      );
+      setCartItems(updatedItems);
+
+      // Then try to sync with server if authenticated
+      if (authState.isAuthenticated) {
+        const result = await syncCartWithServer('push');
+
+        if (result.success) {
+          setActionStatus({
+            action: 'update',
+            success: true,
+            message: `Quantity updated successfully`,
+            timestamp: new Date().toISOString(),
+          });
+        } else {
+          setActionStatus({
+            action: 'update',
+            success: false,
+            message: `Server sync failed: ${result.error}`,
+            timestamp: new Date().toISOString(),
+          });
+
+          // Verify cart to ensure consistency
+          await verifyCartWithServer();
+        }
+      } else {
+        setActionStatus({
+          action: 'update',
+          success: true,
+          message: `Quantity updated in local cart`,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    } catch (error) {
+      console.error('MemberCart: Error updating quantity:', error);
+      setActionStatus({
+        action: 'update',
+        success: false,
+        message: `Error: ${error.message}`,
+        timestamp: new Date().toISOString(),
+      });
+
+      // Verify cart to ensure consistency
+      if (authState.isAuthenticated) {
+        await verifyCartWithServer();
+      }
+    }
+
+    // Clear success message after 2 seconds
+    setTimeout(() => {
+      setActionStatus((prev) => {
+        if (prev.action === 'update') {
+          return { action: null, success: false, message: '', timestamp: null };
+        }
+        return prev;
+      });
+    }, 2000);
+  };
+
+  // Handle delete item
+  // Modify the handleDelete function in MemberCart component
+  const handleDelete = async (itemId) => {
+    console.log('MemberCart: Deleting item with id:', itemId);
+    console.log(
+      'MemberCart: Cart items before deletion:',
+      JSON.stringify(cartItems)
     );
-    setCartItems(updatedCartItems);
-    localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
-  };
 
-  const handleDelete = (_id) => {
-    console.log('Deleting item with id:', _id);
-    const updateDeleteItem = cartItems.filter((item) => item._id !== _id);
-    setCartItems(updateDeleteItem);
-    localStorage.setItem('cartItems', JSON.stringify(updateDeleteItem));
-    console.log('Cart after deletion:', updateDeleteItem);
-  };
+    setActionStatus({
+      action: 'delete',
+      success: false,
+      message: `Removing item from cart...`,
+      timestamp: new Date().toISOString(),
+    });
 
-  //check user is login or not
-  const handleCheckout = () => {
-    console.log('Is Authenticated:', authState.isAuthenticated);
+    try {
+      // Call the removeFromCart function from CartContext
+      // This will handle both local state update and server sync
+      const result = await removeFromCart(itemId);
+
+      if (result.success) {
+        setActionStatus({
+          action: 'delete',
+          success: true,
+          message: `Item removed successfully`,
+          timestamp: new Date().toISOString(),
+        });
+      } else {
+        setActionStatus({
+          action: 'delete',
+          success: false,
+          message: `Failed to remove item: ${result.error}`,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    } catch (error) {
+      console.error('MemberCart: Error removing item:', error);
+      setActionStatus({
+        action: 'delete',
+        success: false,
+        message: `Error: ${error.message}`,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    // Clear success message after 2 seconds
+    setTimeout(() => {
+      setActionStatus((prev) => {
+        if (prev.action === 'delete') {
+          return { action: null, success: false, message: '', timestamp: null };
+        }
+        return prev;
+      });
+    }, 2000);
+  };
+  // Check user is login or not
+  const handleCheckout = async () => {
+    console.log('MemberCart: Is Authenticated:', authState.isAuthenticated);
     if (authState.isAuthenticated) {
-      navigate('/users/member/order-summary');
-    } else {
-      console.log('Navigating to Login page');
-      // window.location.href = 'MERN-petslove/users/login';
+      // Ensure cart is synced with server before checkout
+      setActionStatus({
+        action: 'checkout',
+        success: false,
+        message: `Syncing cart with server before checkout...`,
+        timestamp: new Date().toISOString(),
+      });
 
+      try {
+        const result = await syncCartWithServer('both');
+
+        if (result.success) {
+          navigate('/users/member/order-summary');
+        } else {
+          setActionStatus({
+            action: 'checkout',
+            success: false,
+            message: `Failed to sync cart: ${result.error}`,
+            timestamp: new Date().toISOString(),
+          });
+        }
+      } catch (error) {
+        console.error('MemberCart: Error during checkout:', error);
+        setActionStatus({
+          action: 'checkout',
+          success: false,
+          message: `Error during checkout: ${error.message}`,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    } else {
+      console.log('MemberCart: Navigating to Login page');
       navigate('/users/login');
     }
   };
 
-  //get login user's cart from db
-  const getUsersAllCartItems = async () => {
-    try {
-      if (token) {
-        const response = await axios.get(
-          `${backendUrl}/api/users/member/cart`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        // Check if cart items exist in the response data
-        const userCartItems = response.data.cart?.items || [];
-        console.log('get user All db userCartItems:', userCartItems);
-
-        if (userCartItems.length > 0) {
-          // Process each item to ensure it has the correct structure
-          const serveUserCartItems = userCartItems.map((item) => {
-            // Ensure each item has the required fields
-            return {
-              ...item,
-              image: item.image || 'default.png',
-              _id: item._id || item.productId, // Ensure _id exists
-              productId: item.productId || item._id, // Ensure productId exists
-              quantity: item.quantity || 1,
-              price: item.price || 0,
-              productName: item.productName || 'Unknown Product',
-            };
-          });
-          console.log('Validated cart items:', serveUserCartItems);
-          setCartItems(serveUserCartItems);
-          return serveUserCartItems;
-        } else {
-          console.log('No cart items found in server response');
-          return [];
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching db cartItems:', error);
-      console.dir('Error fetching db cartItems:', error);
-      console.error(
-        'Error details:',
-        error.response ? error.response.data : error.message
-      );
-      return [];
-    }
+  // Helper function to handle image errors
+  const handleImageError = (itemId) => {
+    setFailedImages((prev) => ({
+      ...prev,
+      [itemId]: true,
+    }));
   };
-
-  // Add this inside the MemberCart component, just before the return statement:
-
-  useEffect(() => {
-    console.log('Current cart items:', cartItems);
-    if (cartItems && cartItems.length > 0) {
-      console.log('First cart item structure:', cartItems[0]);
-      console.log(
-        'Image URL for first item:',
-        getProductImageUrl(cartItems[0])
-      );
-    }
-  }, [cartItems]);
 
   // Helper function to get product image URL
   const getProductImageUrl = (item) => {
     if (!item) {
-      console.log('No item provided to getProductImageUrl');
+      console.log('MemberCart: No item provided to getProductImageUrl');
       return '/images/footprint.png';
     }
-
-    // Log the item structure to debug
-    console.log('Getting image URL for item:', {
-      id: item._id,
-      productId: item.productId,
-      image: item.image,
-    });
 
     // Use productId if available, otherwise fall back to _id
     const productId = item.productId || item._id;
 
     if (!productId) {
-      console.log('No productId found for item');
+      console.log('MemberCart: No productId found for item');
       return '/images/footprint.png';
     }
 
     const imageUrl = `${backendUrl}/api/admin/products/image/${productId}`;
-    console.log('Generated image URL:', imageUrl);
     return imageUrl;
   };
 
-  const totalAmount = cartItems?.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  );
+  const totalAmount =
+    cartItems?.reduce((acc, item) => acc + item.price * item.quantity, 0) || 0;
+
+  // Function to manually refresh cart from server
+  const refreshCart = async () => {
+    setActionStatus({
+      action: 'refresh',
+      success: false,
+      message: 'Refreshing cart from server...',
+      timestamp: new Date().toISOString(),
+    });
+
+    try {
+      const result = await syncCartWithServer('pull');
+
+      if (result.success) {
+        setActionStatus({
+          action: 'refresh',
+          success: true,
+          message: 'Cart refreshed successfully',
+          timestamp: new Date().toISOString(),
+        });
+      } else {
+        setActionStatus({
+          action: 'refresh',
+          success: false,
+          message: `Failed to refresh cart: ${result.error}`,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    } catch (error) {
+      console.error('MemberCart: Error refreshing cart:', error);
+      setActionStatus({
+        action: 'refresh',
+        success: false,
+        message: `Error refreshing cart: ${error.message}`,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    // Clear success message after 2 seconds
+    setTimeout(() => {
+      setActionStatus((prev) => {
+        if (prev.action === 'refresh') {
+          return { action: null, success: false, message: '', timestamp: null };
+        }
+        return prev;
+      });
+    }, 2000);
+  };
+
+  // Function to manually push cart to server
+  // Function to manually push cart to server
+  const pushCartToServer = async () => {
+    setActionStatus({
+      action: 'push',
+      success: false,
+      message: 'Pushing cart to server...',
+      timestamp: new Date().toISOString(),
+    });
+
+    console.log(
+      'MemberCart: Starting push to server with cart items:',
+      JSON.stringify(cartItems)
+    );
+
+    try {
+      // First verify what's currently on the server
+      console.log('MemberCart: Verifying current server state before push...');
+      const verifyResult = await verifyCartWithServer();
+      console.log('MemberCart: Server verification result:', verifyResult);
+
+      // Now push the updated cart
+      const result = await syncCartWithServer('push');
+      console.log('MemberCart: Push to server result:', result);
+
+      if (result.success) {
+        // Verify again to make sure changes were applied
+        console.log('MemberCart: Verifying server state after push...');
+        const afterPushVerify = await verifyCartWithServer();
+        console.log('MemberCart: Server state after push:', afterPushVerify);
+
+        setActionStatus({
+          action: 'push',
+          success: true,
+          message: 'Cart pushed to server successfully',
+          timestamp: new Date().toISOString(),
+        });
+      } else {
+        setActionStatus({
+          action: 'push',
+          success: false,
+          message: `Failed to push cart: ${result.error}`,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    } catch (error) {
+      console.error('MemberCart: Error pushing cart to server:', error);
+      setActionStatus({
+        action: 'push',
+        success: false,
+        message: `Error pushing cart: ${error.message}`,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    // Clear success message after 2 seconds
+    setTimeout(() => {
+      setActionStatus((prev) => {
+        if (prev.action === 'push') {
+          return { action: null, success: false, message: '', timestamp: null };
+        }
+        return prev;
+      });
+    }, 2000);
+  };
+
   return (
     <div>
       <h2 className='mb-4'>Shopping Cart</h2>
-      {cartItems.length === 0 ? (
-        <p>your cart is empty</p>
-      ) : (
-        cartItems.map((item) => (
-          <Card className='mb-3' key={item._id}>
-            <Card.Body>
-              <Row className='d-flex align-items-center'>
-                <Col md={2}>
-                  {' '}
-                  {/* Try direct img tag instead of React-Bootstrap Image component */}
-                  {failedImages[item._id] ? (
-                    <img
-                      src='/images/Logo.png'
-                      alt={item.productName || 'Product'}
-                      style={{
-                        maxHeight: '100px',
-                        maxWidth: '100%',
-                        objectFit: 'contain',
-                      }}
-                    />
-                  ) : (
-                    <img
-                      src={getProductImageUrl(item)}
-                      alt={item.productName || 'Product'}
-                      style={{
-                        maxHeight: '100px',
-                        maxWidth: '100%',
-                        objectFit: 'contain',
-                      }}
-                      onError={() => handleImageError(item._id)}
-                    />
-                  )}
-                </Col>
-                <Col md={3}>
-                  <Card.Title>{item.productName}</Card.Title>
-                  <Card.Text>${item.price}</Card.Text>
-                </Col>
-                <Col md={2}>
-                  <Form.Control
-                    type='number'
-                    value={item.quantity}
-                    onChange={(e) =>
-                      handleQtyChange(item._id, parseInt(e.target.value))
-                    }
-                    min='1'
-                  />
-                </Col>
-                <Col md={2}>
-                  <Card.Text>${item.price * item.quantity}</Card.Text>
-                </Col>
-                <Col md={1}>
-                  <Button variant='link' onClick={() => handleDelete(item._id)}>
-                    <BsTrash />
-                  </Button>
-                </Col>
-                <Col md={1}>
-                  <Button variant='link'>
-                    <BsHeart />
-                  </Button>
-                </Col>
-              </Row>
-            </Card.Body>
-          </Card>
-        ))
+
+      {/* Status indicators */}
+      {isUpdating && (
+        <Alert variant='info' className='mb-3 d-flex align-items-center'>
+          <Spinner animation='border' size='sm' className='me-2' />
+          <span>Updating cart...</span>
+        </Alert>
       )}
-      <Card className='p-3'>
-        <Row
-          className='d-flex
-      align-items-center'
+
+      {updateError && (
+        <Alert variant='danger' className='mb-3'>
+          {updateError}
+        </Alert>
+      )}
+
+      {actionStatus.message && (
+        <Alert
+          variant={actionStatus.success ? 'success' : 'info'}
+          className='mb-3'
         >
-          <Col md={4}>Total Amount</Col>
-          <Col md={5} className='text-end pe-5'>
-            ${totalAmount}
-          </Col>
-          <Col md={3}>
-            <Nav.Link to='#' className='text-end mt-2' eventKey={2}>
-              <Button
-                onClick={handleCheckout}
-                variant='primary'
-                className='readMoreBtn p-2 fs-6'
-              >
-                CheckOut
-              </Button>
-            </Nav.Link>
-          </Col>
-        </Row>
-      </Card>
+          {actionStatus.message}
+        </Alert>
+      )}
+
+      {/* Sync controls */}
+      {authState.isAuthenticated && (
+        <div className='mb-3'>
+          <Button
+            variant='outline-primary'
+            size='sm'
+            onClick={refreshCart}
+            className='me-2'
+            disabled={isUpdating || actionStatus.action !== null}
+          >
+            <BsArrowClockwise className='me-1' /> Pull from Server
+          </Button>
+          <Button
+            variant='outline-primary'
+            size='sm'
+            onClick={pushCartToServer}
+            className='me-2'
+            disabled={isUpdating || actionStatus.action !== null}
+          >
+            <FaSync className='me-1' /> Push to Server
+          </Button>
+          {lastSyncTime && (
+            <small className='d-block text-muted mt-1'>
+              Last sync: {new Date(lastSyncTime).toLocaleTimeString()}
+            </small>
+          )}
+        </div>
+      )}
+
+      {cartItems.length === 0 ? (
+        <div className='text-center my-5'>
+          <p className='mb-4'>Your cart is empty</p>
+          <Button variant='primary' as={Link} to='/products'>
+            Continue Shopping
+          </Button>
+        </div>
+      ) : (
+        <>
+          {cartItems.map((item) => (
+            <Card className='mb-3' key={item._id || item.productId}>
+              <Card.Body>
+                <Row className='d-flex align-items-center'>
+                  <Col md={2}>
+                    {failedImages[item._id] ? (
+                      <img
+                        src='/images/Logo.png'
+                        alt={item.productName || 'Product'}
+                        style={{
+                          maxHeight: '100px',
+                          maxWidth: '100%',
+                          objectFit: 'contain',
+                        }}
+                      />
+                    ) : (
+                      <img
+                        src={getProductImageUrl(item)}
+                        alt={item.productName || 'Product'}
+                        style={{
+                          maxHeight: '100px',
+                          maxWidth: '100%',
+                          objectFit: 'contain',
+                        }}
+                        onError={() => handleImageError(item._id)}
+                      />
+                    )}
+                  </Col>
+                  <Col md={3}>
+                    <Card.Title>{item.productName}</Card.Title>
+                    <Card.Text>${item.price}</Card.Text>
+                  </Col>
+                  <Col md={2}>
+                    <Form.Control
+                      type='number'
+                      value={item.quantity}
+                      onChange={(e) =>
+                        handleQtyChange(item._id, parseInt(e.target.value))
+                      }
+                      min='1'
+                      disabled={isUpdating || actionStatus.action === 'update'}
+                    />
+                  </Col>
+                  <Col md={2}>
+                    <Card.Text>
+                      ${(item.price * item.quantity).toFixed(2)}
+                    </Card.Text>
+                  </Col>
+                  <Col md={1}>
+                    <Button
+                      variant='link'
+                      onClick={() => handleDelete(item._id)}
+                      disabled={isUpdating || actionStatus.action === 'delete'}
+                    >
+                      <BsTrash />
+                    </Button>
+                  </Col>
+                  <Col md={1}>
+                    <Button variant='link'>
+                      <BsHeart />
+                    </Button>
+                  </Col>
+                </Row>
+              </Card.Body>
+            </Card>
+          ))}
+
+          <Card className='p-3'>
+            <Row className='d-flex align-items-center'>
+              <Col md={4}>
+                <h5 className='mb-0'>Total Amount</h5>
+              </Col>
+              <Col md={5} className='text-end pe-5'>
+                <h5 className='mb-0'>${totalAmount.toFixed(2)}</h5>
+              </Col>
+              <Col md={3}>
+                <Button
+                  onClick={handleCheckout}
+                  variant='primary'
+                  className='readMoreBtn p-2 fs-6 w-100'
+                  disabled={
+                    isUpdating ||
+                    actionStatus.action !== null ||
+                    cartItems.length === 0
+                  }
+                >
+                  {isUpdating || actionStatus.action === 'checkout'
+                    ? 'Processing...'
+                    : 'Checkout'}
+                </Button>
+              </Col>
+            </Row>
+          </Card>
+        </>
+      )}
     </div>
   );
 };
+
+// The rest of the components remain unchanged
 // 付款詳情頁面組件
 export const PaymentDetails = () => {
   const [cardInfo, setCardInfo] = useState({
@@ -414,6 +681,7 @@ export const PaymentDetails = () => {
     </div>
   );
 };
+
 export const CouponCode = () => {
   const [coupon, setCoupon] = useState('');
   const [message, setMessage] = useState('');
@@ -489,53 +757,6 @@ export const OrderSummary = () => {
             <EditAdd isEditing={isEditing} setIsEditing={setIsEditing} />
           </div>
         </Col>
-        {/* <Col md={4}>
-          <div className='order-section'>
-            <div className='order-title d-flex align-items-center justify-content-between'>
-              {' '}
-              <h4>
-                <span className='me-2'>
-                  <FaRegCheckCircle />
-                </span>
-                Invoicing
-              </h4>
-              <Button variant='link' className='edit-btn'>
-                editing
-              </Button>
-            </div>
-
-            <p className='fw-bold mb-3'>Private person</p>
-            <p>TZU HUANG YEN - 36730912912</p>
-            <p>
-              Postal code: , Budapest, II. district, Budapest, Gyergyó u. 4a
-            </p>
-            <p>yan0912@hotmail.com</p>
-          </div>
-        </Col> */}
-        {/* <Col md={6}>
-          <div className='order-section'>
-            <div className='order-title d-flex align-items-center justify-content-between'>
-              {' '}
-              <h4>
-                <span className='me-2'>
-                  <FaRegCheckCircle />
-                </span>
-                Payment
-              </h4>
-              <Button variant='link' className='edit-btn'>
-                editing
-              </Button>
-            </div>
-
-            <p className='fw-bold mb-3'>Online bank card payment</p>
-            <p>
-              After sending the order, you will be redirected to the payment
-              page to enter your card details. Please note that your bank may
-              send an SMS code to confirm the purchase (the interface may differ
-              from bank to bank).
-            </p>
-          </div>
-        </Col> */}
       </Row>
       <Row>
         <Col>
@@ -579,6 +800,7 @@ export const OrderSummary = () => {
     </Container>
   );
 };
+
 //付款後安全驗證頁面組件
 export const PaymentSecurity = () => {
   const navigate = useNavigate();
@@ -667,6 +889,7 @@ export const PaymentSecurity = () => {
     </Container>
   );
 };
+
 export const Finalization = () => {
   const [showConfetti, setShowConfetti] = useState(true);
   useEffect(() => {
@@ -733,7 +956,7 @@ export const Finalization = () => {
           <FaLock size={50} />
           <h6 className='mt-2'>For maximum security</h6>
           <p>
-            eMAG does not store card data, the security of transactions is our
+            we does not store card data, the security of transactions is our
             priority, which is why we use the 3D Secure system.
           </p>
         </Col>
