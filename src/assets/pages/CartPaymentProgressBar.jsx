@@ -23,7 +23,13 @@ import {
   Spinner,
 } from 'react-bootstrap';
 
-import { BsTrash, BsHeart, BsArrowClockwise } from 'react-icons/bs';
+import {
+  BsTrash,
+  BsHeart,
+  BsArrowClockwise,
+  BsPlusCircle,
+  BsDashCircle,
+} from 'react-icons/bs';
 import {
   FaRegCheckCircle,
   FaCheckCircle,
@@ -40,6 +46,7 @@ import Confetti from 'react-confetti';
 import { useCart } from './Context/CartContext.jsx';
 import { useAuth } from './Context/AuthContext.jsx';
 import EditAdd from './component/EditAdd';
+import { useCartManager } from './component/useCartManager.jsx';
 
 //訂單付款進度條
 export const ProgressBar = ({ steps, currentStep }) => {
@@ -71,11 +78,13 @@ export const MemberCart = () => {
   const { handleNextStep } = useProgress();
   const navigate = useNavigate();
 
+  // 引入 useCartManager 鉤子
+  const { updateCartItemQuantity } = useCartManager();
+
   // Use cart context
   const {
     cartItems,
     setCartItems,
-    updateCartItemQuantity,
     removeFromCart,
     syncCartWithServer,
     verifyCartWithServer,
@@ -95,6 +104,38 @@ export const MemberCart = () => {
     timestamp: null,
   });
 
+  // 當用戶點擊增加按鈕時
+  const handleIncreaseQuantity = (itemId, currentQuantity) => {
+    console.log(
+      `Increasing quantity for item ${itemId} from ${currentQuantity} to ${
+        currentQuantity + 1
+      }`
+    );
+    console.log(
+      `Increasing quantity for item ${itemId} from ${currentQuantity} to ${
+        currentQuantity + 1
+      }`
+    );
+    updateCartItemQuantity(itemId, currentQuantity + 1);
+  };
+
+  // 當用戶點擊減少按鈕時
+  const handleDecreaseQuantity = (itemId, currentQuantity) => {
+    if (currentQuantity > 1) {
+      console.log(
+        `Decreasing quantity for item ${itemId} from ${currentQuantity} to ${
+          currentQuantity - 1
+        }`
+      );
+      console.log(
+        `Decreasing quantity for item ${itemId} from ${currentQuantity} to ${
+          currentQuantity - 1
+        }`
+      );
+      updateCartItemQuantity(itemId, currentQuantity - 1);
+    }
+  };
+
   // Handle quantity change
   const handleQtyChange = async (id, quantity) => {
     if (quantity < 1) {
@@ -108,44 +149,16 @@ export const MemberCart = () => {
       message: `Updating quantity...`,
       timestamp: new Date().toISOString(),
     });
-
     try {
-      // First update local state for immediate UI feedback
-      const updatedItems = cartItems.map((item) =>
-        item._id === id || item.productId === id ? { ...item, quantity } : item
-      );
-      setCartItems(updatedItems);
+      // 使用新的 updateCartItemQuantity 函數
+      await updateCartItemQuantity(id, quantity);
 
-      // Then try to sync with server if authenticated
-      if (authState.isAuthenticated) {
-        const result = await syncCartWithServer('push');
-
-        if (result.success) {
-          setActionStatus({
-            action: 'update',
-            success: true,
-            message: `Quantity updated successfully`,
-            timestamp: new Date().toISOString(),
-          });
-        } else {
-          setActionStatus({
-            action: 'update',
-            success: false,
-            message: `Server sync failed: ${result.error}`,
-            timestamp: new Date().toISOString(),
-          });
-
-          // Verify cart to ensure consistency
-          await verifyCartWithServer();
-        }
-      } else {
-        setActionStatus({
-          action: 'update',
-          success: true,
-          message: `Quantity updated in local cart`,
-          timestamp: new Date().toISOString(),
-        });
-      }
+      setActionStatus({
+        action: 'update',
+        success: true,
+        message: `Quantity updated successfully`,
+        timestamp: new Date().toISOString(),
+      });
     } catch (error) {
       console.error('MemberCart: Error updating quantity:', error);
       setActionStatus({
@@ -154,13 +167,11 @@ export const MemberCart = () => {
         message: `Error: ${error.message}`,
         timestamp: new Date().toISOString(),
       });
-
       // Verify cart to ensure consistency
       if (authState.isAuthenticated) {
         await verifyCartWithServer();
       }
     }
-
     // Clear success message after 2 seconds
     setTimeout(() => {
       setActionStatus((prev) => {
@@ -173,7 +184,6 @@ export const MemberCart = () => {
   };
 
   // Handle delete item
-  // Modify the handleDelete function in MemberCart component
   const handleDelete = async (itemId) => {
     console.log('MemberCart: Deleting item with id:', itemId);
     console.log(
@@ -346,7 +356,16 @@ export const MemberCart = () => {
     }, 2000);
   };
 
-  // Function to manually push cart to server
+  // Clear success message after 2 seconds
+  setTimeout(() => {
+    setActionStatus((prev) => {
+      if (prev.action === 'push') {
+        return { action: null, success: false, message: '', timestamp: null };
+      }
+      return prev;
+    });
+  }, 2000);
+
   // Function to manually push cart to server
   const pushCartToServer = async () => {
     setActionStatus({
@@ -411,7 +430,6 @@ export const MemberCart = () => {
       });
     }, 2000);
   };
-
   return (
     <div>
       <h2 className='mb-4'>Shopping Cart</h2>
@@ -509,16 +527,43 @@ export const MemberCart = () => {
                     <Card.Title>{item.productName}</Card.Title>
                     <Card.Text>${item.price}</Card.Text>
                   </Col>
-                  <Col md={2}>
-                    <Form.Control
-                      type='number'
-                      value={item.quantity}
-                      onChange={(e) =>
-                        handleQtyChange(item._id, parseInt(e.target.value))
-                      }
-                      min='1'
-                      disabled={isUpdating || actionStatus.action === 'update'}
-                    />
+                  <Col md={3}>
+                    <InputGroup className='d-flex justify-content-center align-items-center'>
+                      <Button
+                        variant='outline-secondary'
+                        onClick={() =>
+                          handleDecreaseQuantity(
+                            item._id || item.productId,
+                            item.quantity
+                          )
+                        }
+                        disabled={
+                          item.quantity <= 1 ||
+                          isUpdating ||
+                          actionStatus.action === 'update'
+                        }
+                      >
+                        <BsDashCircle />
+                      </Button>
+                      <div className='quantity-display p-2'>
+                        {item.quantity}
+                      </div>
+
+                      <Button
+                        variant='outline-secondary'
+                        onClick={() =>
+                          handleIncreaseQuantity(
+                            item._id || item.productId,
+                            item.quantity
+                          )
+                        }
+                        disabled={
+                          isUpdating || actionStatus.action === 'update'
+                        }
+                      >
+                        <BsPlusCircle />
+                      </Button>
+                    </InputGroup>
                   </Col>
                   <Col md={2}>
                     <Card.Text>
@@ -718,7 +763,9 @@ export const CouponCode = () => {
   );
 };
 
-// 訂單詳情頁面組件
+{
+  /* 訂單詳情頁面組件 */
+}
 export const OrderSummary = () => {
   const { handleNextStep } = useProgress();
   const navigate = useNavigate();
@@ -905,7 +952,7 @@ export const Finalization = () => {
         <Card.Body>
           <FaCheckCircle size={50} color='green' />
           <Card.Title className='mt-3'>
-            Dear tzu yen, thank you for your order!
+            Dear customer, thank you for your order!
           </Card.Title>
           <Card.Text>
             Lorem ipsum dolor sit amet consectetur, adipisicing elit. Delectus,

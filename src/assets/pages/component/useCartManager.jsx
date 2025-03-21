@@ -264,7 +264,12 @@ export const useCartManager = () => {
         // If item exists, increase quantity
         updatedItems = cartItems.map((cartItem, index) => {
           if (index === existingItemIndex) {
-            return { ...cartItem, quantity: (cartItem.quantity || 1) + 1 };
+            const newQuantity = (cartItem.quantity || 0) + 1;
+            console.log(
+              `Updating quantity for item at index ${index} from ${cartItem.quantity} to ${newQuantity}`
+            );
+
+            return { ...cartItem, quantity: newQuantity };
           }
           return cartItem;
         });
@@ -393,6 +398,77 @@ export const useCartManager = () => {
       return null;
     }
   };
+  // 添加更新購物車項目數量的函數
+  const updateCartItemQuantity = async (itemId, newQuantity) => {
+    try {
+      if (!authState.isAuthenticated || !token) {
+        console.error('User not authenticated, cannot update cart item');
+        return;
+      }
+
+      console.log(`Updating item ${itemId} quantity to ${newQuantity}`);
+
+      // 確保數量是有效的正整數
+      if (newQuantity <= 0 || !Number.isInteger(newQuantity)) {
+        console.error('Invalid quantity:', newQuantity);
+        return;
+      }
+
+      // 先更新本地購物車
+      const updatedCartItems = cartItems.map((item) => {
+        if (item.productId === itemId || item._id === itemId) {
+          return { ...item, quantity: newQuantity };
+        }
+        return item;
+      });
+
+      // 立即更新本地狀態，提供即時反饋
+      setCartItems(updatedCartItems);
+      localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
+
+      // 然後更新服務器購物車
+      // 使用 PATCH 請求來更新特定商品的數量
+      try {
+        const response = await axios.patch(
+          `${backendUrl}/api/users/member/cart/${itemId}`,
+          { quantity: newQuantity },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        console.log('Server response for quantity update:', response.data);
+      } catch (error) {
+        console.error('Error updating quantity on server:', error.message);
+        if (error.response) {
+          console.error('Server error response:', error.response.data);
+
+          // 如果 PATCH 請求失敗，嘗試使用 PUT 請求更新整個購物車
+          try {
+            console.log('Falling back to PUT request to update entire cart');
+            await axios.put(
+              `${backendUrl}/api/users/member/cart`,
+              { items: updatedCartItems },
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  'Content-Type': 'application/json',
+                },
+              }
+            );
+            console.log('Successfully updated cart using PUT fallback');
+          } catch (putError) {
+            console.error('PUT fallback also failed:', putError.message);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error in updateCartItemQuantity:', error);
+    }
+  };
   // Add a function to load cart from server
   const loadCartFromServer = async (cartItems, item) => {
     if (!authState.isAuthenticated || !token) {
@@ -427,7 +503,7 @@ export const useCartManager = () => {
       }
     }
   };
-  // 添加刪除購物車項目的函數
+  // 刪除購物車項目的函數
   const handleDeleteCartItem = async (itemId) => {
     try {
       if (!authState.isAuthenticated || !token) {
@@ -470,6 +546,7 @@ export const useCartManager = () => {
   return {
     handleAddToCart,
     loadCartFromServer,
+    updateCartItemQuantity,
     handleDeleteCartItem,
   };
 };
