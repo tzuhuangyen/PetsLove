@@ -650,7 +650,7 @@ export const PaymentDetails = () => {
     setError(null);
 
     try {
-      console.log('Creating order...');
+      console.log('Creating order with items:', cartItems);
       // 從本地存儲獲取用戶令牌
       const token = localStorage.getItem('token');
       if (!token) {
@@ -700,7 +700,7 @@ export const PaymentDetails = () => {
       // 導航到支付安全頁面並傳遞訂單ID
       handleNextStep();
       navigate(
-        `/users/member/order-PaymentSecurity?orderId=${response.data._id}`
+        `/users/member/order-PaymentSecurity?orderId=${response.data.orderId}`
       );
     } catch (error) {
       console.error('Error creating order:', error);
@@ -854,7 +854,7 @@ export const OrderSummary = () => {
       try {
         // Fetch order details from backend
         const response = await axios.get(
-          `${backendUrl}/api/users/member/orders/${orderId}`
+          `${backendUrl}/api/users/member/getUserOrders/${orderId}`
         );
         setOrder(response.data);
         setLoading(false);
@@ -1000,13 +1000,13 @@ export const PaymentSecurity = () => {
       try {
         const token = localStorage.getItem('token');
         const response = await axios.get(
-          `${backendUrl}/api/users/member/orders/${orderId}`,
+          `${backendUrl}/api/users/member/getUserOrders/${orderId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
 
-        setOrder(response.data);
+        setOrder(response.data.order);
         setLoading(false);
 
         // 模擬付款處理，3秒後自動進入下一步
@@ -1030,7 +1030,7 @@ export const PaymentSecurity = () => {
   const updateOrderStatus = async (orderId, status) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.put(
+      await axios.patch(
         `${backendUrl}/api/users/member/orders/${orderId}/status`,
         { status },
         {
@@ -1177,7 +1177,7 @@ export const Finalization = () => {
         try {
           const token = localStorage.getItem('token');
           const response = await axios.get(
-            `${backendUrl}/api/users/member/orders/${orderId}`,
+            `${backendUrl}/api/users/member/getUserOrders/${orderId}`,
             {
               headers: { Authorization: `Bearer ${token}` },
             }
