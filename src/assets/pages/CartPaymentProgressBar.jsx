@@ -652,12 +652,13 @@ export const PaymentDetails = () => {
     try {
       console.log('Creating order with items:', cartItems);
       // 從本地存儲獲取用戶令牌
-      const decodedToken = jwt_decode(token); // You'll need to import jwt_decode
-      const userId = decodedToken.id; // Adjust this based on your token structure
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Please login to place an order');
+      }
 
       // 準備訂單數據
       const orderData = {
-        userId: userId, // Add this line to include the user ID
         items: cartItems.map((item) => ({
           productId: item._id || item.productId,
           productName: item.productName,
