@@ -524,26 +524,27 @@ export const CartProvider = ({ children }) => {
   const clearCart = async () => {
     console.log('CartContext: Clearing cart');
     try {
-      setIsUpdating(true);
+      setCartItems([]);
+      localStorage.removeItem('cart');
 
       if (authState.isAuthenticated) {
-        // 如果已登錄，則清空伺服器上的購物車
         const token = localStorage.getItem('token');
-        await axios.delete(`${backendUrl}/api/cart`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+
+        // 向服務器發送清除購物車的請求
+        await axios.put(
+          `${backendUrl}/api/users/member/cart/clear`,
+          {},
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        console.log('Server cart cleared successfully');
       }
 
-      // 清空本地購物車
-      setCartItems([]);
-      localStorage.setItem('cartItems', JSON.stringify([]));
-
-      setIsUpdating(false);
       return { success: true };
     } catch (error) {
       console.error('Error clearing cart:', error);
-      setUpdateError(`Failed to clear cart: ${error.message}`);
-      setIsUpdating(false);
       return { success: false, error: error.message };
     }
   };

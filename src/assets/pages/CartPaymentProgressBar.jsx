@@ -693,6 +693,9 @@ export const PaymentDetails = () => {
       // 成功創建訂單後清空購物車
       if (clearCart) {
         await clearCart();
+        // 同步清空本地存儲中的購物車
+        localStorage.removeItem('cart');
+        console.log('Cart cleared successfully');
       } else {
         console.warn('clearCart function not available in CartContext');
       }
