@@ -252,7 +252,9 @@ export const MemberCart = () => {
 
       try {
         const result = await syncCartWithServer('both');
-
+        if (!result.success) {
+          throw new Error(`Failed to sync cart: ${syncResult.error}`);
+        }
         if (result.success) {
           navigate('/users/member/order-summary');
         } else {
@@ -769,8 +771,46 @@ export const CouponCode = () => {
 export const OrderSummary = () => {
   const { handleNextStep } = useProgress();
   const navigate = useNavigate();
-
+  const { cartItems } = useCart(); // Add this line to access cart items
   const [isEditing, setIsEditing] = useState(false);
+  const [order, setOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Extract order ID from URL query params
+  const orderId = new URLSearchParams(location.search).get('orderId');
+  useEffect(() => {
+    const fetchOrder = async () => {
+      if (!orderId) {
+        setLoading(false);
+        return; // Will use cart context instead
+      }
+
+      try {
+        // Fetch order details from backend
+        const response = await axios.get(
+          `${backendUrl}/api/users/member/orders/${orderId}`
+        );
+        setOrder(response.data);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching order:', err);
+        setError('Failed to load order details');
+        setLoading(false);
+      }
+    };
+
+    fetchOrder();
+  }, [orderId]);
+
+  // Use either the fetched order items or fall back to cart items
+  const orderItems = order?.items || cartItems;
+  // Calculate total amount from cart items
+  const totalAmount =
+    order?.totalAmount ||
+    orderItems?.reduce((acc, item) => acc + item.price * item.quantity, 0) ||
+    0;
+
   const handleEditClick = () => {
     setIsEditing(true);
   };
@@ -779,6 +819,24 @@ export const OrderSummary = () => {
     handleNextStep();
     navigate('/users/member/order-payment');
   };
+
+  if (loading) {
+    return (
+      <Container className='text-center mt-5'>
+        <Spinner animation='border' role='status'>
+          <span className='visually-hidden'>Loading...</span>
+        </Spinner>
+      </Container>
+    );
+  }
+  if (error) {
+    return (
+      <Container className='mt-5'>
+        <Alert variant='danger'>{error}</Alert>
+      </Container>
+    );
+  }
+
   return (
     <Container className='order-summary mt-5'>
       <h2 className='text-center mb-4'>Order summary</h2>
@@ -822,14 +880,18 @@ export const OrderSummary = () => {
             </div>
 
             <ListGroup>
-              <ListGroup.Item>
-                1 x Head & Shoulders Citrus Fresh Shampoo, 540 ml{' '}
-                <span className='price'>HUF 2,887</span>
-              </ListGroup.Item>
-              <ListGroup.Item>
-                1 x Power Caps Color washing capsules, 44 washes{' '}
-                <span className='price'>HUF 5,299</span>
-              </ListGroup.Item>
+              {orderItems.length > 0 ? (
+                orderItems.map((item) => (
+                  <ListGroup.Item key={item._id || item.productId}>
+                    {item.quantity} x {item.productName}{' '}
+                    <span className='price'>
+                      ${(item.price * item.quantity).toFixed(2)}
+                    </span>
+                  </ListGroup.Item>
+                ))
+              ) : (
+                <ListGroup.Item>No items in order</ListGroup.Item>
+              )}
             </ListGroup>
             <div className='total mt-3'>
               <div className='total-title d-flex justify-content-between align-items-center '>
@@ -841,7 +903,9 @@ export const OrderSummary = () => {
             <CouponCode />
           </div>
         </Col>
-        <h3 className='text-center mt-4 mb-4'>Total amount: HUF 8,186</h3>
+        <h3 className='text-center mt-4 mb-4'>
+          Total amount: ${totalAmount.toFixed(2)}
+        </h3>
       </Row>
       <PaymentDetails />
     </Container>
