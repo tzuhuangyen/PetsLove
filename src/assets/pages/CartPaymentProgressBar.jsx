@@ -652,13 +652,12 @@ export const PaymentDetails = () => {
     try {
       console.log('Creating order with items:', cartItems);
       // 從本地存儲獲取用戶令牌
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Please login to place an order');
-      }
+      const decodedToken = jwt_decode(token); // You'll need to import jwt_decode
+      const userId = decodedToken.id; // Adjust this based on your token structure
 
       // 準備訂單數據
       const orderData = {
+        userId: userId, // Add this line to include the user ID
         items: cartItems.map((item) => ({
           productId: item._id || item.productId,
           productName: item.productName,
@@ -1010,12 +1009,16 @@ export const PaymentSecurity = () => {
         setLoading(false);
 
         // 模擬付款處理，3秒後自動進入下一步
-        const timer = setTimeout(() => {
-          handleNextStep();
-          navigate(`/users/member/order-finalization?orderId=${orderId}`);
+        setTimeout(async () => {
+          try {
+            await updateOrderStatus(orderId, 'paid');
+          } catch (error) {
+            console.error('Error updating order status:', error);
+            // Still navigate even if update fails
+            handleNextStep();
+            navigate(`/users/member/order-finalization?orderId=${orderId}`);
+          }
         }, 3000);
-
-        return () => clearTimeout(timer);
       } catch (err) {
         console.error('Error fetching order:', err);
         setError('Failed to load order details');
@@ -1028,15 +1031,18 @@ export const PaymentSecurity = () => {
 
   // 更新訂單狀態並導航到最終完成頁面
   const updateOrderStatus = async (orderId, status) => {
+    console.log(`Updating order ${orderId} status to ${status}`);
+
     try {
       const token = localStorage.getItem('token');
-      await axios.patch(
+      const response = await axios.patch(
         `${backendUrl}/api/users/member/orders/${orderId}/status`,
         { status },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+      console.log('Status update response:', response.data);
 
       handleNextStep();
       navigate(`/users/member/order-finalization?orderId=${orderId}`);
