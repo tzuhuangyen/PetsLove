@@ -632,43 +632,111 @@ export const PaymentDetails = () => {
     expiry: '',
     cvv: '',
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
   const { handleNextStep } = useProgress();
-
+  const { cartItems, clearCart } = useCart(); // 添加 clearCart 功能
   const navigate = useNavigate();
-
-  const goToNextStep = () => {
-    handleNextStep();
-    navigate('/users/member/order-finalization');
-  };
 
   const handleChange = (e) => {
     setCardInfo({ ...cardInfo, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     console.log(cardInfo);
     // 在這裡處理信用卡支付邏輯
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      console.log('Creating order...');
+      // 從本地存儲獲取用戶令牌
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Please login to place an order');
+      }
+
+      // 準備訂單數據
+      const orderData = {
+        items: cartItems.map((item) => ({
+          productId: item._id || item.productId,
+          productName: item.productName,
+          price: item.price,
+          quantity: item.quantity,
+        })),
+        paymentMethod: 'credit_card',
+        paymentDetails: {
+          cardNumber: cardInfo.cardNumber.replace(/\s/g, '').slice(-4), // 只保存最後4位數字，保護信用卡信息
+          cardHolderName: cardInfo.name,
+          expiryDate: cardInfo.expiry,
+        },
+        totalAmount: cartItems.reduce(
+          (total, item) => total + item.price * item.quantity,
+          0
+        ),
+        status: 'pending',
+      };
+      console.log('Sending order data:', orderData);
+
+      // 發送訂單創建請求
+      const response = await axios.post(
+        `${backendUrl}/api/users/member/orders`,
+        orderData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      console.log('Order created successfully:', response.data);
+
+      // 成功創建訂單後清空購物車
+      if (clearCart) {
+        await clearCart();
+      } else {
+        console.warn('clearCart function not available in CartContext');
+      }
+
+      // 導航到支付安全頁面並傳遞訂單ID
+      handleNextStep();
+      navigate(
+        `/users/member/order-PaymentSecurity?orderId=${response.data._id}`
+      );
+    } catch (error) {
+      console.error('Error creating order:', error);
+      setError(
+        error.response?.data?.message ||
+          error.message ||
+          'Failed to create order'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div>
-      {' '}
+      {error && (
+        <Alert variant='danger' className='mb-3'>
+          {error}
+        </Alert>
+      )}
       <Card className='p-4'>
         <Form onSubmit={handleSubmit}>
           <Form.Group className='mb-3' controlId='formCardNumber'>
-            <Form.Label></Form.Label>
+            <Form.Label>Card Number</Form.Label>
             <Form.Control
               type='text'
-              placeholder='Card number'
+              placeholder='1234 5678 9012 3456'
               name='cardNumber'
               value={cardInfo.cardNumber}
               onChange={handleChange}
+              required
             />
           </Form.Group>
 
           <Form.Group className='mb-3' controlId='formCardName'>
-            <Form.Label></Form.Label>
+            <Form.Label>Cardholder Name</Form.Label>
             <Form.Control
               type='text'
               placeholder='Name'
@@ -681,7 +749,7 @@ export const PaymentDetails = () => {
           <Row>
             <Col>
               <Form.Group className='mb-3' controlId='formCardExpiry'>
-                <Form.Label></Form.Label>
+                <Form.Label>Expiry Date</Form.Label>
                 <Form.Control
                   type='text'
                   placeholder='MM/YY'
@@ -693,7 +761,7 @@ export const PaymentDetails = () => {
             </Col>
             <Col>
               <Form.Group className='mb-3' controlId='formCardCVV'>
-                <Form.Label></Form.Label>
+                <Form.Label>CVV</Form.Label>
                 <Form.Control
                   type='text'
                   placeholder='CVV'
@@ -708,21 +776,18 @@ export const PaymentDetails = () => {
             type='checkbox'
             label='By submitting the order, I accept the General Terms of Use.'
             className='mb-3 fs-6 '
+            required
           />
-          <Nav.Link
-            className='mt-2 text-center'
-            eventKey={2}
-            as={Link}
-            to='/users/member/order-PaymentSecurity'
-          >
+          <div className='text-center'>
             <Button
               variant='primary'
               className='order-btn'
-              onClick={goToNextStep}
+              type='submit'
+              disabled={isSubmitting}
             >
-              place an order
+              {isSubmitting ? 'Processing...' : 'Place an Order'}
             </Button>
-          </Nav.Link>
+          </div>
         </Form>
       </Card>
     </div>
@@ -915,12 +980,109 @@ export const OrderSummary = () => {
 //付款後安全驗證頁面組件
 export const PaymentSecurity = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { handleNextStep } = useProgress();
+  const [order, setOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // 從 URL 獲取訂單 ID
+  const orderId = new URLSearchParams(location.search).get('orderId');
+
+  useEffect(() => {
+    const fetchOrderDetails = async () => {
+      if (!orderId) {
+        setError('No order ID found');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(
+          `${backendUrl}/api/users/member/orders/${orderId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        setOrder(response.data);
+        setLoading(false);
+
+        // 模擬付款處理，3秒後自動進入下一步
+        const timer = setTimeout(() => {
+          handleNextStep();
+          navigate(`/users/member/order-finalization?orderId=${orderId}`);
+        }, 3000);
+
+        return () => clearTimeout(timer);
+      } catch (err) {
+        console.error('Error fetching order:', err);
+        setError('Failed to load order details');
+        setLoading(false);
+      }
+    };
+
+    fetchOrderDetails();
+  }, [orderId, navigate, handleNextStep]);
+
+  // 更新訂單狀態並導航到最終完成頁面
+  const updateOrderStatus = async (orderId, status) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put(
+        `${backendUrl}/api/users/member/orders/${orderId}/status`,
+        { status },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      handleNextStep();
+      navigate(`/users/member/order-finalization?orderId=${orderId}`);
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      // 即使更新狀態失敗，也繼續導航
+      handleNextStep();
+      navigate(`/users/member/order-finalization?orderId=${orderId}`);
+    }
+  };
 
   const goToNextStep = () => {
-    handleNextStep();
-    navigate('/users/member/order-finalization');
+    if (orderId) {
+      updateOrderStatus(orderId, 'paid');
+    } else {
+      handleNextStep();
+      navigate('/users/member/order-finalization');
+    }
   };
+
+  if (loading) {
+    return (
+      <Container className='text-center mt-5'>
+        <Spinner animation='border' role='status'>
+          <span className='visually-hidden'>Loading...</span>
+        </Spinner>
+      </Container>
+    );
+  }
+  if (error) {
+    return (
+      <Container className='mt-5'>
+        <Alert variant='danger'>{error}</Alert>
+        <div className='text-center mt-3'>
+          <Button onClick={() => navigate('/users/member/myOrders')}>
+            查看我的訂單
+          </Button>
+        </div>
+      </Container>
+    );
+  }
+
+  // 格式化日期
+  const formattedDate = new Date().toISOString();
+  const totalAmount = order?.totalAmount || 0;
+
   return (
     <Container className='mt-5'>
       <Card className='p-4'>
@@ -970,11 +1132,11 @@ export const PaymentSecurity = () => {
               </h5>
               <div className='d-flex justify-content-between mb-3'>
                 <span>Date</span>
-                <span>2024-05-31T18:05:40.964Z</span>
+                <span>{formattedDate}</span>
               </div>
               <div className='d-flex justify-content-between'>
                 <span>Total</span>
-                <span>Ft 8,186.00</span>
+                <span>${totalAmount.toFixed(2)}</span>
               </div>
             </Card>
           </Col>
@@ -987,26 +1149,55 @@ export const PaymentSecurity = () => {
           </Col>
         </Row>
       </Card>
-      <Nav.Link
-        className='mt-2 text-center'
-        eventKey={2}
-        as={Link}
-        to='/users/member/order-finalization'
-      >
-        <Button className=' text-mute' onClick={goToNextStep}>
-          test to order-finalization
+      <div className='text-center mt-3'>
+        <Button className='btn-secondary' onClick={goToNextStep}>
+          Skip Payment Verification (For Testing)
         </Button>
-      </Nav.Link>
+      </div>
     </Container>
   );
 };
 
 export const Finalization = () => {
   const [showConfetti, setShowConfetti] = useState(true);
+  const location = useLocation();
+  const [order, setOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
+  // 從 URL 獲取訂單 ID
+  const orderId = new URLSearchParams(location.search).get('orderId');
+
+  // 獲取訂單詳情
   useEffect(() => {
-    const timer = setTimeout(() => setShowConfetti(false), 5000); // 5秒后停止动画
-    return () => clearTimeout(timer);
-  }, []);
+    // 5秒後停止動畫
+    const confettiTimer = setTimeout(() => setShowConfetti(false), 5000);
+
+    // 獲取訂單詳情
+    const fetchOrder = async () => {
+      if (orderId) {
+        try {
+          const token = localStorage.getItem('token');
+          const response = await axios.get(
+            `${backendUrl}/api/users/member/orders/${orderId}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+
+          setOrder(response.data);
+        } catch (err) {
+          console.error('Error fetching order details:', err);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
+    };
+
+    fetchOrder();
+
+    return () => clearTimeout(confettiTimer);
+  }, [orderId]);
 
   return (
     <Container className='mt-5'>
@@ -1019,11 +1210,27 @@ export const Finalization = () => {
             Dear customer, thank you for your order!
           </Card.Title>
           <Card.Text>
-            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Delectus,
-            obcaecati.{' '}
-            <Link to='/users/member/myOrders' className='mt-4'>
-              View order
-            </Link>
+            {orderId ? (
+              <>
+                Your order #{orderId.substring(0, 8)} has been successfully
+                placed.
+                <br />
+                <Link
+                  to={`/users/member/myOrders?highlight=${orderId}`}
+                  className='mt-4'
+                >
+                  View order
+                </Link>
+              </>
+            ) : (
+              <>
+                Your order has been successfully placed.
+                <br />
+                <Link to='/users/member/myOrders' className='mt-4'>
+                  View all orders
+                </Link>
+              </>
+            )}
           </Card.Text>
         </Card.Body>
       </Card>

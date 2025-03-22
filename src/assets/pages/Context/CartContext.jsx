@@ -523,14 +523,29 @@ export const CartProvider = ({ children }) => {
   // Function to clear cart
   const clearCart = async () => {
     console.log('CartContext: Clearing cart');
-    setCartItems([]);
-    localStorage.setItem('cartItems', JSON.stringify([]));
+    try {
+      setIsUpdating(true);
 
-    if (authState.isAuthenticated) {
-      return await updateCartOnServer([]);
+      if (authState.isAuthenticated) {
+        // 如果已登錄，則清空伺服器上的購物車
+        const token = localStorage.getItem('token');
+        await axios.delete(`${backendUrl}/api/cart`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+
+      // 清空本地購物車
+      setCartItems([]);
+      localStorage.setItem('cartItems', JSON.stringify([]));
+
+      setIsUpdating(false);
+      return { success: true };
+    } catch (error) {
+      console.error('Error clearing cart:', error);
+      setUpdateError(`Failed to clear cart: ${error.message}`);
+      setIsUpdating(false);
+      return { success: false, error: error.message };
     }
-
-    return { success: true };
   };
 
   const toggleFavorite = (productId) => {
