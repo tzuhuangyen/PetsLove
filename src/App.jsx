@@ -56,7 +56,8 @@ function App() {
               <Route path='myProfile' element={<MemberProfile />} />
               <Route path='myOrders' element={<MemberOrders />} />
               <Route path='myWishlist' element={<MemberWishlist />} />
-              <Route path='/users/member/*' element={<PaymentRoutes />} />
+              <Route path='payment/*' element={<PaymentRoutes />} />{' '}
+              {/* 修改為相對路徑 */}
             </Route>
             {/* <Route path="/favorite" element={<Favorite />} /> */}
             {/* Blog */}

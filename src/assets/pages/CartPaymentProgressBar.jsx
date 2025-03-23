@@ -1173,9 +1173,17 @@ export const Finalization = () => {
   const location = useLocation();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+
   // 從 URL 獲取訂單 ID
   const orderId = new URLSearchParams(location.search).get('orderId');
-
+  const navigate = useNavigate();
+  const viewOrder = (orderId) => {
+    // Navigate to orders page with the active tab set to "processing"
+    // and pass order ID to highlight
+    navigate('/users/member/myOrders?tab=processing', {
+      state: { highlightOrderId: orderId },
+    });
+  };
   // 獲取訂單詳情
   useEffect(() => {
     // 5秒後停止動畫
@@ -1225,12 +1233,7 @@ export const Finalization = () => {
                 Your order #{orderId.substring(0, 8)} has been successfully
                 placed.
                 <br />
-                <Link
-                  to={`/users/member/myOrders?highlight=${orderId}`}
-                  className='mt-4'
-                >
-                  View order
-                </Link>
+                <Button onClick={() => viewOrder(orderId)}>View Order</Button>
               </>
             ) : (
               <>
