@@ -10,9 +10,12 @@ import {
 import { ProgressProvider } from './assets/pages/Context/ProgressContext';
 
 const PaymentRoutes = () => {
+  console.log('PaymentRoutes组件被渲染'); // 添加调试信息
+
   return (
     <ProgressProvider>
       <Routes>
+        <Route path='' element={<MemberCart />} /> {/* 默認路由 */}
         <Route path='cart' element={<MemberCart />} />
         <Route path='order-summary' element={<OrderSummary />} />
         <Route path='order-PaymentSecurity' element={<PaymentSecurity />} />

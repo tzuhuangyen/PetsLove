@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Tab, Nav, Modal, Button, Table, Container } from 'react-bootstrap';
+import {
+  Tab,
+  Nav,
+  Modal,
+  Button,
+  Table,
+  Container,
+  Spinner,
+} from 'react-bootstrap';
 import { CiShoppingCart } from 'react-icons/ci';
 import { ImSad } from 'react-icons/im';
 import { MdOutlineRateReview } from 'react-icons/md';
@@ -16,8 +24,7 @@ export const MemberOrders = () => {
   const [activeTab, setActiveTab] = useState('all'); // 預設顯示所有訂單
   const [searchParams] = useSearchParams();
   const location = useLocation();
-
-  // Check for URL parameters or state for active tab
+  // v Check for URL parameters or state for active tab
   useEffect(() => {
     const tabParam = searchParams.get('tab');
     if (
@@ -33,30 +40,40 @@ export const MemberOrders = () => {
     }
   }, [searchParams, location]);
 
-  // Fetch all orders when component mounts
+  // v Fetch all orders when component mounts
   useEffect(() => {
-    fetchOrders();
+    try {
+      console.log('Fetching orders...');
+
+      fetchOrders();
+    } catch (err) {
+      console.error('Error fetching orders::', err);
+      setError('Failed to load your orders. Please try again later.');
+      setLoading(false);
+    }
   }, []);
 
   const fetchOrders = async () => {
     try {
+      console.log('Fetching orders...');
       setLoading(true);
       setError(null);
 
       // Get JWT from localStorage or AuthContext
-      const token = localStorage.getItem('jwt');
+      const token = localStorage.getItem('token');
+      console.log('Token:', token);
 
       // Make API request with authentication
       const response = await axios.get(
-        `${backendUrl}/api/users/member/orders`,
+        `${backendUrl}/api/users/member/getUserAllOrders`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-
-      setOrders(response.data);
+      console.log('API response:', response.data);
+      setOrders(response.data.orders || []);
     } catch (err) {
       console.error('Error fetching orders:', err);
       setError('Failed to load your orders. Please try again later.');
@@ -70,13 +87,11 @@ export const MemberOrders = () => {
   };
 
   const openOrderDetails = (order) => {
-    setSelectedOrder(order);
+    console.log('Opening order details:', order);
+    setSelectedOrder(order || null);
     setShowModal(true);
   };
 
-  // const openModal = () => {
-  //   setShowModal(true);
-  // };
   const closeModal = () => {
     setShowModal(false);
   };
@@ -91,12 +106,14 @@ export const MemberOrders = () => {
       return orderStatus === status.toLowerCase();
     });
   };
-
   // Render order table with filtered data
   const OrderTable = ({ status }) => {
     const filteredOrders = getFilteredOrders(status);
+    console.log('Rendering OrderTable for status:', status);
 
     if (loading) {
+      console.log('Loading:', loading);
+
       return (
         <div className='text-center p-5'>
           <Spinner animation='border' role='status'>
@@ -108,10 +125,14 @@ export const MemberOrders = () => {
     }
 
     if (error) {
+      console.log('Error:', error);
+
       return <div className='alert alert-danger'>{error}</div>;
     }
 
     if (filteredOrders.length === 0) {
+      console.log('Orders:', orders);
+
       return (
         <div className='text-center p-4'>
           <ImSad size={30} className='mb-2' />
@@ -134,16 +155,9 @@ export const MemberOrders = () => {
         </thead>
         <tbody>
           {filteredOrders.map((order) => (
-            <tr
-              key={order.id}
-              className={
-                location.state?.highlightOrderId === order.id
-                  ? 'table-primary'
-                  : ''
-              }
-            >
+            <tr key={order.id}>
               <td>{order.id}</td>
-              <td>{order.state || order.status}</td>
+              <td>{order.status}</td>
               <td>${parseFloat(order.total).toFixed(2)}</td>
               <td>{order.date}</td>
               <td>
@@ -154,15 +168,6 @@ export const MemberOrders = () => {
                 >
                   Details
                 </Button>
-
-                {(order.status === 'shipped' || order.state === 'Shipped') && (
-                  <Button variant='success'>Track</Button>
-                )}
-
-                {(order.status === 'delivered' ||
-                  order.state === 'Delivered') && (
-                  <Button variant='info'>Review</Button>
-                )}
               </td>
             </tr>
           ))}
@@ -170,12 +175,20 @@ export const MemberOrders = () => {
       </Table>
     );
   };
-
+  console.log('MemberOrders组件开始渲染'); // 添加调试信息
+  // 先渲染一个简单的组件，测试路由是否正常工作
+  // return (
+  //   <div className='container mt-5 p-4 border'>
+  //     <h2 className='text-center mb-4'>MY ORDERS - 测试页面</h2>
+  //     <p>如果您看到此消息，说明路由工作正常！</p>
+  //     <Button onClick={() => alert('按钮点击测试')}>测试按钮</Button>
+  //   </div>
+  // );
   return (
     <div className='container mt-5'>
-      <h2 className='text-center mb-4'>MY ORDERS</h2>
+      <h2 className='text-center mb-4'>My Orders</h2>
 
-      <Tab.Container activeKey={activeTab} onSelect={handleTabSelect}>
+      <Tab.Container activeKey={activeTab} onSelect={(k) => setActiveTab(k)}>
         <Nav variant='tabs' className='mb-4'>
           <Nav.Item>
             <Nav.Link eventKey='all'>All Orders</Nav.Link>
@@ -216,20 +229,26 @@ export const MemberOrders = () => {
       {/* Modal for order details */}
       <Modal show={showModal} onHide={closeModal} size='lg'>
         <Modal.Header closeButton>
-          <Modal.Title>Order Details #{selectedOrder?.id}</Modal.Title>
+          <Modal.Title>
+            {selectedOrder
+              ? `Order Details #${selectedOrder.id}`
+              : 'Order Details'}{' '}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {selectedOrder && (
+          {selectedOrder ? (
             <>
               <p>
-                <strong>Order Date:</strong> {selectedOrder.date}
+                <strong>Order Date:</strong> {selectedOrder.date || 'N/A'}
               </p>
               <p>
-                <strong>Status:</strong> {selectedOrder.status}
+                <strong>Status:</strong> {selectedOrder.status || 'N/A'}
               </p>
               <p>
                 <strong>Total Amount:</strong> $
-                {parseFloat(selectedOrder.total).toFixed(2)}
+                {selectedOrder.total
+                  ? parseFloat(selectedOrder.total).toFixed(2)
+                  : '0.00'}
               </p>
 
               <h5 className='mt-4'>Order Items</h5>
@@ -239,6 +258,8 @@ export const MemberOrders = () => {
               <h5 className='mt-4'>Shipping Information</h5>
               <p>Shipping details would be shown here...</p>
             </>
+          ) : (
+            <p>No order details available.</p>
           )}
         </Modal.Body>
         <Modal.Footer>
@@ -252,4 +273,8 @@ export const MemberOrders = () => {
       </Modal>
     </div>
   );
+
+  // const openModal = () => {
+  //   setShowModal(true);
+  // };
 };

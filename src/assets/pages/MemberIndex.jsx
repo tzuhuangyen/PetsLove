@@ -18,17 +18,21 @@ import {
 } from 'react-bootstrap';
 
 function MemberIndex() {
+  console.log('MemberIndex组件正在渲染');
   const navigate = useNavigate();
+  const location = useLocation(); // 添加这行
   const { authState } = useContext(AuthContext); // 获取 authState
+  console.log('当前路径:', location.pathname); // 添加这行，检查当前路径
+
   // 在组件加载时检查用户是否已登录
   useEffect(() => {
     if (!authState.isAuthenticated) {
       console.log('User is not authenticated, redirecting to login'); // Debug line
-
       // 如果未登录，重定向到登录页面
       navigate('/users/login');
     }
   }, [authState.isAuthenticated, navigate]);
+
   return (
     <Container fluid='md' className='mt-4'>
       <Row className='mb-4'>
@@ -47,6 +51,16 @@ function MemberIndex() {
           </ListGroup>
         </Col>
         <Col md={9}>
+          <div
+            style={{
+              border: '1px solid #ddd',
+              padding: '10px',
+              marginBottom: '10px',
+            }}
+          >
+            <p>调试信息: 当前路径 {location.pathname}</p>
+          </div>
+
           <Outlet />
         </Col>
       </Row>
