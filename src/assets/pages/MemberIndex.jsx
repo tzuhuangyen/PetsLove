@@ -51,16 +51,6 @@ function MemberIndex() {
           </ListGroup>
         </Col>
         <Col md={9}>
-          <div
-            style={{
-              border: '1px solid #ddd',
-              padding: '10px',
-              marginBottom: '10px',
-            }}
-          >
-            <p>调试信息: 当前路径 {location.pathname}</p>
-          </div>
-
           <Outlet />
         </Col>
       </Row>

@@ -155,11 +155,11 @@ export const MemberOrders = () => {
         </thead>
         <tbody>
           {filteredOrders.map((order) => (
-            <tr key={order.id}>
-              <td>{order.id}</td>
+            <tr key={order._id}>
+              <td>{order._id}</td>
               <td>{order.status}</td>
-              <td>${parseFloat(order.total).toFixed(2)}</td>
-              <td>{order.date}</td>
+              <td>${parseFloat(order.totalAmount).toFixed(2)}</td>
+              <td>{order.createdAt}</td>
               <td>
                 <Button
                   variant='outline-primary'
@@ -231,7 +231,7 @@ export const MemberOrders = () => {
         <Modal.Header closeButton>
           <Modal.Title>
             {selectedOrder
-              ? `Order Details #${selectedOrder.id}`
+              ? `Order Details #${selectedOrder._id}`
               : 'Order Details'}{' '}
           </Modal.Title>
         </Modal.Header>
@@ -239,21 +239,36 @@ export const MemberOrders = () => {
           {selectedOrder ? (
             <>
               <p>
-                <strong>Order Date:</strong> {selectedOrder.date || 'N/A'}
+                <strong>Order Date:</strong> {selectedOrder.createdAt || 'N/A'}
               </p>
               <p>
                 <strong>Status:</strong> {selectedOrder.status || 'N/A'}
               </p>
               <p>
                 <strong>Total Amount:</strong> $
-                {selectedOrder.total
-                  ? parseFloat(selectedOrder.total).toFixed(2)
+                {selectedOrder.totalAmount
+                  ? parseFloat(selectedOrder.totalAmount).toFixed(2)
                   : '0.00'}
               </p>
 
               <h5 className='mt-4'>Order Items</h5>
               {/* Here you would display the order items, which would come from your API */}
-              <p>Items would be listed here...</p>
+              <p>
+                {selectedOrder.items.map((item, index) => (
+                  <div key={index} className='mb-3 p-2 border-bottom'>
+                    <p>
+                      <strong>Product:</strong> {item.productName}
+                    </p>
+                    <p>
+                      <strong>Quantity:</strong> {item.quantity}
+                    </p>
+                    <p>
+                      <strong>Price:</strong> $
+                      {parseFloat(item.price).toFixed(2)}
+                    </p>
+                  </div>
+                ))}
+              </p>
 
               <h5 className='mt-4'>Shipping Information</h5>
               <p>Shipping details would be shown here...</p>
